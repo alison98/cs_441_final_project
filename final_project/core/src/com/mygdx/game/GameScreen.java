@@ -21,7 +21,7 @@ public class GameScreen implements Screen {
     private OrthographicCamera camera;
     private Hud hud;
     private SpriteBatch spriteBatch;
-    Sprite sprite;
+    Player player;
 
     public GameScreen(Game g) {
         game = g;
@@ -31,7 +31,8 @@ public class GameScreen implements Screen {
         spriteBatch = new SpriteBatch();
         hud = new Hud(spriteBatch, this);
         camera = new OrthographicCamera();
-        Player player = new Player();
+        player = new Player();
+        stage.addActor(player);
     }
 
     @Override
@@ -47,7 +48,6 @@ public class GameScreen implements Screen {
         checkCollisions();
         stage.act(delta);
         stage.draw();
-        spriteBatch.draw(img, 1000, 500);
         spriteBatch.setProjectionMatrix(hud.getStage().getCamera().combined);
         hud.getStage().act(delta);
         hud.getStage().draw();

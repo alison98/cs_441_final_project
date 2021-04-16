@@ -19,4 +19,9 @@ public class Player extends Actor {
     public void draw(Batch batch, float alpha){
         sprite.draw(batch);
     }
+
+    @Override
+    public void positionChanged(){
+        sprite.setPosition(getX(), getY());
+    }
 }

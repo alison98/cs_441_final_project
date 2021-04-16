@@ -25,8 +25,8 @@ public class Hud {
         stageViewport = new ScreenViewport();
         stage = new Stage(stageViewport, spriteBatch);
         Table table = new Table();
-        Texture buttonTexture = new Texture(Gdx.files.internal("badlogic.jpg"));
-        ImageButton upButton = new ImageButton(new TextureRegionDrawable(buttonTexture));
+        ImageButton upButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("up-button.png"))));
+        upButton.padLeft(53);
         upButton.setTouchable(Touchable.enabled);
         upButton.addListener(new InputListener(){
             @Override
@@ -37,7 +37,8 @@ public class Hud {
                 return true;
             }
         });
-        ImageButton downButton = new ImageButton(new TextureRegionDrawable(buttonTexture));
+        ImageButton downButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("down-arrow.png"))));
+        downButton.padLeft(53);
         downButton.setTouchable(Touchable.enabled);
         downButton.addListener(new InputListener(){
             @Override
@@ -48,7 +49,7 @@ public class Hud {
                 return true;
             }
         });
-        ImageButton leftButton = new ImageButton(new TextureRegionDrawable(buttonTexture));
+        ImageButton leftButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("left-button.png"))));
         leftButton.setTouchable(Touchable.enabled);
         leftButton.addListener(new InputListener(){
             @Override
@@ -59,7 +60,7 @@ public class Hud {
                 return true;
             }
         });
-        ImageButton rightButton = new ImageButton(new TextureRegionDrawable(buttonTexture));
+        ImageButton rightButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("right-button.png"))));
         rightButton.setTouchable(Touchable.enabled);
         rightButton.addListener(new InputListener(){
             @Override

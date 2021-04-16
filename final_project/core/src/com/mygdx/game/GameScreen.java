@@ -33,6 +33,7 @@ public class GameScreen implements Screen {
         hud = new Hud(spriteBatch, this);
         camera = new OrthographicCamera();
         player = new Player();
+        player.setPosition(500, 500);
         stage.addActor(player);
     }
 
@@ -50,6 +51,7 @@ public class GameScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         tick();
         checkCollisions();
+        player.move();
         stage.act(delta);
         stage.draw();
         spriteBatch.setProjectionMatrix(hud.getStage().getCamera().combined);

@@ -26,26 +26,30 @@ public class Hud {
         stage = new Stage(stageViewport, spriteBatch);
         Table table = new Table();
         ImageButton upButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("up-button.png"))));
-        upButton.padLeft(53);
+        upButton.padLeft(160);
         upButton.setTouchable(Touchable.enabled);
         upButton.addListener(new InputListener(){
             @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                gameScreen.player.setSpeedY(0);
+            }
+            @Override
             public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
-                gameScreen.player.moveBy(0, 20);
-                gameScreen.player.positionChanged();
-                System.out.println("Touched");
+                gameScreen.player.setSpeedY(20);
                 return true;
             }
         });
-        ImageButton downButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("down-arrow.png"))));
-        downButton.padLeft(53);
+        ImageButton downButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("down-button.png"))));
+        downButton.padLeft(160);
         downButton.setTouchable(Touchable.enabled);
         downButton.addListener(new InputListener(){
             @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                gameScreen.player.setSpeedY(0);
+            }
+            @Override
             public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
-                gameScreen.player.moveBy(0, -20);
-                gameScreen.player.positionChanged();
-                System.out.println("Touched");
+                gameScreen.player.setSpeedY(-20);
                 return true;
             }
         });
@@ -53,10 +57,12 @@ public class Hud {
         leftButton.setTouchable(Touchable.enabled);
         leftButton.addListener(new InputListener(){
             @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                gameScreen.player.setSpeedX(0);
+            }
+            @Override
             public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
-                gameScreen.player.moveBy(-20, 0);
-                gameScreen.player.positionChanged();
-                System.out.println("Touched");
+                gameScreen.player.setSpeedX(-20);
                 return true;
             }
         });
@@ -64,9 +70,12 @@ public class Hud {
         rightButton.setTouchable(Touchable.enabled);
         rightButton.addListener(new InputListener(){
             @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                gameScreen.player.setSpeedX(0);
+            }
+            @Override
             public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
-                gameScreen.player.moveBy(20, 0);
-                System.out.println("Touched");
+                gameScreen.player.setSpeedX(20);
                 return true;
             }
         });
@@ -76,7 +85,7 @@ public class Hud {
         table.add(rightButton);
         table.row();
         table.add(downButton);
-        table.setPosition(500, 500);
+        table.setPosition(200, 200);
         stage.addActor(table);
     }
 

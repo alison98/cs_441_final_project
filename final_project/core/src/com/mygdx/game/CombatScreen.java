@@ -20,6 +20,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.xml.soap.Text;
@@ -61,8 +64,8 @@ public class CombatScreen implements Screen {
         game = g;
         enemy = e;
         player = p;
-        player = new Player();//uncomment once passing in
-        enemy = new Enemy(0,0,0,0,0);//uncomment once passing in
+        player = new Player();//comment out once passing in
+        enemy = new Enemy(0,0,0,0,1);//comment out once passing in
         stage = new Stage(new ScreenViewport());
         width = Gdx.graphics.getWidth();
         height = Gdx.graphics.getHeight();
@@ -104,18 +107,19 @@ public class CombatScreen implements Screen {
 
 
     //activated on selection/handler
-    private void playerTurn(Move selectedMove){
-        /*
+    private void playerTurn(String selectedWeapon){
+
 
         //uncomment when getters and setters exist
 
-        int damage = selectedMove.getRandomDamageInRange();//get damage in the move's range
-        enemy.inflictDamage(damage);//update enemy's stats (health)
+        int damage = Move.getInstance().getDamage(selectedWeapon);//get damage in the move's range
+        //enemy.inflictDamage(damage);//update enemy's stats (health)
         //update player if need be (if they used a resource, hurt themselves?)
         playerTurn = false;
 
         //I'll need things here to manipulate UI, play animations, etc
 
+        /*
         if(enemy.getHealth() <= 0){//check if player won
             game.setScreen(new GameScreen(game));//back to game screen, might need a way to say player won
         }else{
@@ -123,25 +127,24 @@ public class CombatScreen implements Screen {
         }
 
          */
+
+
     }
 
     //called after player's turn
     public void enemyTurn(){
-        /*
-
-        //uncomment when getters and setters exist
-
-        Move[] enemyMoves = enemy.getMoves(); //get list of moves
+        List<String> enemyWeapons = enemy.getWeapon(); //get list of moves
         Random rand = new Random(); //pick one (random for now)
         //double check that using same Rand is random
-        Move move = enemyMoves[rand.nextInt(enemyMoves.length)];//get random move
-        int damage = move.getRandomDamageInRange();//get damage in range of move
-        player.inflictDamage(damage);//update player's stats (health)
+        String selectedWeapon = enemyWeapons.get(rand.nextInt(enemyWeapons.size()));//get random weapon
+        int damage = Move.getInstance().getDamage(selectedWeapon);//get damage in range of move
+        //player.inflictDamage(damage);//update player's stats (health)
         //update enemy if need be (if they used a resource, hurt themselves?)
         playerTurn = true;
 
         //I'll need things here to manipulate UI, play animations, etc
 
+        /*
         if(player.getHealth() <= 0){//check if enemy won
             //game.setScreen(new GameOverScreen(game));//some sort of game over screen
             System.out.println("game over");
@@ -156,17 +159,21 @@ public class CombatScreen implements Screen {
     //I'm using TextButtons for now, but we can easily change to images
     //will eventually include elements listed above (health, sprites, etc)
     private void initUI(){
-        //TODO: change to new use new Move class
         //Player moves located in player class?
-        /*
-        final Move[] playerMoves = {new Move("Move 1", 1, 5), new Move("stronger move", 10, 20)}; //example for now
-        //final Move[] playerMoves = player.getMoves(); //get all of the players moves
-        moveButtons = new TextButton[playerMoves.length];//make a button for each move
+        //for now, assume player moves will work like enemy moves (see enemyTurn above)
+
+        //List<String> playerWeapons = player.getWeapon(); //get list of moves - uncomment once Player class setup for this
+        List<String> playerWeapons = new ArrayList<>();
+        playerWeapons.add("sword");
+
+/*
+
+        moveButtons = new TextButton[playerWeapons.size()];//make a button for each move
         float nextY = 50;
-        for(int i = 0; i< playerMoves.length; i++){
-            final Move currentMove = playerMoves[i]; //get the current move
+        for(int i = 0; i< playerWeapons.size(); i++){
+            final String currentMove = playerWeapons.get(i); //get the current move
             Skin s = new Skin(Gdx.files.internal("skin/plain-james-ui.json")); //random skin from my last project just to test - I didn't upload the skin files so this will cause an error
-            TextButton newMoveButton = new TextButton(currentMove.getNameOfMove(), s);//make a new button on screen with move's name
+            TextButton newMoveButton = new TextButton(currentMove, s);//make a new button on screen with move's name
             newMoveButton.setSize(250, 100); //just for now
             newMoveButton.setPosition((float) 50, (float) nextY); //this goes up the left side of the screen, I'll probably change to along bottom
             nextY+=150;
@@ -175,6 +182,8 @@ public class CombatScreen implements Screen {
                 @Override
                 public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
                     //when the user clicks a button for a move, call playerTurn with said move
+                    //don't just send with damage as parameter, as that would be same damage for same move
+                    //this setup will call getDamage (to get a random damage in range) every time
                     playerTurn(currentMove);
                     return true;
                 }
@@ -183,7 +192,10 @@ public class CombatScreen implements Screen {
             //System.out.println("added " + currentMove.getNameOfMove() + " to stage");
             moveButtons[i] = newMoveButton;
         }
-        */
+
+*/
+
+
         //starting to add additional UI elements (player and enemy sprites and health bars)
         player.setPosition((float) width/6,(float) height/2);
         stage.addActor(player);
@@ -205,7 +217,6 @@ public class CombatScreen implements Screen {
         private ShapeRenderer backgroundBar;
         private ShapeRenderer frontBar;
         private int edgeDifference;
-        private boolean decrementing;
         private int currentLength;
         private float decrementTo;
 
@@ -213,7 +224,6 @@ public class CombatScreen implements Screen {
             HP = amount;
             backgroundBar = new ShapeRenderer();
             frontBar = new ShapeRenderer();
-            decrementing = false;
             edgeDifference = 40; //looks good
             currentLength = 750; //looks good
         }

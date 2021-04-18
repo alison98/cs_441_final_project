@@ -62,7 +62,7 @@ public class CombatScreen implements Screen {
         enemy = e;
         player = p;
         player = new Player();//uncomment once passing in
-        enemy = new Enemy(0,0,0,0);//uncomment once passing in
+        enemy = new Enemy(0,0,0,0,0);//uncomment once passing in
         stage = new Stage(new ScreenViewport());
         width = Gdx.graphics.getWidth();
         height = Gdx.graphics.getHeight();
@@ -156,6 +156,9 @@ public class CombatScreen implements Screen {
     //I'm using TextButtons for now, but we can easily change to images
     //will eventually include elements listed above (health, sprites, etc)
     private void initUI(){
+        //TODO: change to new use new Move class
+        //Player moves located in player class?
+        /*
         final Move[] playerMoves = {new Move("Move 1", 1, 5), new Move("stronger move", 10, 20)}; //example for now
         //final Move[] playerMoves = player.getMoves(); //get all of the players moves
         moveButtons = new TextButton[playerMoves.length];//make a button for each move
@@ -180,7 +183,7 @@ public class CombatScreen implements Screen {
             //System.out.println("added " + currentMove.getNameOfMove() + " to stage");
             moveButtons[i] = newMoveButton;
         }
-
+        */
         //starting to add additional UI elements (player and enemy sprites and health bars)
         player.setPosition((float) width/6,(float) height/2);
         stage.addActor(player);

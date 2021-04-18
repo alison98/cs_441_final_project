@@ -7,6 +7,9 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
+import java.util.List;
+import java.util.Random;
+
 public class Enemy  extends Actor {
     private Sprite[] sprites;
     private Sprite sprite;
@@ -15,10 +18,14 @@ public class Enemy  extends Actor {
     private float initX;
     private float initY;
     private boolean horizontal;
-    private boolean clockwise;
+    private boolean direction;
     private Rectangle hitbox;
+    private List<String> weapon;
+    private int floor;
+    private int level;
+    private Move abilities;
 
-    public Enemy(int x, int y,int speedIn, int typeIn){
+    public Enemy(int x, int y, int speedIn, int typeIn, int floorIn){
         initSprites();
         sprite = sprites[0];
         initX = x;
@@ -26,10 +33,18 @@ public class Enemy  extends Actor {
         speed = speedIn;
         type = typeIn;
         horizontal = true;
-        clockwise = true;
-        this.setBounds(this.sprite.getX(), this.sprite.getY(), this.sprite.getWidth(), this.sprite.getHeight());
+        direction = true;
+        setBounds(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
         hitbox = new Rectangle(getX() + 32, getY() + 144, 176, 64);
-        this.setPosition(initX, initY);
+        setPosition(initX, initY);
+
+        //get the weapons based on level
+        floor = floorIn;
+        abilities = Move.getInstance();
+        weapon = abilities.getEnemyWeapons(floor);
+
+        Random random = new Random();
+        level = random.nextInt(10)+floor;
     }
 
     public Rectangle getHitbox(){
@@ -46,69 +61,85 @@ public class Enemy  extends Actor {
 
     public void tick() {
         if (type == 1) { // side to side
-            if (getX() < initX - 100 || getX() > initX + 100) {
-                speed = -speed;
-            }
-            this.setPosition(getX() + speed, getY());
+            moveHorizontal();
         }else if(type ==2){ //up and down
-            if (getY() < initY - 100 || getY() > initY + 100) {
-                speed = -speed;
-            }
-            this.setPosition(getX() , getY()+ speed);
+            moveVertical();
         }else if(type ==3){ //clockwise
-            if(horizontal && clockwise) {
-                if (getX() > initX + 100) {
-                    speed = -speed;
-                    horizontal = false;
-                }
-                this.setPosition(getX() + speed, getY());
-            }else if(horizontal && !clockwise){
-                if (getX() < initX - 100) {
-                    speed = -speed;
-                    horizontal = false;
-                }
-                this.setPosition(getX() + speed, getY());
-            }else if(!horizontal && clockwise) {
-                if (getY() < initY - 100) {
-                    clockwise = false;
-                    horizontal = true;
-                }
-                this.setPosition(getX(), getY()+speed);
-            }else {
-                if (getY() > initY + 100) {
-                    clockwise = true;
-                    horizontal = true;
-                }
-                this.setPosition(getX(), getY()+speed);
-            }
+            moveClockwise();
         }else if(type ==4) { //counter-clockwise
-            if (horizontal && !clockwise) {
-                if (getX() > initX + 100) {
-                    speed = -speed;
-                    horizontal = false;
-                }
-                this.setPosition(getX() - speed, getY());
-            } else if (horizontal && clockwise) {
-                if (getX() < initX - 100) {
-                    speed = -speed;
-                    horizontal = false;
-                }
-                this.setPosition(getX() - speed, getY());
-            } else if (!horizontal && !clockwise) {
-                if (getY() < initY - 100) {
-                    clockwise = true;
-                    horizontal = true;
-                }
-                this.setPosition(getX(), getY() - speed);
-            } else {
-                if (getY() > initY + 100) {
-                    clockwise = false;
-                    horizontal = true;
-                }
-                this.setPosition(getX(), getY() - speed);
-            }
+            moveCounterClockwise();
         }
         //positionChanged();
+    }
+
+    public void moveHorizontal(){
+        if (getX() < initX - 100 || getX() > initX + 100) {
+            speed = -speed;
+        }
+        moveBy(speed, 0);
+    }
+
+    public void moveVertical(){
+        if (getY() < initY - 100 || getY() > initY + 100) {
+            speed = -speed;
+        }
+        moveBy(0, speed);
+    }
+
+    public void moveClockwise(){
+        if(horizontal && direction) {
+            if (getX() > initX + 100) {
+                speed = -speed;
+                horizontal = false;
+            }
+            moveBy(speed, 0);
+        }else if(horizontal && !direction){
+            if (getX() < initX - 100) {
+                speed = -speed;
+                horizontal = false;
+            }
+            moveBy(speed, 0);
+        }else if(!horizontal && direction) {
+            if (getY() < initY - 100) {
+                direction = false;
+                horizontal = true;
+            }
+            moveBy(0, speed);
+        }else {
+            if (getY() > initY + 100) {
+                direction = true;
+                horizontal = true;
+            }
+            moveBy(0, speed);
+        }
+    }
+
+    public void moveCounterClockwise(){
+        if (horizontal && !direction) {
+            if (getX() > initX + 100) {
+                speed = -speed;
+                horizontal = false;
+            }
+            moveBy(-speed, 0);
+        } else if (horizontal && direction) {
+            if (getX() < initX - 100) {
+                speed = -speed;
+                horizontal = false;
+            }
+            moveBy(-speed, 0);
+        } else if (!horizontal && !direction) {
+            if (getY() < initY - 100) {
+                direction = true;
+                horizontal = true;
+            }
+            moveBy(0, -speed);
+        } else {
+            if (getY() > initY + 100) {
+                direction = false;
+                horizontal = true;
+            }
+            moveBy(0, -speed);
+        }
     }
 
     @Override
@@ -118,8 +149,6 @@ public class Enemy  extends Actor {
 
     @Override
     public void positionChanged(){
-
-
         sprite.setPosition(getX(), getY());
         hitbox.set(getX() + 32, getY() + 144, 176, 64);
     }
@@ -127,5 +156,13 @@ public class Enemy  extends Actor {
     @Override
     public boolean remove(){
         return super.remove();
+    }
+
+    public List<String> getWeapon(){
+        return weapon;
+    }
+
+    public int getLevel(){
+        return level;
     }
 }

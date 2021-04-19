@@ -15,7 +15,7 @@ public class Player extends Actor {
     private Rectangle bounds;
 
     public Player(){
-        sprite = new Sprite(new Texture("badlogic.jpg"));
+        sprite = new Sprite(new Texture("player-resized6x.png"));
         this.setBounds(this.sprite.getX(), this.sprite.getY(), this.sprite.getWidth(), this.sprite.getHeight());
         bounds = new Rectangle(this.sprite.getX(), this.sprite.getY(), this.sprite.getWidth(), this.sprite.getHeight());
         this.setOrigin(this.sprite.getWidth() / 2, this.sprite.getHeight() / 2);
@@ -33,6 +33,10 @@ public class Player extends Actor {
 
     public Rectangle getBounds(){
         return bounds;
+    }
+
+    public void scaleSprite(float scale){
+        sprite.setScale(scale);
     }
 
     @Override

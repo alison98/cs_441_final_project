@@ -14,6 +14,8 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
+import java.util.ArrayList;
+
 public class GameScreen implements Screen {
     private Game game;
     private Stage stage;
@@ -23,7 +25,8 @@ public class GameScreen implements Screen {
     private Hud hud;
     private SpriteBatch spriteBatch;
     Player player;
-    Enemy enemy;
+    private ArrayList<Enemy> enemies;
+    private Enemy toRemove;
 
     public GameScreen(Game g) {
         game = g;
@@ -35,8 +38,11 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         player = new Player();
         player.setPosition(500, 500);
-        enemy = new Enemy(800, 800, 0, 0, 1);
-        stage.addActor(enemy);
+        enemies = new ArrayList<Enemy>();
+        enemies.add(new Enemy(800, 800, 0, 0, 1));
+        for(Enemy enemy : enemies){
+            stage.addActor(enemy);
+        }
         stage.addActor(player);
     }
 
@@ -53,8 +59,10 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         tick();
-        if(checkCollisions()){
-            game.setScreen(new CombatScreen(game, enemy, player));
+        Enemy hitEnemy = checkCollisions();
+        if(hitEnemy != null){
+            toRemove = hitEnemy;
+            game.setScreen(new CombatScreen(game, hitEnemy, player, this));
         }
         player.move();
         stage.act(delta);
@@ -64,11 +72,19 @@ public class GameScreen implements Screen {
         hud.getStage().draw();
     }
 
-    private boolean checkCollisions(){
-        if(enemy.getHitbox().overlaps(player.getBounds())){
-            return true;
+    private Enemy checkCollisions(){
+        for(Enemy enemy : enemies){
+            if(enemy.getHitbox().overlaps(player.getBounds())){
+                return enemy;
+            }
         }
-        return false;
+        return null;
+    }
+
+    public void removeEnemy(){
+        enemies.remove(toRemove);
+        toRemove.remove();
+        toRemove = null;
     }
 
     private void tick(){

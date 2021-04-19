@@ -42,6 +42,7 @@ public class CombatScreen implements Screen {
     private HealthBar playerHealthBar;
     private HealthBar enemyHealthBar;
     private boolean animationActive;
+    private GameScreen gameScreen;
 
 
     //TODO
@@ -63,7 +64,7 @@ public class CombatScreen implements Screen {
 
 
     //basic constructor
-    public CombatScreen(Game g, Enemy e, Player p) { //player is optional? might have access from elsewhere
+    public CombatScreen(Game g, Enemy e, Player p, GameScreen gameScreen) { //player is optional? might have access from elsewhere
         game = g;
         enemy = e;
         player = p;
@@ -74,8 +75,8 @@ public class CombatScreen implements Screen {
         height = Gdx.graphics.getHeight();
         playerTurn = true;
         animationActive = false;
+        this.gameScreen = gameScreen;
         initUI();
-
     }
 
     @Override
@@ -91,6 +92,9 @@ public class CombatScreen implements Screen {
         checkCollisions();
         stage.act();
         stage.draw();
+        //NOTE FROM DREW: Call these two lines when you want to exit the combat screen. The first line will remove the hit enemy from the game screen, so only use that when the enemy loses.
+        //gameScreen.removeEnemy();
+        //game.setScreen(gameScreen);
     }
 
     private void checkCollisions() {//there won't be any collisions but I see the benefit of making all screens similar
@@ -236,6 +240,7 @@ public class CombatScreen implements Screen {
         //starting to add additional UI elements (player and enemy sprites and health bars)
         //will probably but in different function or at least clean up
         player.setPosition((float) width / 6, (float) height / 2);
+        player.scaleSprite(2f);
         stage.addActor(player);
         enemy.setPosition((float) (width - (width / 6) - enemy.getWidth()), (float) height / 2);
         stage.addActor(enemy);

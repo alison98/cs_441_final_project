@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
 public class Player extends Actor {
@@ -11,10 +12,12 @@ public class Player extends Actor {
     private Sprite sprite;
     private int speedX;
     private int speedY;
+    private Rectangle bounds;
 
     public Player(){
         sprite = new Sprite(new Texture("badlogic.jpg"));
         this.setBounds(this.sprite.getX(), this.sprite.getY(), this.sprite.getWidth(), this.sprite.getHeight());
+        bounds = new Rectangle(this.sprite.getX(), this.sprite.getY(), this.sprite.getWidth(), this.sprite.getHeight());
         this.setOrigin(this.sprite.getWidth() / 2, this.sprite.getHeight() / 2);
         speedX = 0;
         speedY = 0;
@@ -28,6 +31,10 @@ public class Player extends Actor {
         speedY = speedYIn;
     }
 
+    public Rectangle getBounds(){
+        return bounds;
+    }
+
     @Override
     public void draw(Batch batch, float alpha){
         sprite.draw(batch);
@@ -36,6 +43,7 @@ public class Player extends Actor {
     @Override
     public void positionChanged(){
         sprite.setPosition(getX(), getY());
+        this.bounds.set(getX(), getY(), this.sprite.getWidth(), this.sprite.getHeight());
     }
 
     public void move(){

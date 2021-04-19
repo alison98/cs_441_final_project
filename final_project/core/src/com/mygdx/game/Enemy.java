@@ -35,7 +35,7 @@ public class Enemy  extends Actor {
         horizontal = true;
         direction = true;
         setBounds(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
-        hitbox = new Rectangle(getX() + 32, getY() + 144, 176, 64);
+        hitbox = new Rectangle(getX(), getY(), getWidth(), getHeight());
         setPosition(initX, initY);
 
         //get the weapons based on level
@@ -150,7 +150,7 @@ public class Enemy  extends Actor {
     @Override
     public void positionChanged(){
         sprite.setPosition(getX(), getY());
-        hitbox.set(getX() + 32, getY() + 144, 176, 64);
+        hitbox.set(getX(), getY(), getWidth(), getHeight());
     }
 
     @Override

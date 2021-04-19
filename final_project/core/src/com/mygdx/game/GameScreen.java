@@ -23,6 +23,7 @@ public class GameScreen implements Screen {
     private Hud hud;
     private SpriteBatch spriteBatch;
     Player player;
+    Enemy enemy;
 
     public GameScreen(Game g) {
         game = g;
@@ -34,6 +35,8 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         player = new Player();
         player.setPosition(500, 500);
+        enemy = new Enemy(800, 800, 0, 0, 1);
+        stage.addActor(enemy);
         stage.addActor(player);
     }
 
@@ -50,7 +53,9 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         tick();
-        checkCollisions();
+        if(checkCollisions()){
+            game.setScreen(new CombatScreen(game, enemy, player));
+        }
         player.move();
         stage.act(delta);
         stage.draw();
@@ -59,8 +64,11 @@ public class GameScreen implements Screen {
         hud.getStage().draw();
     }
 
-    private void checkCollisions(){
-
+    private boolean checkCollisions(){
+        if(enemy.getHitbox().overlaps(player.getBounds())){
+            return true;
+        }
+        return false;
     }
 
     private void tick(){

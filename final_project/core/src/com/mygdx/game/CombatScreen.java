@@ -41,14 +41,15 @@ public class CombatScreen implements Screen {
     private TextButton[] moveButtons;
     private HealthBar playerHealthBar;
     private HealthBar enemyHealthBar;
-    private boolean animationActive;
+    private boolean animationActive; //is there an active animation/movement on screen? if so, we're mid-turn and need to wait
+    private AnimationManager animationManager;//this keeps track of/sets the state of animationActive
     private GameScreen gameScreen;
+    private Attack currentAttack;
 
 
     //TODO:
     //  -uncomment code once health vars exist
     //  -some sort of indication of damage done/attack (name of move and damage done, sprites shake, etc.)
-    //  -then better UI/animation class to handle animationActive (as health and movement will use it)
     //  -no hard-coded numbers (HealthBar)
     //  -clean the button code
     //  -setup going back to game screen on winning (with Drew's code)
@@ -66,6 +67,7 @@ public class CombatScreen implements Screen {
         height = Gdx.graphics.getHeight();
         playerTurn = true;
         animationActive = false;
+        animationManager = new AnimationManager(2);//right now, max animations at one time is 2 - decreasing health bar and sprite moving across screen
         this.gameScreen = gameScreen;
         initUI();
     }
@@ -101,38 +103,37 @@ public class CombatScreen implements Screen {
         enemy.tick();
         playerHealthBar.tick();
         enemyHealthBar.tick();
+        if(currentAttack!=null) currentAttack.tick(); //if there's an attack ongoing, call it's tick
     }
 
 
     //activated on selection/handler
     private void playerTurn(String selectedWeapon) {
-        animationActive = true;
-        playerTurn = false;
-
-
         int damage = Move.getInstance().getDamage(selectedWeapon);//get damage in the move's range
         System.out.println("dealing " + damage + " to enemy");
         //uncomment when getters and setters exist
         //enemy.inflictDamage(damage);//update enemy's stats (health)
         //update player if need be (if they used a resource, hurt themselves?)
         enemyHealthBar.decrementHealth(damage);
+        animationManager.startAnimation();
+        currentAttack = new Attack(player, enemy);
+        animationManager.startAnimation();
+        playerTurn = false;//it is now the enemy's turn, they can go once animations finish
 
-        //I'll need things here to manipulate UI, play animations, etc
-
-        /*        //uncomment when getters and setters exist
+        //uncomment when getters and setters exist
+        /*
         if(enemy.getHealth() <= 0){//check if player won
-            game.setScreen(new GameScreen(game));//back to game screen, might need a way to say player won
-        }else{
-            enemyTurn();//explicitly call function to allow enemy to go
+            //NOTE FROM DREW: Call these two lines when you want to exit the combat screen. The first line will remove the hit enemy from the game screen, so only use that when the enemy loses.
+            //gameScreen.removeEnemy();
+            //game.setScreen(gameScreen);
         }
         */
 
 
     }
 
-    //called after player's turn
+    //called once all animations finish (the player's turn ends)
     public void enemyTurn() {
-        animationActive = true;
         List<String> enemyWeapons = enemy.getWeapon(); //get list of moves
         Random rand = new Random(); //pick one (random for now)
         //double check that using same Rand is random
@@ -142,15 +143,18 @@ public class CombatScreen implements Screen {
         //uncomment when getters and setters exist
         //player.inflictDamage(damage);//update player's stats (health)
         //update enemy if need be (if they used a resource, hurt themselves?)
-        playerHealthBar.decrementHealth(damage);
-        playerTurn = true;
+        playerHealthBar.decrementHealth(damage);//start animation
+        animationManager.startAnimation();//and tell animation manager something is happening
+        currentAttack = new Attack(enemy, player);//start animation
+        animationManager.startAnimation();//and tell animation manager something is happening
+        playerTurn = true;//it is now the player's turn, they can go once animations finish
 
-        //I'll need things here to manipulate UI, play animations, etc
 
-        /*        //uncomment when getters and setters exist
+        //uncomment when getters and setters exist
+        /*
         if(player.getHealth() <= 0){//check if enemy won
-            //game.setScreen(new GameOverScreen(game));//some sort of game over screen
-            System.out.println("game over");
+            //NOTE FROM DREW: Call these two lines when you want to exit the combat screen.
+            //game.setScreen(gameScreen);//might need something to modify game state (like moving player away from enemy)
         }
         */
     }
@@ -163,28 +167,20 @@ public class CombatScreen implements Screen {
         //Player moves located in player class?
         //for now, assume player moves will work like enemy moves (see enemyTurn above)
 
-        //can't add buttons without skin
-
-
-
 
         //List<String> playerWeapons = player.getWeapon(); //get list of moves - uncomment once Player class setup for this
         final List<String> playerWeapons = new ArrayList<>();
         playerWeapons.add("sword");
 
-
-
-
-
-        int prevButtonIndex = -1;
+        int prevButtonIndex = -1;//index of the button which will be used to go back a "page". Will only be used if we have more moves than we can display at once
         moveButtons = new TextButton[playerWeapons.size()];//make a button for each move
         float nextY = 200;
         float nextX = 150;
         for (int i = 0; i < playerWeapons.size(); i++) {//set up buttons - a max of 2 rows
             final String currentMove = playerWeapons.get(i); //get the current move
-            Skin s = new Skin(Gdx.files.internal("skin/plain-james-ui.json")); //random skin from my last project just to test - I didn't upload the skin files so this will cause an error
+            Skin s = new Skin(Gdx.files.internal("skin/plain-james-ui.json")); //random skin from my last project just to test, very ugly, replace (can also switch to image buttons)
             TextButton newMoveButton = new TextButton(currentMove, s);//make a new button on screen with move's name
-            newMoveButton.setSize(250, 100); //just for now
+            newMoveButton.setSize(250, 100); //good size for now
             newMoveButton.setPosition(nextX, nextY);
             newMoveButton.setColor(Color.WHITE);
             nextX += 300;
@@ -214,6 +210,8 @@ public class CombatScreen implements Screen {
                         //when the user clicks a button for a move, call playerTurn with said move
                         //don't just send with damage as parameter, as that would be same damage for same move
                         //this setup will call getDamage (to get a random damage in range) every time
+                        //but only call playerTurn if it is the player's turn (set to true at start and at end of enemyTurn)
+                        //and if there's no active animations (dealt with by animationManager)
                         if (playerTurn && !animationActive) playerTurn(currentMove);
                         return true;
                     }
@@ -240,14 +238,20 @@ public class CombatScreen implements Screen {
         //trying out this HealthBar class with a basic decrementing animation, still need to test a bit
         playerHealthBar = new HealthBar(100, 100, height - (float) (height / 5));//will also modify X, Y to be based on sprite size, health
         stage.addActor(playerHealthBar);
-        //playerHealthBar.decrementHealth(50);
 
         enemyHealthBar = new HealthBar(100, width - 850, height - (float) (height / 5));//will also modify X, Y to be based on sprite size, health
         stage.addActor(enemyHealthBar);
-        //enemyHealthBar.decrementHealth(20);
 
     }
 
+    /*
+     * Given a text button and a String representing the name of a move,
+     *      -set the button's text to the string
+     *      -clear the button's existing listeners
+     *      -add a new listener where the player attacks with the move represented by this string
+     * @param button the button to modify
+     * @content the string to display on the button and make listener for, represents a move
+     */
     public void setHandler(TextButton button, final String content) {
         button.setText(content);
         button.clearListeners();
@@ -263,6 +267,8 @@ public class CombatScreen implements Screen {
 
 
     /*
+     * This is pretty messy and I want to fix it
+     *
      * This function is called when moving to the next "page". It
      *      -sets up a previous page button
      *      -sets up an additional next page button if needed
@@ -275,7 +281,7 @@ public class CombatScreen implements Screen {
      */
     public void nextPage(final int lastButtonIndex, final int prevButtonIndex, final int nextStartingIndex, final List<String> playerWeapons, final int prevStartingIndex) {
 
-        System.out.println("next" + nextStartingIndex);
+        //System.out.println("next" + nextStartingIndex);
 
         int numberOfEntries = lastButtonIndex;//how many buttons we will be adding handlers for
         //at most it is lastButtonIndex, as 1 will be used for previous, and the index is 0 based
@@ -326,6 +332,8 @@ public class CombatScreen implements Screen {
     }
 
     /*
+     * This is also pretty messy and I want to fix it
+     *
      * This function is called when moving to the previous "page". It
      *      -resets all text and event handlers of the buttons for the previous group of moves
      *      -sets up a next page button
@@ -338,14 +346,12 @@ public class CombatScreen implements Screen {
      */
     public void prevPage(final int lastButtonIndex, final int prevStartingIndex, final int prevButtonIndex, final List<String> playerWeapons) {
 
-        System.out.println(prevStartingIndex);
+        //System.out.println(prevStartingIndex);
 
         int numberOfEntries = lastButtonIndex;//how many buttons we will be adding handlers for
         boolean prevButtonPresent = false;
         //at most it is lastButtonIndex, as 1 will be used for next, and the index is 0 based
         //at least it is lastButtonIndex-1, if we have another prev page before this (and thus a prev and next button)
-
-
 
         //check for previous button
         if (prevStartingIndex > prevButtonIndex) {//we will have another previous page
@@ -424,11 +430,8 @@ public class CombatScreen implements Screen {
         public void tick(){
             if (currentLength > decrementTo) { //keep decreasing by 1 pixel until we reach spot
                     currentLength--;
-                    //this is also dealing with animationActive - don't allow player to go until enemy is done and vice versa
-                    //will put somewhere better
                     if(currentLength <= decrementTo){
-                        animationActive = false;
-                        if(!playerTurn) enemyTurn();
+                        animationManager.endAnimation();
                     }
             }
 
@@ -446,6 +449,113 @@ public class CombatScreen implements Screen {
         }
 
     }
+
+    /*
+     * Start of an animation for an attack. Right now, one side moves towards the other, then moves back.
+     *
+     * This is all subject to change as we'll probably use a real animation, not just this sliding, but hopefully we can reuse this and its a good start.
+     * I just wanted something basic for now so I could try to deal with multiple animations at once
+     */
+
+    public class Attack {
+
+        //attacker moves towards victim
+        //reaches victim
+        //moves back (probably slower speed)
+        //stops once they're back at original position
+
+
+        float startingPosition;
+        float currentPosition;
+        float targetPosition;
+        float pixelsPerTick;
+        Actor attacker, victim;
+        boolean goingRight;
+
+        public Attack(Actor a, Actor v){
+            attacker = a;
+            victim = v;
+            startingPosition = currentPosition = a.getX();
+            targetPosition = v.getX();
+            goingRight = targetPosition > currentPosition;
+            if(goingRight) pixelsPerTick = 10;//increase x
+            else pixelsPerTick = -10;
+            //System.out.println(goingRight + " from " + currentPosition + " to " + targetPosition);
+        }
+
+        public void tick(){
+
+            if(goingRight){
+                if(currentPosition >= targetPosition) pixelsPerTick*=-1;//once we reach victim, move back
+                if(currentPosition <= startingPosition && pixelsPerTick<0){
+                    pixelsPerTick = 0;//stop movement
+                    animationManager.endAnimation();//and tell manager we're done
+                }
+            }else{//same thing but for going left
+                if(currentPosition <= targetPosition) pixelsPerTick*=-1;
+                if(currentPosition >= startingPosition && pixelsPerTick>0){
+                    pixelsPerTick = 0;//stop movement
+                    animationManager.endAnimation();//and tell manager we're done
+                }
+            }
+            attacker.moveBy(pixelsPerTick, 0);
+            currentPosition = attacker.getX();
+        }
+
+    }
+
+    /*
+     * Basic class to manage animations. Need to prevent either side from starting a new turn while
+     * still in the middle of the previous. I figured we could use booleans and a check in the tick,
+     * but I wanted to try to be as efficient as possible.
+     *
+     * Works like a basic lock - constructor says how many animations can be active at once. Then,
+     * when starting each animation, increment the number of active animations. While there are active
+     * animations (>0) animations active will be true, which will prevent the player from attacking during this time.
+     * When an animation ends, decrement the number of active animations. Once hitting 0, we can go to the next turn.
+     *
+     * Same goes for the AI - it would automatically try to go without this class. With it, we actually don't call "enemyTurn"
+     * until animationActive is false (seen below).
+     */
+    public class AnimationManager{
+
+        private int totalAnimations;
+        private int currentActiveAnimations;
+
+        //constructor, called with the maximum number of animations that can be active at once
+        public AnimationManager(int num){
+            totalAnimations = num;
+            currentActiveAnimations = 0;
+        }
+
+        //increment amount of active animations. also set "animationsActive" to true if its not already.
+        //I also added a check for making sure we don't go over number of active animations, but we probably don't need it
+        public void startAnimation(){
+            if(currentActiveAnimations < totalAnimations){
+                animationActive = true;
+                currentActiveAnimations++;
+            }
+        }
+
+        //decrement amount of active animations. once hitting 0, set animationsActive to false.
+        //if it is also the player's turn, they will be able to attack now by hitting a button
+        //if it is the enemy's turn, explicitly call "enemyTurn()" to allow them to attack
+        //I also added a check for making sure we don't go below 0, but we probably don't need it
+        public void endAnimation(){
+            if(currentActiveAnimations > 0) currentActiveAnimations--;
+            if(currentActiveAnimations == 0){
+                animationActive = false;
+                //can call an event to trigger next function
+                //playerTurn is never explicitly called, its done via buttons
+                //so we just check if animations are active and its the player's turn
+                //but enemy will automatically go without a class like this
+                if(!playerTurn) enemyTurn();
+            }
+        }
+
+
+    }
+
 
 
 

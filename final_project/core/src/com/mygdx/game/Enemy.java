@@ -10,7 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import java.util.List;
 import java.util.Random;
 
-public class Enemy  extends Actor {
+public class Enemy extends Actor {
     private Sprite[] sprites;
     private Sprite sprite;
     private int speed;
@@ -19,11 +19,14 @@ public class Enemy  extends Actor {
     private float initY;
     private boolean horizontal;
     private boolean direction;
+    private boolean fight;
     private Rectangle hitbox;
     private List<String> weapon;
     private int floor;
     private int level;
     private Move abilities;
+    private int health;
+    private Random random;
 
     public Enemy(int x, int y, int speedIn, int typeIn, int floorIn){
         initSprites();
@@ -34,6 +37,7 @@ public class Enemy  extends Actor {
         type = typeIn;
         horizontal = true;
         direction = true;
+        fight = true;
         setBounds(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
         hitbox = new Rectangle(getX(), getY(), getWidth(), getHeight());
         setPosition(initX, initY);
@@ -43,8 +47,9 @@ public class Enemy  extends Actor {
         abilities = Move.getInstance();
         weapon = abilities.getEnemyWeapons(floor);
 
-        Random random = new Random();
+        random = new Random();
         level = random.nextInt(10)+floor;
+        health = floor*100 + random.nextInt(100);
     }
 
     public Rectangle getHitbox(){
@@ -52,14 +57,15 @@ public class Enemy  extends Actor {
     }
 
     private void initSprites(){
-        sprites = new Sprite[1];
+        sprites = new Sprite[2];
         sprites[0] = new Sprite(new Texture("badlogic.jpg"));
-        //sprites[0] = new Sprite(new Texture(Gdx.files.internal("rocket/rocket-1-resized.png")));
-        //sprites[1] = new Sprite(new Texture(Gdx.files.internal("rocket/rocket-2-resized.png")));
-        //sprites[2] = new Sprite(new Texture(Gdx.files.internal("rocket/rocket-3-resized.png")));
+        sprites[1] = new Sprite(new Texture("player-resized6x.png")); //change to random human character
     }
 
     public void tick() {
+        if(!fight){
+            return;
+        }
         if (type == 1) { // side to side
             moveHorizontal();
         }else if(type ==2){ //up and down
@@ -69,7 +75,6 @@ public class Enemy  extends Actor {
         }else if(type ==4) { //counter-clockwise
             moveCounterClockwise();
         }
-        //positionChanged();
     }
 
     public void moveHorizontal(){
@@ -164,5 +169,34 @@ public class Enemy  extends Actor {
 
     public int getLevel(){
         return level;
+    }
+
+    public int getHealth(){
+        return health;
+    }
+
+    public boolean getFight(){
+        return fight;
+    }
+
+    public void setHealth(int healthIn){
+        health = healthIn;
+        if(health<=0) {
+            fight = false;
+            float x = getX();
+            float y = getY();
+            sprite = sprites[1];
+            sprite.setPosition(x, y);
+        }
+    }
+
+    //May not need
+    public void respawn(){
+        health = floor*100 + random.nextInt(100);
+        fight = true;
+        float x = getX();
+        float y = getY();
+        sprite = sprites[0];
+        sprite.setPosition(x,y);
     }
 }

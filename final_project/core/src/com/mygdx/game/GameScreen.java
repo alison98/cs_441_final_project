@@ -25,8 +25,7 @@ public class GameScreen implements Screen {
     private Hud hud;
     private SpriteBatch spriteBatch;
     Player player;
-    private ArrayList<Enemy> enemies;
-    private Enemy toRemove;
+    private Room room;
 
     public GameScreen(Game g) {
         game = g;
@@ -38,11 +37,8 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         player = new Player();
         player.setPosition(500, 500);
-        enemies = new ArrayList<Enemy>();
-        enemies.add(new Enemy(800, 800, 0, 0, 1));
-        for(Enemy enemy : enemies){
-            stage.addActor(enemy);
-        }
+        room = new Room();
+        stage.addActor(room);
         stage.addActor(player);
     }
 
@@ -59,11 +55,8 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         tick();
-        Enemy hitEnemy = checkCollisions();
-        if(hitEnemy != null){
-            toRemove = hitEnemy;
-            game.setScreen(new CombatScreen(game, hitEnemy, player, this));
-        }
+        checkCollisions();
+        roomChange();
         player.move();
         stage.act(delta);
         stage.draw();
@@ -72,23 +65,34 @@ public class GameScreen implements Screen {
         hud.getStage().draw();
     }
 
-    private Enemy checkCollisions(){
-        for(Enemy enemy : enemies){
-            if(enemy.getHitbox().overlaps(player.getBounds())){
-                return enemy;
-            }
+    private void checkCollisions(){
+        Enemy hitEnemy = room.checkCollisions(player);
+        if(hitEnemy != null){
+            game.setScreen(new CombatScreen(game, hitEnemy, player, this));
+
+            //do this in the combat screen
+            //hitEnemy.setHealth(0);
+            //Layout.getInstance().setEnemies();
         }
-        return null;
     }
 
-    public void removeEnemy(){
-        enemies.remove(toRemove);
-        toRemove.remove();
-        toRemove = null;
+    private void roomChange(){
+        Integer location = room.roomChange(player);
+        if(location != null){
+            if(location == 0){
+                player.setPosition(Gdx.graphics.getWidth() - player.getWidth()-70,player.getY());
+            }else if(location == 1){
+                player.setPosition(70,player.getY());
+            }else if(location == 2){
+                player.setPosition(player.getX(),70);
+            }else if(location == 3){
+                player.setPosition(player.getX(),Gdx.graphics.getHeight() - player.getHeight()-70);
+            }
+        }
     }
 
     private void tick(){
-
+        room.tick();
     }
 
     @Override

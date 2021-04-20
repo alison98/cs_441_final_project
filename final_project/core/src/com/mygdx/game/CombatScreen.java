@@ -45,22 +45,13 @@ public class CombatScreen implements Screen {
     private GameScreen gameScreen;
 
 
-    //TODO
-    //talk with group to get:
-    //  -getMoves, inflictDamage, getHealth for Player and Enemy
-    //then some more UI
-    //  -display sprites (left and right or front and far)
+    //TODO:
+    //  -uncomment code once health vars exist
     //  -some sort of indication of damage done/attack (name of move and damage done, sprites shake, etc.)
-    //Future issues:
-    //  -how to play animations (sprite moves close on attack, shakes on damage?)
-    //  -cleaning up and improving UI (can make front and far rather than side to side, use images for health bars, etc)
-    //  -how to update UI elements during runtime (if HP is a picture, how many pictures do we need?)
-
-    //TODO for Monday
-    //  -better UI/animation class to handle animationActive
+    //  -then better UI/animation class to handle animationActive (as health and movement will use it)
     //  -no hard-coded numbers (HealthBar)
     //  -clean the button code
-    //  -setup going back to game screen on winning
+    //  -setup going back to game screen on winning (with Drew's code)
 
 
     //basic constructor
@@ -176,7 +167,7 @@ public class CombatScreen implements Screen {
 
 
 
-        /*
+
         //List<String> playerWeapons = player.getWeapon(); //get list of moves - uncomment once Player class setup for this
         final List<String> playerWeapons = new ArrayList<>();
         playerWeapons.add("sword");
@@ -234,7 +225,7 @@ public class CombatScreen implements Screen {
         }
 
 
-         */
+
 
 
         //starting to add additional UI elements (player and enemy sprites and health bars)

@@ -68,6 +68,7 @@ public class GameScreen implements Screen {
     private void checkCollisions(){
         Enemy hitEnemy = room.checkCollisions(player);
         if(hitEnemy != null){
+            player.resetSprite();
             game.setScreen(new CombatScreen(game, hitEnemy, player, this));
 
             //do this in the combat screen

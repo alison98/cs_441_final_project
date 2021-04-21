@@ -45,14 +45,20 @@ public class CombatScreen implements Screen {
     private AnimationManager animationManager;//this keeps track of/sets the state of animationActive
     private GameScreen gameScreen;
     private Attack currentAttack;
+    private float playerX, playerY, enemyX, enemyY;
 
 
     //TODO:
+    //  -add actual animation, not sliding around
+    //  -flip player sprite
+    //  -fix bug where player is moving when coming out of combat screen
+    //  -see if Derrick can change his code to replace sprite (i.e. a method I can call AFTER animation ends, as right now its instant)
+    //  -add spot for names (move everything down)
     //  -uncomment code once health vars exist
     //  -some sort of indication of damage done/attack (name of move and damage done, sprites shake, etc.)
     //  -no hard-coded numbers (HealthBar)
     //  -clean the button code
-    //  -setup going back to game screen on winning (with Drew's code)
+    //  -setup going back to game screen on player winning - where does he go?
 
 
     //basic constructor
@@ -60,8 +66,10 @@ public class CombatScreen implements Screen {
         game = g;
         enemy = e;
         player = p;
-        player = new Player();//comment out once passing in
-        enemy = new Enemy(0, 0, 0, 0, 1);//comment out once passing in
+        enemyX = e.getX();
+        enemyY = e.getY();
+        playerX = p.getX();
+        playerY = p.getY();
         stage = new Stage(new ScreenViewport());
         width = Gdx.graphics.getWidth();
         height = Gdx.graphics.getHeight();
@@ -100,7 +108,7 @@ public class CombatScreen implements Screen {
     //i.e. we wait for player to select, handler fires, does move, then allows enemy to move, which will then start the process over
     private void tick() {
         //player.tick();
-        enemy.tick();
+        //enemy.tick();
         playerHealthBar.tick();
         enemyHealthBar.tick();
         if(currentAttack!=null) currentAttack.tick(); //if there's an attack ongoing, call it's tick
@@ -111,24 +119,14 @@ public class CombatScreen implements Screen {
     private void playerTurn(String selectedWeapon) {
         int damage = Move.getInstance().getDamage(selectedWeapon);//get damage in the move's range
         System.out.println("dealing " + damage + " to enemy");
-        //uncomment when getters and setters exist
-        //enemy.inflictDamage(damage);//update enemy's stats (health)
         //update player if need be (if they used a resource, hurt themselves?)
+        damage = 90;
+
+        enemy.setHealth(enemy.getHealth() - damage);
         enemyHealthBar.decrementHealth(damage);
-        animationManager.startAnimation();
         currentAttack = new Attack(player, enemy);
-        animationManager.startAnimation();
+        animationManager.startAnimation();//move to attack constructor
         playerTurn = false;//it is now the enemy's turn, they can go once animations finish
-
-        //uncomment when getters and setters exist
-        /*
-        if(enemy.getHealth() <= 0){//check if player won
-            //NOTE FROM DREW: Call these two lines when you want to exit the combat screen. The first line will remove the hit enemy from the game screen, so only use that when the enemy loses.
-            //Layout.getInstance().setEnemies();
-            //game.setScreen(gameScreen);
-        }
-        */
-
 
     }
 
@@ -140,24 +138,37 @@ public class CombatScreen implements Screen {
         String selectedWeapon = enemyWeapons.get(rand.nextInt(enemyWeapons.size()));//get random weapon
         int damage = Move.getInstance().getDamage(selectedWeapon);//get damage in range of move
         System.out.println("dealing " + damage + " to player");
+
         //uncomment when getters and setters exist
-        //player.inflictDamage(damage);//update player's stats (health)
+        //player.setHealth(player.getHealth() - damage);//update player's stats (health)
         //update enemy if need be (if they used a resource, hurt themselves?)
         playerHealthBar.decrementHealth(damage);//start animation
-        animationManager.startAnimation();//and tell animation manager something is happening
         currentAttack = new Attack(enemy, player);//start animation
-        animationManager.startAnimation();//and tell animation manager something is happening
+        animationManager.startAnimation();///move to attack constructor
         playerTurn = true;//it is now the player's turn, they can go once animations finish
 
 
-        //uncomment when getters and setters exist
-        /*
-        if(player.getHealth() <= 0){//check if enemy won
-            //NOTE FROM DREW: Call these two lines when you want to exit the combat screen.
-            //game.setScreen(gameScreen);//might need something to modify game state (like moving player away from enemy)
-        }
-        */
     }
+
+    //called when either side wins
+    //called from animationsManager (we don't want to exit until animations are done)
+    private void combatOver(boolean playerWon) {
+        //NOTE FROM DREW: Call these two lines when you want to exit the combat screen.
+        //game.setScreen(gameScreen);//might need something to modify game state (like moving player away from enemy)
+        if(playerWon){//the player won
+            player.setPosition(playerX, playerY);//put back in original spot
+            Layout.getInstance().setEnemies();//turn enemies into friendlies (?)
+        }else{//player lost
+            player.setPosition(playerX -200, playerY -200);//move over a bit? idk yet - needs to be far enough to not be in hitbox, but also not hit another enemy or go outside screen
+        }
+        //common to both
+        stage.clear();
+        enemy.setPosition(enemyX, enemyY); //reset enemy back to starting position
+        player.scaleSprite(1f);//back to original size
+        gameScreen.getStage().addActor(player);//necessary, or player won't reappear - IDK why I don't need for enemy
+        game.setScreen(gameScreen);
+    }
+
 
 
     //set up the UI elements. For now, this is just a button for each move.
@@ -231,6 +242,7 @@ public class CombatScreen implements Screen {
         player.setPosition((float) width / 6, (float) height / 2);
         player.scaleSprite(2f);
         stage.addActor(player);
+        player.positionChanged();
         enemy.setPosition((float) (width - (width / 6) - enemy.getWidth()), (float) height / 2);
         stage.addActor(enemy);
         //this puts player on left, enemy on right
@@ -239,7 +251,7 @@ public class CombatScreen implements Screen {
         playerHealthBar = new HealthBar(100, 100, height - (float) (height / 5));//will also modify X, Y to be based on sprite size, health
         stage.addActor(playerHealthBar);
 
-        enemyHealthBar = new HealthBar(100, width - 850, height - (float) (height / 5));//will also modify X, Y to be based on sprite size, health
+        enemyHealthBar = new HealthBar(enemy.getHealth(), width - 850, height - (float) (height / 5));//will also modify X, Y to be based on sprite size, health
         stage.addActor(enemyHealthBar);
 
     }
@@ -403,7 +415,8 @@ public class CombatScreen implements Screen {
     //uses basic rectangles for now, can modify to images (or anything later)
     public class HealthBar extends Actor {
 
-        private int HP;
+        private float HP;
+        private float currentHealth;
         private ShapeRenderer backgroundBar;
         private ShapeRenderer frontBar;
         private float edgeDifference;
@@ -412,7 +425,7 @@ public class CombatScreen implements Screen {
         private float x, y;
 
         public HealthBar(int amount, float x, float y){
-            HP = amount;
+            HP = currentHealth = amount;
             backgroundBar = new ShapeRenderer();
             frontBar = new ShapeRenderer();
             edgeDifference = 40; //looks good
@@ -423,14 +436,17 @@ public class CombatScreen implements Screen {
 
         //on taking damage, call this
         public void decrementHealth(int damage){
-            HP-=damage;
-            decrementTo  = (float) (HP*7.5); //change to use current length
+            currentHealth-=damage;
+            if(currentHealth<=0) decrementTo = 0;
+            else decrementTo  =  (currentHealth/HP) * (750); //750 comes from starting length
+            animationManager.startAnimation();
+            System.out.println(currentLength + " " + decrementTo);
         }
 
         public void tick(){
             if (currentLength > decrementTo) { //keep decreasing by 1 pixel until we reach spot
                     currentLength--;
-                    if(currentLength <= decrementTo){
+                    if(currentLength <= decrementTo || currentLength <=0){//end once we reach desired spot or 0 (and 1 side dies)
                         animationManager.endAnimation();
                     }
             }
@@ -478,8 +494,8 @@ public class CombatScreen implements Screen {
             startingPosition = currentPosition = a.getX();
             targetPosition = v.getX();
             goingRight = targetPosition > currentPosition;
-            if(goingRight) pixelsPerTick = 10;//increase x
-            else pixelsPerTick = -10;
+            if(goingRight) pixelsPerTick = 25;//increase x
+            else pixelsPerTick = -25;
             //System.out.println(goingRight + " from " + currentPosition + " to " + targetPosition);
         }
 
@@ -549,14 +565,14 @@ public class CombatScreen implements Screen {
                 //playerTurn is never explicitly called, its done via buttons
                 //so we just check if animations are active and its the player's turn
                 //but enemy will automatically go without a class like this
-                if(!playerTurn) enemyTurn();
+                if(!playerTurn && enemyHealthBar.currentHealth <= 0) combatOver(true); //enemy's health is <=0 and animations are done, player wins
+                else if(!playerTurn) enemyTurn();//enemy is not dead, and its their turn
+                else if(playerTurn && playerHealthBar.currentHealth <= 0) combatOver(false);//player died, animations over enemy wins
             }
         }
 
 
     }
-
-
 
 
     @Override

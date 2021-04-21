@@ -27,6 +27,12 @@ public class GameScreen implements Screen {
     Player player;
     private Room room;
 
+    //so I think an actor can only be on 1 stage at a time
+    //and adding player to CombatScreen removes from this stage
+    //and I need to re-add the player to the stage before coming back to GameScreen
+    //I have no idea why I don't get this problem with the enemy
+    public Stage getStage(){ return stage; }
+
     public GameScreen(Game g) {
         game = g;
         stage = new Stage(new ScreenViewport());
@@ -70,7 +76,6 @@ public class GameScreen implements Screen {
         if(hitEnemy != null){
             player.setCombat();
             game.setScreen(new CombatScreen(game, hitEnemy, player, this));
-
             //do this in the combat screen
             //hitEnemy.setHealth(0);
             //Layout.getInstance().setEnemies();

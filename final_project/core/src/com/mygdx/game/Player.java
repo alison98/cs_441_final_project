@@ -49,6 +49,8 @@ public class Player extends Actor {
     }
 
     public void setCombat(){
+        speedX = 0;
+        speedY = 0;
         walkFrame = 8;
         this.sprite = walkingSprites.get(walkFrame);
     }

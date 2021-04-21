@@ -86,7 +86,7 @@ public class CombatScreen implements Screen {
         stage.act();
         stage.draw();
         //NOTE FROM DREW: Call these two lines when you want to exit the combat screen. The first line will remove the hit enemy from the game screen, so only use that when the enemy loses.
-        //gameScreen.removeEnemy();
+        //Layout.getInstance().setEnemies();
         //game.setScreen(gameScreen);
     }
 
@@ -124,7 +124,7 @@ public class CombatScreen implements Screen {
         /*
         if(enemy.getHealth() <= 0){//check if player won
             //NOTE FROM DREW: Call these two lines when you want to exit the combat screen. The first line will remove the hit enemy from the game screen, so only use that when the enemy loses.
-            //gameScreen.removeEnemy();
+            //Layout.getInstance().setEnemies();
             //game.setScreen(gameScreen);
         }
         */

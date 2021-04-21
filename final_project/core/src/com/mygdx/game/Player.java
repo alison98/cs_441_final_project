@@ -29,7 +29,7 @@ public class Player extends Actor {
         walkingSprites.add(new Sprite(new Texture("player-walk-right3.png"))); //5
         walkingSprites.add(new Sprite(new Texture("player-walk-right4.png"))); //6
         walkingSprites.add(new Sprite(new Texture("player-walk-right3.png"))); //7
-        walkingSprites.add(new Sprite(new Texture("player-resized6x.png"))); //9
+        walkingSprites.add(new Sprite(new Texture("player-resized6x.png"))); //8
         walkFrame = 0;
         sprite = walkingSprites.get(walkFrame);
         this.setBounds(this.sprite.getX(), this.sprite.getY(), this.sprite.getWidth(), this.sprite.getHeight());
@@ -48,8 +48,8 @@ public class Player extends Actor {
         speedY = speedYIn;
     }
 
-    public void resetSprite(){
-        walkFrame = 0;
+    public void setCombat(){
+        walkFrame = 8;
         this.sprite = walkingSprites.get(walkFrame);
     }
 
@@ -113,6 +113,8 @@ public class Player extends Actor {
             } else if(speedX < 0){
                 walkFrame = 1;
             }
+        } else if(walkFrame == 8){
+            walkFrame = 4;
         }
         this.sprite = this.walkingSprites.get(walkFrame);
     }

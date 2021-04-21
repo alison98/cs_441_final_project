@@ -49,13 +49,16 @@ public class CombatScreen implements Screen {
 
 
     //TODO:
-    //  -add spot for names
-    //  -make sure animations end before going back to game screen
+    //  -add actual animation, not sliding around
+    //  -flip player sprite
+    //  -fix bug where player is moving when coming out of combat screen
+    //  -see if Derrick can change his code to replace sprite (i.e. a method I can call AFTER animation ends, as right now its instant)
+    //  -add spot for names (move everything down)
     //  -uncomment code once health vars exist
     //  -some sort of indication of damage done/attack (name of move and damage done, sprites shake, etc.)
     //  -no hard-coded numbers (HealthBar)
     //  -clean the button code
-    //  -setup going back to game screen on player winning (need health var first)
+    //  -setup going back to game screen on player winning - where does he go?
 
 
     //basic constructor
@@ -117,77 +120,55 @@ public class CombatScreen implements Screen {
         int damage = Move.getInstance().getDamage(selectedWeapon);//get damage in the move's range
         System.out.println("dealing " + damage + " to enemy");
         //update player if need be (if they used a resource, hurt themselves?)
+        damage = 90;
 
-        //damage = 99;
-
-        System.out.println(enemy.getHealth());
-        enemy.setHealth(enemy.getHealth() - damage);//for debugging, screen ends immediately after 1 attack
-
+        enemy.setHealth(enemy.getHealth() - damage);
         enemyHealthBar.decrementHealth(damage);
-        //animationManager.startAnimation();
         currentAttack = new Attack(player, enemy);
-        animationManager.startAnimation();
+        animationManager.startAnimation();//move to attack constructor
         playerTurn = false;//it is now the enemy's turn, they can go once animations finish
-
-
-
 
     }
 
     //called once all animations finish (the player's turn ends)
     public void enemyTurn() {
-
-        System.out.println("enemy turn");
-
-        //this check needs to go AFTER animations end - so, it should go at start of enemy turn
-        if(enemy.getHealth() <= 0){//check if player won
-            //NOTE FROM DREW: Call these two lines when you want to exit the combat screen. The first line will remove the hit enemy from the game screen, so only use that when the enemy loses.
-            //gameScreen.removeEnemy();
-            //game.setScreen(gameScreen);
-
-            stage.clear();
-            //reset player and enemy back to starting positions
-            enemy.setPosition(enemyX, enemyY);
-            player.setPosition(playerX, playerY);
-            player.scaleSprite(1f);//back to original size
-            gameScreen.getStage().addActor(player);//necessary, or player won't reappear - IDK why I don't need for enemy
-            Layout.getInstance().setEnemies();
-            game.setScreen(gameScreen);
-        }
-
         List<String> enemyWeapons = enemy.getWeapon(); //get list of moves
         Random rand = new Random(); //pick one (random for now)
         //double check that using same Rand is random
         String selectedWeapon = enemyWeapons.get(rand.nextInt(enemyWeapons.size()));//get random weapon
         int damage = Move.getInstance().getDamage(selectedWeapon);//get damage in range of move
         System.out.println("dealing " + damage + " to player");
+
         //uncomment when getters and setters exist
         //player.setHealth(player.getHealth() - damage);//update player's stats (health)
         //update enemy if need be (if they used a resource, hurt themselves?)
         playerHealthBar.decrementHealth(damage);//start animation
-        //animationManager.startAnimation();//and tell animation manager something is happening
         currentAttack = new Attack(enemy, player);//start animation
-        animationManager.startAnimation();//and tell animation manager something is happening
+        animationManager.startAnimation();///move to attack constructor
         playerTurn = true;//it is now the player's turn, they can go once animations finish
 
 
-        //uncomment when getters and setters exist
-        /*
-        if(player.getHealth() <= 0){//check if enemy won
-            //NOTE FROM DREW: Call these two lines when you want to exit the combat screen.
-            //game.setScreen(gameScreen);//might need something to modify game state (like moving player away from enemy)
-
-            stage.clear();
-            //reset player and enemy back to starting positions
-            enemy.setPosition(enemyX, enemyY);
-            player.setPosition(playerX, playerY);
-            player.scaleSprite(.5f);//back to original size
-            gameScreen.getStage().addActor(player);//necessary, or player won't reappear - IDK why I don't need for enemy
-            Layout.getInstance().setEnemies();
-            game.setScreen(gameScreen);
-        }
-        */
     }
+
+    //called when either side wins
+    //called from animationsManager (we don't want to exit until animations are done)
+    private void combatOver(boolean playerWon) {
+        //NOTE FROM DREW: Call these two lines when you want to exit the combat screen.
+        //game.setScreen(gameScreen);//might need something to modify game state (like moving player away from enemy)
+        if(playerWon){//the player won
+            player.setPosition(playerX, playerY);//put back in original spot
+            Layout.getInstance().setEnemies();//turn enemies into friendlies (?)
+        }else{//player lost
+            player.setPosition(playerX -200, playerY -200);//move over a bit? idk yet - needs to be far enough to not be in hitbox, but also not hit another enemy or go outside screen
+        }
+        //common to both
+        stage.clear();
+        enemy.setPosition(enemyX, enemyY); //reset enemy back to starting position
+        player.scaleSprite(1f);//back to original size
+        gameScreen.getStage().addActor(player);//necessary, or player won't reappear - IDK why I don't need for enemy
+        game.setScreen(gameScreen);
+    }
+
 
 
     //set up the UI elements. For now, this is just a button for each move.
@@ -456,19 +437,16 @@ public class CombatScreen implements Screen {
         //on taking damage, call this
         public void decrementHealth(int damage){
             currentHealth-=damage;
-            //System.out.println(HP);
-            if(currentHealth <= 0) animationManager.endAnimation();
-            else {
-                decrementTo  =  (currentHealth/HP) * (750); //change to use current length
-                animationManager.startAnimation();
-                System.out.println(currentLength + " " + decrementTo);
-            }
+            if(currentHealth<=0) decrementTo = 0;
+            else decrementTo  =  (currentHealth/HP) * (750); //750 comes from starting length
+            animationManager.startAnimation();
+            System.out.println(currentLength + " " + decrementTo);
         }
 
         public void tick(){
             if (currentLength > decrementTo) { //keep decreasing by 1 pixel until we reach spot
                     currentLength--;
-                    if(currentLength <= decrementTo){
+                    if(currentLength <= decrementTo || currentLength <=0){//end once we reach desired spot or 0 (and 1 side dies)
                         animationManager.endAnimation();
                     }
             }
@@ -587,14 +565,14 @@ public class CombatScreen implements Screen {
                 //playerTurn is never explicitly called, its done via buttons
                 //so we just check if animations are active and its the player's turn
                 //but enemy will automatically go without a class like this
-                if(!playerTurn) enemyTurn();
+                if(!playerTurn && enemyHealthBar.currentHealth <= 0) combatOver(true); //enemy's health is <=0 and animations are done, player wins
+                else if(!playerTurn) enemyTurn();//enemy is not dead, and its their turn
+                else if(playerTurn && playerHealthBar.currentHealth <= 0) combatOver(false);//player died, animations over enemy wins
             }
         }
 
 
     }
-
-
 
 
     @Override

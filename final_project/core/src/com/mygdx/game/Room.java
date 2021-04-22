@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -14,23 +15,26 @@ public class Room extends Actor {
 
     private Layout layout;
     private List<Enemy> enemyList;
+    private List<Integer> doors;
     private int enemyNum;
     private int humanNum;
     private Random random;
+    private boolean stair;
 
     public Room(){
         random = new Random();
         layout = Layout.getInstance();
         sprite = layout.getRoom();
+        doors = layout.possibleRooms();
         setUpEnemies();
         setBounds(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
+        stair = false;
     }
 
     private void setUpEnemies(){
         //add enemies to the room in random locations
-        enemyNum = layout.getEnemies();
-        enemyList = new ArrayList<>();
-        for(int i=0; i<enemyNum; i++){
+        enemyList = layout.getEnemies();
+        /*for(int i=0; i<enemyNum; i++){
             Enemy enemy = new Enemy(random.nextInt(1000)+100,random.nextInt(700)+100,2,random.nextInt(5),1);
             enemyList.add(enemy);
         }
@@ -41,7 +45,7 @@ public class Room extends Actor {
             Enemy enemy = new Enemy(random.nextInt(1000)+100,random.nextInt(700)+100,2,0,1);
             enemy.setHealth(0);
             enemyList.add(enemy);
-        }
+        },*/
 
     }
 
@@ -54,8 +58,22 @@ public class Room extends Actor {
     @Override
     public void draw(Batch batch, float alpha){
         batch.draw(sprite, getX(),getY(), Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
+        for(int i=0; i<doors.size(); i++){
+            if(doors.get(i)==0){
+                batch.draw(new Texture("badlogic.jpg"), 0, Gdx.graphics.getHeight()/2, 50, 150);
+            }else if(doors.get(i)==1){
+                batch.draw(new Texture("badlogic.jpg"), Gdx.graphics.getWidth()-50, Gdx.graphics.getHeight()/2, 50, 150);
+            }else if(doors.get(i)==2){
+                batch.draw(new Texture("badlogic.jpg"), Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()-50, 150, 50);
+            }else if(doors.get(i)==3){
+                batch.draw(new Texture("badlogic.jpg"), Gdx.graphics.getWidth()/2, 0, 150, 50);
+            }
+        }
         for(Enemy enemy: enemyList) {
             enemy.draw(batch, alpha);
+        }
+        if(stair){
+            batch.draw(new Texture("badlogic.jpg"), Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2, 150, 150);
         }
     }
 
@@ -79,9 +97,15 @@ public class Room extends Actor {
     }
 
     public Integer roomChange(Player player){
-        Integer location = layout.changeRoom(player);
+        Integer location = layout.changeRoom(player, stair);
         if(location != null){
             sprite = layout.getRoom();
+            if(sprite.getTexture().toString().equals("img4.jpg")){
+                stair = true;
+            }else{
+                stair = false;
+            }
+            doors = layout.possibleRooms();
             setUpEnemies();
         }
         return location;

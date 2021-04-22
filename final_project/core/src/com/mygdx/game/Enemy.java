@@ -26,6 +26,7 @@ public class Enemy extends Actor {
     private int level;
     private Move abilities;
     private int health;
+    private String name;
     private Random random;
 
     public Enemy(int x, int y, int speedIn, int typeIn, int floorIn){
@@ -60,6 +61,7 @@ public class Enemy extends Actor {
         sprites = new Sprite[2];
         sprites[0] = new Sprite(new Texture("badlogic.jpg"));
         sprites[1] = new Sprite(new Texture("player-resized6x.png")); //change to random human character
+        name = "Monster";
     }
 
     public void tick() {
@@ -179,14 +181,14 @@ public class Enemy extends Actor {
         return fight;
     }
 
+    public String getName(){return name;}
+
     public void setHealth(int healthIn){
         health = healthIn;
         if(health<=0) {
             fight = false;
-            float x = getX();
-            float y = getY();
             sprite = sprites[1];
-            sprite.setPosition(x, y);
+            positionChanged();
         }
     }
 
@@ -194,9 +196,7 @@ public class Enemy extends Actor {
     public void respawn(){
         health = floor*100 + random.nextInt(100);
         fight = true;
-        float x = getX();
-        float y = getY();
         sprite = sprites[0];
-        sprite.setPosition(x,y);
+        positionChanged();
     }
 }

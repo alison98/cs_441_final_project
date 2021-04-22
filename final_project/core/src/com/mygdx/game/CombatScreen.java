@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -15,8 +16,10 @@ import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
@@ -49,16 +52,19 @@ public class CombatScreen implements Screen {
 
 
     //TODO:
-    //  -add actual animation, not sliding around
-    //  -flip player sprite
-    //  -fix bug where player is moving when coming out of combat screen
-    //  -see if Derrick can change his code to replace sprite (i.e. a method I can call AFTER animation ends, as right now its instant)
-    //  -add spot for names (move everything down)
-    //  -uncomment code once health vars exist
-    //  -some sort of indication of damage done/attack (name of move and damage done, sprites shake, etc.)
-    //  -no hard-coded numbers (HealthBar)
-    //  -clean the button code
-    //  -setup going back to game screen on player winning - where does he go?
+    //  -For Friday:
+    //      -add spot for names (move everything down)
+    //      -see if Derrick can change his code to replace sprite (i.e. a method I can call AFTER animation ends, as right now its instant)
+    //          ---if changing is too quick, we can change it during an animation
+    //          ---or start a new one that's just basically a timer
+    //      -setup going back to game screen on player losing - needs to be far enough away, but not out of bounds - i.e. I need checks
+    //  -Stretch/next:
+    //       -add actual animation, not sliding around (use player code)
+    //      -uncomment code once health vars exist
+    //      -some sort of indication of damage done/attack (name of move and damage done, sprites shake, etc.)
+    //      -no hard-coded numbers (HealthBar)
+    //      -clean the button code
+    //
 
 
     //basic constructor
@@ -120,8 +126,7 @@ public class CombatScreen implements Screen {
         int damage = Move.getInstance().getDamage(selectedWeapon);//get damage in the move's range
         System.out.println("dealing " + damage + " to enemy");
         //update player if need be (if they used a resource, hurt themselves?)
-        damage = 90;
-
+        damage = 99;
         enemy.setHealth(enemy.getHealth() - damage);
         enemyHealthBar.decrementHealth(damage);
         currentAttack = new Attack(player, enemy);
@@ -158,6 +163,7 @@ public class CombatScreen implements Screen {
         if(playerWon){//the player won
             player.setPosition(playerX, playerY);//put back in original spot
             Layout.getInstance().setEnemies();//turn enemies into friendlies (?)
+            //enemy.sprite = enemy.sprites[1];//I need to think of a way to hang here for just a moment, but it doesn't really fit with the animation manager
         }else{//player lost
             player.setPosition(playerX -200, playerY -200);//move over a bit? idk yet - needs to be far enough to not be in hitbox, but also not hit another enemy or go outside screen
         }
@@ -238,21 +244,43 @@ public class CombatScreen implements Screen {
 
 
         //starting to add additional UI elements (player and enemy sprites and health bars)
-        //will probably but in different function or at least clean up
-        player.setPosition((float) width / 6, (float) height / 2);
+        //probably need to use size of sprites to determine positions better
+        player.setPosition((float) width / 5, (float) (height / 2) - 75);
         player.scaleSprite(2f);
         stage.addActor(player);
         player.positionChanged();
-        enemy.setPosition((float) (width - (width / 6) - enemy.getWidth()), (float) height / 2);
+        enemy.setPosition((float) (width - (width / 6) - enemy.getWidth()), (float) (height / 2) - 75);
         stage.addActor(enemy);
         //this puts player on left, enemy on right
 
-        //trying out this HealthBar class with a basic decrementing animation, still need to test a bit
-        playerHealthBar = new HealthBar(100, 100, height - (float) (height / 5));//will also modify X, Y to be based on sprite size, health
+        //HealthBar class with a basic decrementing animation
+        playerHealthBar = new HealthBar(100, 100, height - (float) (height /4 ));//will also modify X, Y to be based on sprite size, health
         stage.addActor(playerHealthBar);
 
-        enemyHealthBar = new HealthBar(enemy.getHealth(), width - 850, height - (float) (height / 5));//will also modify X, Y to be based on sprite size, health
+        enemyHealthBar = new HealthBar(enemy.getHealth(), width - 850, height - (float) (height / 4));//will also modify X, Y to be based on sprite size, health
         stage.addActor(enemyHealthBar);
+
+
+        //set up label style - I just copied the font from Alison's last project, we can change
+        //and we can change to images later if need be
+        Label.LabelStyle labelStyle = new Label.LabelStyle();
+        labelStyle.font = new BitmapFont(Gdx.files.internal("font/font.fnt"));
+
+        //these look the best when they are directly above the health bars and the same length
+        //thus the 750 + 40 - this is the length of the black box (background of the health bar)
+        //will probably need to define these numbers differently/less hard-coding and make sure it looks good at different scales(?)
+
+        Label playerLabel = new Label("Bill Gates", labelStyle);
+        playerLabel.setSize(750 + 40, 200);
+        playerLabel.setPosition(100,height - (float) (height/5.5));
+        playerLabel.setAlignment(Align.center);
+        stage.addActor(playerLabel);
+
+        Label enemyLabel = new Label(enemy.getName(), labelStyle);
+        enemyLabel.setSize(750 + 40, 200);
+        enemyLabel.setPosition(width - 850,height - (float) (height/5.5));
+        enemyLabel.setAlignment(Align.center);
+        stage.addActor(enemyLabel);
 
     }
 
@@ -437,7 +465,7 @@ public class CombatScreen implements Screen {
         //on taking damage, call this
         public void decrementHealth(int damage){
             currentHealth-=damage;
-            if(currentHealth<=0) decrementTo = 0;
+            if(currentHealth<=0){ decrementTo = 0; }
             else decrementTo  =  (currentHealth/HP) * (750); //750 comes from starting length
             animationManager.startAnimation();
             System.out.println(currentLength + " " + decrementTo);
@@ -445,7 +473,7 @@ public class CombatScreen implements Screen {
 
         public void tick(){
             if (currentLength > decrementTo) { //keep decreasing by 1 pixel until we reach spot
-                    currentLength--;
+                    currentLength-=3;
                     if(currentLength <= decrementTo || currentLength <=0){//end once we reach desired spot or 0 (and 1 side dies)
                         animationManager.endAnimation();
                     }
@@ -520,6 +548,8 @@ public class CombatScreen implements Screen {
 
     }
 
+
+
     /*
      * Basic class to manage animations. Need to prevent either side from starting a new turn while
      * still in the middle of the previous. I figured we could use booleans and a check in the tick,
@@ -565,7 +595,9 @@ public class CombatScreen implements Screen {
                 //playerTurn is never explicitly called, its done via buttons
                 //so we just check if animations are active and its the player's turn
                 //but enemy will automatically go without a class like this
-                if(!playerTurn && enemyHealthBar.currentHealth <= 0) combatOver(true); //enemy's health is <=0 and animations are done, player wins
+                if(!playerTurn && enemyHealthBar.currentHealth <= 0){
+                    combatOver(true); //enemy's health is <=0 and animations are done, player wins
+                }
                 else if(!playerTurn) enemyTurn();//enemy is not dead, and its their turn
                 else if(playerTurn && playerHealthBar.currentHealth <= 0) combatOver(false);//player died, animations over enemy wins
             }

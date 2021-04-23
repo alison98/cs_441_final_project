@@ -20,12 +20,14 @@ public class Room extends Actor {
     private int humanNum;
     private Random random;
     private boolean stair;
+    private Texture doorImg;
 
     public Room(){
         random = new Random();
         layout = Layout.getInstance();
         sprite = layout.getRoom();
         doors = layout.possibleRooms();
+        doorImg = new Texture("badlogic.jpg");
         setUpEnemies();
         setBounds(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
         stair = false;
@@ -60,20 +62,20 @@ public class Room extends Actor {
         batch.draw(sprite, getX(),getY(), Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
         for(int i=0; i<doors.size(); i++){
             if(doors.get(i)==0){
-                batch.draw(new Texture("badlogic.jpg"), 0, Gdx.graphics.getHeight()/2, 50, 150);
+                batch.draw(doorImg, 0, Gdx.graphics.getHeight()/2, 50, 150);
             }else if(doors.get(i)==1){
-                batch.draw(new Texture("badlogic.jpg"), Gdx.graphics.getWidth()-50, Gdx.graphics.getHeight()/2, 50, 150);
+                batch.draw(doorImg, Gdx.graphics.getWidth()-50, Gdx.graphics.getHeight()/2, 50, 150);
             }else if(doors.get(i)==2){
-                batch.draw(new Texture("badlogic.jpg"), Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()-50, 150, 50);
+                batch.draw(doorImg, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()-50, 150, 50);
             }else if(doors.get(i)==3){
-                batch.draw(new Texture("badlogic.jpg"), Gdx.graphics.getWidth()/2, 0, 150, 50);
+                batch.draw(doorImg, Gdx.graphics.getWidth()/2, 0, 150, 50);
             }
         }
         for(Enemy enemy: enemyList) {
             enemy.draw(batch, alpha);
         }
         if(stair){
-            batch.draw(new Texture("badlogic.jpg"), Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2, 150, 150);
+            batch.draw(doorImg, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2, 150, 150);
         }
     }
 

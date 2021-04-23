@@ -244,6 +244,7 @@ public class CombatScreen implements Screen {
         stage.addActor(player);
         player.positionChanged();
         enemy.setPosition((float) (width - (width / 6) - enemy.getWidth()), (float) height / 2);
+        enemy.scaleSprite(2f);
         stage.addActor(enemy);
         //this puts player on left, enemy on right
 

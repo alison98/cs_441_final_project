@@ -58,8 +58,12 @@ public class Enemy extends Actor {
 
     private void initSprites(){
         sprites = new Sprite[2];
-        sprites[0] = new Sprite(new Texture("badlogic.jpg"));
+        sprites[0] = new Sprite(new Texture("enemy1.png"));
         sprites[1] = new Sprite(new Texture("player-resized6x.png")); //change to random human character
+    }
+
+    public void scaleSprite(float scale){
+        sprite.setScale(scale);
     }
 
     public void tick() {

@@ -98,6 +98,10 @@ public class Room extends Actor {
         return null;
     }
 
+    public boolean getDoorTouched(Player player){
+        return layout.getDoorTouched(player, stair);
+    }
+
     public Integer roomChange(Player player){
         Integer location = layout.changeRoom(player, stair);
         if(location != null){

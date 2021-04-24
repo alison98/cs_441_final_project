@@ -39,7 +39,7 @@ public class Layout {
         row = random.nextInt(maxRow);
         column = random.nextInt(maxCol);
         setupFloor();
-        addRoom(0, row, column, "img3.jpg", 1, 0);
+        addRoom(0, row, column, "office-space-1.png", 1, 0);
 
         generateMap();
 
@@ -75,6 +75,29 @@ public class Layout {
     /*public Integer getHumans(){
         return enemies.get(floor).get(row).get(column)[1];
     }*/
+    public boolean getDoorTouched(Player player, boolean stair){
+        if(hitboxes.get(0).overlaps(player.getBounds())){
+            if (checkRoom(0)){
+                return true;
+            }
+        }else if(hitboxes.get(1).overlaps(player.getBounds())){
+            if (checkRoom(1)){
+                return true;
+            }
+        }else if(hitboxes.get(2).overlaps(player.getBounds())){
+            if (checkRoom(2)){
+                return true;
+            }
+        }else if(hitboxes.get(3).overlaps(player.getBounds())){
+            if (checkRoom(3)){
+                return true;
+            }
+        }else if(stair && hitboxes.get(4).overlaps(player.getBounds())){
+            return true;
+        }
+
+        return false;
+    }
 
     public Integer changeRoom(Player player, boolean stair){
         if(hitboxes.get(0).overlaps(player.getBounds())){

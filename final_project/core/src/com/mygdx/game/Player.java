@@ -61,6 +61,7 @@ public class Player extends Actor {
 
     public void scaleSprite(float scale){
         sprite.setScale(scale);
+        positionChanged();
     }
 
     @Override

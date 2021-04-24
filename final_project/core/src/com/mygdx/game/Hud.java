@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -20,10 +21,25 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 public class Hud {
     private Stage stage;
     private ScreenViewport stageViewport;
+    private ImageButton selectButton;
 
     public Hud(final SpriteBatch spriteBatch, final GameScreen gameScreen) {
         stageViewport = new ScreenViewport();
         stage = new Stage(stageViewport, spriteBatch);
+        selectButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("select-button.png"))));
+        selectButton.setPosition(1800, 80);
+        selectButton.setVisible(false);
+        selectButton.setTouchable(Touchable.disabled);
+        selectButton.addListener(new InputListener(){
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                gameScreen.roomChange();
+            }
+            @Override
+            public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+        });
         Table table = new Table();
         ImageButton upButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("up-button.png"))));
         upButton.padLeft(160);
@@ -87,6 +103,17 @@ public class Hud {
         table.add(downButton);
         table.setPosition(200, 200);
         stage.addActor(table);
+        stage.addActor(selectButton);
+    }
+
+    public void setInteractable(){
+        selectButton.setVisible(true);
+        selectButton.setTouchable(Touchable.enabled);
+    }
+
+    public void setUninteractable(){
+        selectButton.setVisible(false);
+        selectButton.setTouchable(Touchable.disabled);
     }
 
     public Stage getStage(){

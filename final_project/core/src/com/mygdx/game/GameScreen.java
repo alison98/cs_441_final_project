@@ -25,7 +25,13 @@ public class GameScreen implements Screen {
     private Hud hud;
     private SpriteBatch spriteBatch;
     Player player;
-    private Room room;
+    Room room;
+
+    //so I think an actor can only be on 1 stage at a time
+    //and adding player to CombatScreen removes from this stage
+    //and I need to re-add the player to the stage before coming back to GameScreen
+    //I have no idea why I don't get this problem with the enemy
+    public Stage getStage(){ return stage; }
 
     public GameScreen(Game g) {
         game = g;
@@ -56,7 +62,8 @@ public class GameScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         tick();
         checkCollisions();
-        roomChange();
+        checkInteractable();
+        //roomChange();
         player.move();
         stage.act(delta);
         stage.draw();
@@ -68,15 +75,24 @@ public class GameScreen implements Screen {
     private void checkCollisions(){
         Enemy hitEnemy = room.checkCollisions(player);
         if(hitEnemy != null){
+            player.setCombat();
             game.setScreen(new CombatScreen(game, hitEnemy, player, this));
-
             //do this in the combat screen
             //hitEnemy.setHealth(0);
             //Layout.getInstance().setEnemies();
         }
     }
 
-    private void roomChange(){
+    private void checkInteractable(){
+        boolean door = room.getDoorTouched(player);
+        if(door){
+            hud.setInteractable();
+        } else{
+            hud.setUninteractable();
+        }
+    }
+
+    public void roomChange(){
         Integer location = room.roomChange(player);
         if(location != null){
             if(location == 0){

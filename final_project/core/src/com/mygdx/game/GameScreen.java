@@ -63,7 +63,6 @@ public class GameScreen implements Screen {
         tick();
         checkCollisions();
         checkInteractable();
-        //roomChange();
         player.move();
         stage.act(delta);
         stage.draw();

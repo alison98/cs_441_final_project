@@ -21,14 +21,14 @@ public class Player extends Actor {
 
     public Player(){
         walkingSprites = new ArrayList<Sprite>();
-        walkingSprites.add(new Sprite(new Texture("player-walk-left2.png"))); //0
-        walkingSprites.add(new Sprite(new Texture("player-walk-left3.png"))); //1
-        walkingSprites.add(new Sprite(new Texture("player-walk-left4.png"))); //2
-        walkingSprites.add(new Sprite(new Texture("player-walk-left3.png"))); //3
-        walkingSprites.add(new Sprite(new Texture("player-walk-right2.png"))); //4
-        walkingSprites.add(new Sprite(new Texture("player-walk-right3.png"))); //5
-        walkingSprites.add(new Sprite(new Texture("player-walk-right4.png"))); //6
-        walkingSprites.add(new Sprite(new Texture("player-walk-right3.png"))); //7
+        walkingSprites.add(new Sprite(new Texture("player-4x/player-walk-left2.png"))); //0
+        walkingSprites.add(new Sprite(new Texture("player-4x/player-walk-left3.png"))); //1
+        walkingSprites.add(new Sprite(new Texture("player-4x/player-walk-left4.png"))); //2
+        walkingSprites.add(new Sprite(new Texture("player-4x/player-walk-left3.png"))); //3
+        walkingSprites.add(new Sprite(new Texture("player-4x/player-walk-right2.png"))); //4
+        walkingSprites.add(new Sprite(new Texture("player-4x/player-walk-right3.png"))); //5
+        walkingSprites.add(new Sprite(new Texture("player-4x/player-walk-right4.png"))); //6
+        walkingSprites.add(new Sprite(new Texture("player-4x/player-walk-right3.png"))); //7
         walkingSprites.add(new Sprite(new Texture("player-resized6x.png"))); //8
         walkFrame = 0;
         sprite = walkingSprites.get(walkFrame);

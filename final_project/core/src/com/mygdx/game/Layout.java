@@ -39,7 +39,7 @@ public class Layout {
         row = random.nextInt(maxRow);
         column = random.nextInt(maxCol);
         setupFloor();
-        addRoom(0, row, column, "office-space-1.png", 1, 0);
+        addRoom(0, row, column, "office-space-2.png", 1, 0);
 
         generateMap();
 

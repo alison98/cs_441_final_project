@@ -33,7 +33,9 @@ public class Hud {
         selectButton.addListener(new InputListener(){
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                gameScreen.roomChange();
+                if(gameScreen.room.getDoorTouched(gameScreen.player)){
+                    gameScreen.roomChange();
+                }
             }
             @Override
             public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {

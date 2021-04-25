@@ -164,7 +164,6 @@ public class CombatScreen implements Screen {
         //common to both
         //does clearing stage remove player
         stage.clear();
-        stage.dispose();
         enemy.setPosition(enemyX, enemyY); //reset enemy back to starting position
         player.scaleSprite(1f);//back to original size
         gameScreen.getStage().addActor(player);//necessary, or player won't reappear - IDK why I don't need for enemy

@@ -53,16 +53,18 @@ public class CombatScreen implements Screen {
 
     //TODO
     //  -health vars in player
-    //  -healing system (a self-targeting move)
-    //  -figure out the scale sprite issue
-    //  -memory issue
-    //  -Stretch/next:
+    //  -GL error 0x501 (caused by stage.dispose)
+    //  -expand on Move ideas
+    //      -add animation (basic movement) for healing
+    //      -decide what happens when trying to heal when at 100%
+    //  -figure out the scale sprite issue (haven't seen in a while)
+    //  -update comments
+    //  -next:
     //      -add actual animation, not sliding around (use player code)
     //      -uncomment code once health vars exist
     //      -some sort of indication of damage done/attack (name of move and damage done, sprites shake, etc.)
     //      -no hard-coded numbers (HealthBar)
     //      -clean the button code
-    //
 
 
     //basic constructor
@@ -113,16 +115,22 @@ public class CombatScreen implements Screen {
 
     //activated on selection/handler
     private void playerTurn(String selectedWeapon) {
-        int damage = Move.getInstance().getDamage(selectedWeapon);//get damage in the move's range
-        System.out.println("dealing " + damage + " to enemy");
-        //update player if need be (if they used a resource, hurt themselves?)
-        damage = 99;
-        enemy.setHealth(enemy.getHealth() - damage);
-        enemyHealthBar.decrementHealth(damage);
-        currentAttack = new Attack(player, enemy);
-        animationManager.startAnimation();//move to attack constructor
+        int amount = Move.getInstance().getDamage(selectedWeapon);//get damage in the move's range
+        switch (Move.getInstance().getMoveType(selectedWeapon)){
+            case ATTACK:
+                System.out.println("dealing " + amount + " to enemy");
+                enemy.setHealth(enemy.getHealth() - amount);
+                enemyHealthBar.decreaseHealth(amount);
+                currentAttack = new Attack(player, enemy);
+                break;
+            case HEALING:
+                System.out.println("healing " + amount + " to self");
+                //player.setHealth(player.getHealth() + damage); //need health var in player
+                playerHealthBar.increaseHealth(amount);
+                currentAttack = new Attack(player, player); //don't remove - it doesn't do anything yet, but ensures nothing breaks when healing has no effect (healing at 100% for example)
+                //once I decide what I want for healing, I'll replace the attack with that
+        }
         playerTurn = false;//it is now the enemy's turn, they can go once animations finish
-
     }
 
     //called once all animations finish (the player's turn ends)
@@ -130,17 +138,23 @@ public class CombatScreen implements Screen {
         List<String> enemyWeapons = enemy.getWeapon(); //get list of moves
         Random rand = new Random(); //pick one (random for now)
         //double check that using same Rand is random
+        //I'll probably want to make a smarter choice - only heal when low
         String selectedWeapon = enemyWeapons.get(rand.nextInt(enemyWeapons.size()));//get random weapon
-        int damage = Move.getInstance().getDamage(selectedWeapon);//get damage in range of move
-        //damage = 99;
-        System.out.println("dealing " + damage + " to player");
-
-        //uncomment when getters and setters exist
-        //player.setHealth(player.getHealth() - damage);//update player's stats (health)
-        //update enemy if need be (if they used a resource, hurt themselves?)
-        playerHealthBar.decrementHealth(damage);//start animation
-        currentAttack = new Attack(enemy, player);//start animation
-        animationManager.startAnimation();///move to attack constructor
+        int amount = Move.getInstance().getDamage(selectedWeapon);//get damage in the move's range
+        switch (Move.getInstance().getMoveType(selectedWeapon)){
+            case ATTACK:
+                System.out.println("dealing " + amount + " to player");
+                //player.setHealth(player.getHealth() - damage)
+                playerHealthBar.decreaseHealth(amount);//start animation
+                currentAttack = new Attack(enemy, player);
+                break;
+            case HEALING:
+                System.out.println("healing " + amount + " to enemy");
+                enemy.setHealth(enemy.getHealth() + amount);
+                enemyHealthBar.increaseHealth(amount);
+                currentAttack = new Attack(enemy, enemy); //don't remove - it doesn't do anything yet, but ensures nothing breaks when healing has no effect (healing at 100% for example)
+                //once I decide what I want for healing, I'll replace the attack with that
+        }
         playerTurn = true;//it is now the player's turn, they can go once animations finish
 
 
@@ -158,17 +172,21 @@ public class CombatScreen implements Screen {
             do{
                 //so pick a random spot in the room (away from the walls to not hit a door as well)
                 player.setPosition(rand.nextInt(width-150), rand.nextInt(height-150));
-                System.out.println(width + " , " + height);
+                //System.out.println(width + " , " + height);
             } while (gameScreen.getRoom().checkCollisions(player) != null);//and if the spot is where an enemy is, try again
         }
+
         //common to both
-        //does clearing stage remove player
+        //does clearing stage remove player? - trying to figure out why I need to re-add player to game screen
         stage.clear();
         enemy.setPosition(enemyX, enemyY); //reset enemy back to starting position
+        enemy.scaleSprite(1f);
         player.scaleSprite(1f);//back to original size
         gameScreen.getStage().addActor(player);//necessary, or player won't reappear - IDK why I don't need for enemy
-        dispose();
+        this.dispose();//This causes GL error 0x501, even if we don't do stage.clear() above, I don't know why
         game.setScreen(gameScreen);
+
+
     }
 
 
@@ -184,6 +202,7 @@ public class CombatScreen implements Screen {
         //List<String> playerWeapons = player.getWeapon(); //get list of moves - uncomment once Player class setup for this
         final List<String> playerWeapons = new ArrayList<>();
         playerWeapons.add("sword");
+        playerWeapons.add("coffee");
 
         int prevButtonIndex = -1;//index of the button which will be used to go back a "page". Will only be used if we have more moves than we can display at once
         moveButtons = new TextButton[playerWeapons.size()];//make a button for each move
@@ -217,18 +236,7 @@ public class CombatScreen implements Screen {
 
 
             } else {//normal input listener for move
-                newMoveButton.addListener(new InputListener() {
-                    @Override
-                    public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                        //when the user clicks a button for a move, call playerTurn with said move
-                        //don't just send with damage as parameter, as that would be same damage for same move
-                        //this setup will call getDamage (to get a random damage in range) every time
-                        //but only call playerTurn if it is the player's turn (set to true at start and at end of enemyTurn)
-                        //and if there's no active animations (dealt with by animationManager)
-                        if (playerTurn && !animationActive) playerTurn(currentMove);
-                        return true;
-                    }
-                });
+                setHandler(newMoveButton, currentMove);
             }
 
             stage.addActor(newMoveButton);
@@ -285,6 +293,7 @@ public class CombatScreen implements Screen {
      * Given a text button and a String representing the name of a move,
      *      -set the button's text to the string
      *      -clear the button's existing listeners
+     *      -set the buttons color based on the move type
      *      -add a new listener where the player attacks with the move represented by this string
      * @param button the button to modify
      * @content the string to display on the button and make listener for, represents a move
@@ -292,8 +301,26 @@ public class CombatScreen implements Screen {
     public void setHandler(TextButton button, final String content) {
         button.setText(content);
         button.clearListeners();
+        switch (Move.getInstance().getMoveType(content)){ //we can set color of button based on move type
+            case ATTACK: //red for attack
+                button.getStyle().fontColor = Color.WHITE;
+                button.setColor(Color.RED);
+                break;
+            case HEALING: //blue for healing
+                button.getStyle().fontColor = Color.WHITE;
+                button.setColor(Color.BLUE);
+                break;
+            default: //white for other
+                button.getStyle().fontColor = Color.BLACK;
+                button.setColor(Color.WHITE);
+        }
         button.addListener(new InputListener() {
             @Override
+            //when the user clicks a button for a move, call playerTurn with said move
+            //don't just send with damage as parameter, as that would be same damage for same move
+            //this setup will call getDamage (to get a random damage in range) every time
+            //but only call playerTurn if it is the player's turn (set to true at start and at end of enemyTurn)
+            //and if there's no active animations (dealt with by animationManager)
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 if (playerTurn && !animationActive)
                     playerTurn(content);
@@ -392,7 +419,7 @@ public class CombatScreen implements Screen {
 
         //check for previous button
         if (prevStartingIndex > prevButtonIndex) {//we will have another previous page
-            System.out.println("will have a prev: " + prevButtonIndex);
+            //System.out.println("will have a prev: " + prevButtonIndex);
             moveButtons[prevButtonIndex].setText("prev page");
             moveButtons[prevButtonIndex].clearListeners();
             moveButtons[prevButtonIndex].setVisible(true);
@@ -425,9 +452,9 @@ public class CombatScreen implements Screen {
         for (int currentButton = 0; currentButton < lastButtonIndex; currentButton++) {
             moveButtons[currentButton].setVisible(true);
             if(currentButton == prevButtonIndex && prevButtonPresent){
-                System.out.println("nop");
+                //System.out.println("nop");
             }else{
-                System.out.println(currentButton);
+                //System.out.println(currentButton);
                 setHandler(moveButtons[currentButton], playerWeapons.get(currentWeaponIndex));//add corresponding text and handler
                 currentWeaponIndex++;//increment which element to grab
                 //this won't be increment when we're at previous button, keeping us in sync (otherwise we'd skip that element by setting previous)
@@ -446,7 +473,7 @@ public class CombatScreen implements Screen {
         private ShapeRenderer frontBar;
         private float edgeDifference;
         private float currentLength;
-        private float decrementTo;
+        private float moveTo; //pixel to decrease or increase health bar to
         private float x, y;
         private boolean lastAttack;
         private int i = 0;
@@ -456,33 +483,47 @@ public class CombatScreen implements Screen {
             backgroundBar = new ShapeRenderer();
             frontBar = new ShapeRenderer();
             edgeDifference = 40; //looks good
-            currentLength = decrementTo = 750; //looks good, will make parameter or function of sprite
+            currentLength = moveTo = 750; //looks good, will make parameter or function of sprite
             this.x = x;
             this.y = y;
             lastAttack = false;
         }
 
         //on taking damage, call this
-        public void decrementHealth(int damage){
+        public void decreaseHealth(int damage){
             currentHealth-=damage;
             if(currentHealth<=0){
                 //this is the last attack
+                currentHealth = 0;//prevent from going below 0%
                 if(playerTurn) {
                     lastAttack = true; //we can use this to switch sprites as soon as health bar reaches 0
                     //kinda hacky and relies on health bar going faster than player attack
                     //I'll try to think of something better
                 }
-                decrementTo = 0;
             }
-            else decrementTo  =  (currentHealth/HP) * (750); //750 comes from starting length
-            animationManager.startAnimation();
-            System.out.println(currentLength + " " + decrementTo);
+            moveTo =  (currentHealth/HP) * (750); //750 comes from starting length
+            if (moveTo != currentLength){//only preform animation if health changes
+                animationManager.startAnimation();
+            }
         }
 
+        //on healing, call this
+        public void increaseHealth(int amount){
+            currentHealth+=amount;
+            if(currentHealth > HP) currentHealth = HP; //prevent from going over 100%
+            moveTo =  (currentHealth/HP) * (750); //750 comes from starting length
+            if(moveTo != currentLength){ //only preform animation if health changes
+                animationManager.startAnimation();
+            }
+        }
+
+
+
         public void tick(){
-            if (currentLength > decrementTo) { //keep decreasing by 1 pixel until we reach spot
+            if (currentLength > moveTo) { //keep decreasing by 3 pixels until we reach spot
                     currentLength-=3;
-                    if(currentLength <= decrementTo || currentLength <=0){//end once we reach desired spot or 0 (and 1 side dies)
+                    if(currentLength <= moveTo){//end once we reach desired spot or 0 (and 1 side dies)
+                        currentLength = moveTo; //set exactly equal (moveTo is a float or we could have gone past it)
                         if(lastAttack) {
                             //commented out for now but if we're switching sprites, we can do here
                             //enemy.sprite = enemy.sprites[1]; //switch enemy sprite as soon as health reaches 0 - as I mentioned above, this is kinda hacky and I need something better
@@ -490,6 +531,12 @@ public class CombatScreen implements Screen {
                         }
                         animationManager.endAnimation();
                     }
+            }else if (currentLength < moveTo){ //keep increasing by 3 pixels until we reach spot
+                currentLength+=3;
+                if(currentLength >= moveTo){
+                    currentLength = moveTo; //set exactly equal (moveTo is a float or we could have gone past it)
+                    animationManager.endAnimation();
+                }
             }
 
             //draw the shapes
@@ -504,6 +551,7 @@ public class CombatScreen implements Screen {
             frontBar.end();
 
         }
+
 
     }
 
@@ -538,6 +586,7 @@ public class CombatScreen implements Screen {
             if(goingRight) pixelsPerTick = 25;//increase x
             else pixelsPerTick = -25;
             //System.out.println(goingRight + " from " + currentPosition + " to " + targetPosition);
+            animationManager.startAnimation();
         }
 
         public void tick(){
@@ -603,6 +652,7 @@ public class CombatScreen implements Screen {
         public void endAnimation(){
             if(currentActiveAnimations > 0) currentActiveAnimations--;
             if(currentActiveAnimations == 0){
+                //System.out.println("done with all animations");
                 animationActive = false;
                 //can call an event to trigger next function
                 //playerTurn is never explicitly called, its done via buttons

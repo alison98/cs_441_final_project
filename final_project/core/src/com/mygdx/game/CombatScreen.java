@@ -51,15 +51,13 @@ public class CombatScreen implements Screen {
     private float playerX, playerY, enemyX, enemyY;
 
 
-    //TODO:
-    //  -For Friday:
-    //      -add spot for names (move everything down)
-    //      -see if Derrick can change his code to replace sprite (i.e. a method I can call AFTER animation ends, as right now its instant)
-    //          ---if changing is too quick, we can change it during an animation
-    //          ---or start a new one that's just basically a timer
-    //      -setup going back to game screen on player losing - needs to be far enough away, but not out of bounds - i.e. I need checks
+    //TODO
+    //  -health vars in player
+    //  -healing system (a self-targeting move)
+    //  -figure out the scale sprite issue
+    //  -memory issue
     //  -Stretch/next:
-    //       -add actual animation, not sliding around (use player code)
+    //      -add actual animation, not sliding around (use player code)
     //      -uncomment code once health vars exist
     //      -some sort of indication of damage done/attack (name of move and damage done, sprites shake, etc.)
     //      -no hard-coded numbers (HealthBar)
@@ -96,16 +94,8 @@ public class CombatScreen implements Screen {
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         tick();
-        checkCollisions();
         stage.act();
         stage.draw();
-        //NOTE FROM DREW: Call these two lines when you want to exit the combat screen. The first line will remove the hit enemy from the game screen, so only use that when the enemy loses.
-        //Layout.getInstance().setEnemies();
-        //game.setScreen(gameScreen);
-    }
-
-    private void checkCollisions() {//there won't be any collisions but I see the benefit of making all screens similar
-
     }
 
 
@@ -142,6 +132,7 @@ public class CombatScreen implements Screen {
         //double check that using same Rand is random
         String selectedWeapon = enemyWeapons.get(rand.nextInt(enemyWeapons.size()));//get random weapon
         int damage = Move.getInstance().getDamage(selectedWeapon);//get damage in range of move
+        //damage = 99;
         System.out.println("dealing " + damage + " to player");
 
         //uncomment when getters and setters exist
@@ -158,17 +149,22 @@ public class CombatScreen implements Screen {
     //called when either side wins
     //called from animationsManager (we don't want to exit until animations are done)
     private void combatOver(boolean playerWon) {
-        //NOTE FROM DREW: Call these two lines when you want to exit the combat screen.
-        //game.setScreen(gameScreen);//might need something to modify game state (like moving player away from enemy)
         if(playerWon){//the player won
             player.setPosition(playerX, playerY);//put back in original spot
-            Layout.getInstance().setEnemies();//turn enemies into friendlies (?)
-            //enemy.sprite = enemy.sprites[1];//I need to think of a way to hang here for just a moment, but it doesn't really fit with the animation manager
         }else{//player lost
-            player.setPosition(playerX -200, playerY -200);//move over a bit? idk yet - needs to be far enough to not be in hitbox, but also not hit another enemy or go outside screen
+            Random rand = new Random();
+            //for now, place player back in the same room
+            //but player needs to be far enough away from enemy to not instantly restart fight
+            do{
+                //so pick a random spot in the room (away from the walls to not hit a door as well)
+                player.setPosition(rand.nextInt(width-150), rand.nextInt(height-150));
+                System.out.println(width + " , " + height);
+            } while (gameScreen.getRoom().checkCollisions(player) != null);//and if the spot is where an enemy is, try again
         }
         //common to both
+        //does clearing stage remove player
         stage.clear();
+        stage.dispose();
         enemy.setPosition(enemyX, enemyY); //reset enemy back to starting position
         player.scaleSprite(1f);//back to original size
         gameScreen.getStage().addActor(player);//necessary, or player won't reappear - IDK why I don't need for enemy
@@ -453,6 +449,8 @@ public class CombatScreen implements Screen {
         private float currentLength;
         private float decrementTo;
         private float x, y;
+        private boolean lastAttack;
+        private int i = 0;
 
         public HealthBar(int amount, float x, float y){
             HP = currentHealth = amount;
@@ -462,12 +460,21 @@ public class CombatScreen implements Screen {
             currentLength = decrementTo = 750; //looks good, will make parameter or function of sprite
             this.x = x;
             this.y = y;
+            lastAttack = false;
         }
 
         //on taking damage, call this
         public void decrementHealth(int damage){
             currentHealth-=damage;
-            if(currentHealth<=0){ decrementTo = 0; }
+            if(currentHealth<=0){
+                //this is the last attack
+                if(playerTurn) {
+                    lastAttack = true; //we can use this to switch sprites as soon as health bar reaches 0
+                    //kinda hacky and relies on health bar going faster than player attack
+                    //I'll try to think of something better
+                }
+                decrementTo = 0;
+            }
             else decrementTo  =  (currentHealth/HP) * (750); //750 comes from starting length
             animationManager.startAnimation();
             System.out.println(currentLength + " " + decrementTo);
@@ -477,6 +484,11 @@ public class CombatScreen implements Screen {
             if (currentLength > decrementTo) { //keep decreasing by 1 pixel until we reach spot
                     currentLength-=3;
                     if(currentLength <= decrementTo || currentLength <=0){//end once we reach desired spot or 0 (and 1 side dies)
+                        if(lastAttack) {
+                            //commented out for now but if we're switching sprites, we can do here
+                            //enemy.sprite = enemy.sprites[1]; //switch enemy sprite as soon as health reaches 0 - as I mentioned above, this is kinda hacky and I need something better
+                            //enemy.positionChanged();
+                        }
                         animationManager.endAnimation();
                     }
             }

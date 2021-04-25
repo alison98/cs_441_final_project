@@ -20,7 +20,7 @@ public class Move {
 
     //Getters
     public List<String> getEnemyWeapons(int level) {
-        return enemyWeapons.get(level-1);
+        return enemyWeapons.get(level);
     }
 
     //Singleton constructor
@@ -31,9 +31,18 @@ public class Move {
 
         //Set up weapons/abilities for enemies
         enemyWeapons = new ArrayList<>();
-        List<String> floor = new ArrayList<>();
-        floor.add("sword");
-        enemyWeapons.add(floor);
+        List<String> floor0 = new ArrayList<>();
+        floor0.add("sword");
+        List<String> floor1 = new ArrayList<>();
+        floor1.add("sword");
+        List<String> floor2 = new ArrayList<>();
+        floor2.add("sword");
+        List<String> floor3 = new ArrayList<>();
+        floor3.add("sword");
+        enemyWeapons.add(floor0);
+        enemyWeapons.add(floor1);
+        enemyWeapons.add(floor2);
+        enemyWeapons.add(floor3);
     }
 
     public static Move getInstance(){

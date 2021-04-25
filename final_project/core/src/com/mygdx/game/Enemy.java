@@ -13,19 +13,14 @@ import java.util.Random;
 public class Enemy extends Actor {
     private Sprite[] sprites;
     private Sprite sprite;
-    private int speed;
-    private int type;
-    private float initX;
-    private float initY;
-    private boolean horizontal;
-    private boolean direction;
-    private boolean fight;
+    private int speed, type, floor;
+    private float initX, initY;
+    private boolean horizontal, direction;
+    private boolean fight, key, boss, human;
     private Rectangle hitbox;
     private List<String> weapon;
-    private int floor;
-    private int level;
+    private int level, health;
     private Move abilities;
-    private int health;
     private String name;
     private Random random;
 
@@ -39,6 +34,9 @@ public class Enemy extends Actor {
         horizontal = true;
         direction = true;
         fight = true;
+        key = false;
+        boss = false;
+        human = false;
         setBounds(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
         hitbox = new Rectangle(getX(), getY(), getWidth(), getHeight());
         setPosition(initX, initY);
@@ -59,7 +57,7 @@ public class Enemy extends Actor {
 
     private void initSprites(){
         sprites = new Sprite[2];
-        sprites[0] = new Sprite(new Texture("enemy1.png"));
+        sprites[0] = new Sprite(new Texture("badlogic.jpg"));
         sprites[1] = new Sprite(new Texture("player-resized6x.png")); //change to random human character
         name = "Monster";
     }
@@ -187,20 +185,45 @@ public class Enemy extends Actor {
 
     public String getName(){return name;}
 
+    public void setKey(){
+        key = true;
+    }
+
+    public void setBoss(){
+        boss = true;
+        sprite = new Sprite(new Texture("enemy1.png"));
+        positionChanged();
+    }
+
+    public void setHuman(){
+        human = true;
+        setHealth(0);
+    }
+
     public void setHealth(int healthIn){
         health = healthIn;
         if(health<=0) {
             fight = false;
             sprite = sprites[1];
             positionChanged();
+            if(key){
+                Layout.getInstance().setKey(floor);
+                System.out.println("Obtained Key");
+            }
+            if(boss){
+                Layout.getInstance().setBoss(floor);
+                System.out.println("Defeated Boss");
+            }
         }
     }
 
-    //May not need
     public void respawn(){
-        health = floor*100 + random.nextInt(100);
-        fight = true;
-        sprite = sprites[0];
-        positionChanged();
+        if(!boss && !human) {
+            health = floor * 100 + random.nextInt(100);
+            fight = true;
+            sprite = sprites[0];
+            scaleSprite(1f);
+            positionChanged();
+        }
     }
 }

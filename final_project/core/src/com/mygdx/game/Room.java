@@ -60,6 +60,7 @@ public class Room extends Actor {
     @Override
     public void draw(Batch batch, float alpha){
         batch.draw(sprite, getX(),getY(), Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
+        doors = layout.possibleRooms();
         for(int i=0; i<doors.size(); i++){
             if(doors.get(i)==0){
                 batch.draw(doorImg, 0, Gdx.graphics.getHeight()/2, 50, 150);
@@ -74,7 +75,7 @@ public class Room extends Actor {
         for(Enemy enemy: enemyList) {
             enemy.draw(batch, alpha);
         }
-        if(stair){
+        if(stair && (layout.getBoss() || layout.downFloor())){
             batch.draw(doorImg, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2, 150, 150);
         }
     }
@@ -111,7 +112,6 @@ public class Room extends Actor {
             }else{
                 stair = false;
             }
-            doors = layout.possibleRooms();
             setUpEnemies();
         }
         return location;

@@ -14,9 +14,11 @@ public class Layout {
     private List<List<List<Sprite>>> rooms;
     private List<List<List<List<Enemy>>>> enemies;
     private List<List<List<List<Integer>>>> connections;
+    private List<Integer[]> bossRooms;
     private int floor, row, column;
     private int maxFloor, maxRow, maxCol, maxTunnel, maxLen;
     private List<Rectangle> hitboxes;
+    private List<Boolean> keys, bosses;
     private Random random;
 
 
@@ -25,21 +27,24 @@ public class Layout {
         rooms = new ArrayList<>();
         enemies = new ArrayList<>();
         connections = new ArrayList<>();
+        //stairRooms = new ArrayList<>();
+        bossRooms = new ArrayList<>();
+        keys = new ArrayList<>();
+        bosses = new ArrayList<>();
 
         random = new Random();
         //Map size
-        maxFloor = 3;
+        maxFloor = 4;
         maxRow =3;
         maxCol =3;
-        maxTunnel = 20;
+        maxTunnel = 4;
         maxLen = 3;
 
         //Initial location
         floor = 0;
         row = random.nextInt(maxRow);
-        column = random.nextInt(maxCol);
-        setupFloor();
-        addRoom(0, row, column, "office-space-1.png", 1, 0);
+        column = random.nextInt(maxCol-1);
+
 
         generateMap();
 
@@ -72,9 +77,25 @@ public class Layout {
     public List<Enemy> getEnemies(){
         return enemies.get(floor).get(row).get(column);
     }
-    /*public Integer getHumans(){
-        return enemies.get(floor).get(row).get(column)[1];
-    }*/
+
+    public Boolean getKey(){
+        return keys.get(floor);
+    }
+
+    public void setKey(int floorIn){
+        keys.set(floorIn, true);
+    }
+
+    public Boolean getBoss(){
+        return bosses.get(floor);
+    }
+
+    public void setBoss(int floorIn){
+        bosses.set(floorIn, true);
+    }
+
+
+
     public boolean getDoorTouched(Player player, boolean stair){
         if(hitboxes.get(0).overlaps(player.getBounds())){
             if (checkRoom(0)){
@@ -93,7 +114,9 @@ public class Layout {
                 return true;
             }
         }else if(stair && hitboxes.get(4).overlaps(player.getBounds())){
-            return true;
+            if(getBoss() || downFloor()) {
+                return true;
+            }
         }
 
         return false;
@@ -121,55 +144,51 @@ public class Layout {
                 return 3;
             }
         }else if(stair && hitboxes.get(4).overlaps(player.getBounds())){
-            if(floor +1 < rooms.size() && rooms.get(floor+1).get(row).get(column) != null &&
-                    rooms.get(floor+1).get(row).get(column).getTexture().toString().equals("img4.jpg")){
+            if(!downFloor() && getBoss()){
+                respawn();
                 floor +=1;
             }else{
+                respawn();
                 floor -=1;
             }
-            player.moveBy(300,300);
+            player.moveBy(200,0);
             return 4;
         }
 
         return null;
     }
 
+    public boolean downFloor(){
+        if(floor +1 < rooms.size() && rooms.get(floor+1).get(row).get(column) != null &&
+                rooms.get(floor+1).get(row).get(column).getTexture().toString().equals("img4.jpg")){
+            return false;
+        }else{
+            return true;
+        }
+    }
+
     private boolean checkRoom(int direction){
         return connections.get(floor).get(row).get(column).contains(direction);
-        /*if(direction ==0){
-            if(connections.get(floor).get(row).get(column).contains(0))
-            //if(column == 0 || rooms.get(floor).get(row).get(column-1) == null){
-                return false;
-            }else{
-                return true;
-            }
-        }else if(direction == 1){
-            if(column+1 >= rooms.get(floor).get(row).size() || rooms.get(floor).get(row).get(column+1) == null){
-                return false;
-            }else{
-                return true;
-            }
-        }else if(direction == 2){
-            if(row == 0 /*|| column >= rooms.get(floor).get(row-1).size()*/ /*|| rooms.get(floor).get(row-1).get(column) == null){
-                return false;
-            }else{
-                return true;
-            }
-        }else if(direction == 3){
-            if(row+1 >= rooms.get(floor).size() /*|| column >= rooms.get(floor).get(row+1).size()*/ /*|| rooms.get(floor).get(row+1).get(column) == null){
-                return false;
-            }else{
-                return true;
-            }
-        } else{
-            return false;
-        }*/
     }
 
     public List<Integer> possibleRooms(){
         List<Integer> doors = new ArrayList<>();
-        for(int i=0;i<4;i++){
-            if(checkRoom(i)){
+        for(int i=0;i<4;i++) {
+            if (i == 0 &&bossRooms.get(floor)[0] == row
+                    && bossRooms.get(floor)[1] == column - 1 && !getKey()) {
+                //do nothing
+            } else if (i == 1 && bossRooms.get(floor)[0] == row
+                    && bossRooms.get(floor)[1] == column + 1 && !getKey()) {
+                //do nothing
+            } else if (i == 2 && bossRooms.get(floor)[0] == row - 1
+                    && bossRooms.get(floor)[1] == column && !getKey()) {
+                //do nothing
+            } else if (i == 3 && bossRooms.get(floor)[0] == row + 1
+                    && bossRooms.get(floor)[1] == column && !getKey()) {
+                //do nothing
+            }else if(bossRooms.get(floor)[0] == row && bossRooms.get(floor)[1] == column && !getBoss()){
+                //do nothing
+            }else if(checkRoom(i)){
                 doors.add(i);
             }
         }
@@ -195,16 +214,27 @@ public class Layout {
     }
 
     private void generateMap(){
-        //setupFloor();
+        setupFloor();
+
+        int originalCol =column;
+
+        //tutorial floor
+        addRoom(0, row, column, "office-space-1.png", 1, 0);
+        connections.get(0).get(row).get(column).add(1);
+        column +=1;
+        addRoom(0, row, column, "img4.jpg", 0, 0);
+        connections.get(0).get(row).get(column).add(0);
+        addRoom(1, row, column, "img4.jpg", 0, 0);
+        keys.add(false);
+        bosses.add(false);
+
         int nextRow = row;
         int nextCol = column;
-        for(int j=0; j<maxFloor;j++) {
+        for(int j=1; j<maxFloor;j++) {
             int currRow = nextRow;
             int currCol = nextCol;
-            boolean stair =true;
-            if(j == maxFloor -1){
-                stair = false;
-            }
+            keys.add(false);
+            bosses.add(false);
             for (int k=0; k<maxTunnel; k++) {
                 int length = random.nextInt(maxLen) + 1;
                 int direction = random.nextInt(4);
@@ -231,30 +261,178 @@ public class Layout {
                         //need to change to random room
                         //if certain room do something else
                         int stairRoom = random.nextInt(2);
-                        if(stairRoom == 1 && stair) {
-                            addRoom(j, currRow, currCol, "img4.jpg", 0, 0);
-                            stair = false;
-                            nextRow = currRow;
-                            nextCol = currCol;
-                            addRoom(j+1, currRow, currCol, "img4.jpg", 0, 0);
-                        }else {
-                            addRoom(j, currRow, currCol, "img3.jpg", random.nextInt(2) + 1, 0);
+                        addRoom(j, currRow, currCol, "img3.jpg", random.nextInt(2) + 1, 0);
+
+                    }
+                }
+            }
+            if(j != maxFloor -1) {
+                List<Integer> nextRoom = addStairs(j);
+                nextRow = nextRoom.get(0);
+                nextCol = nextRoom.get(1);
+            }
+            addKey(j);
+            addBoss(j,"office-space-1.png");
+        }
+        column = originalCol;
+    }
+
+    private void addRoom(int floorIn, int rowIn, int columnIn, String sprite, int enemy, int human){
+        if(floorIn ==0){ //tutorial floor
+            rooms.get(floorIn).get(rowIn).set(columnIn, new Sprite(new Texture(sprite)));
+            if(enemy !=0){
+                enemies.get(floorIn).get(rowIn).get(columnIn).add(new Enemy(1700,100,2,0,floorIn));
+                enemies.get(floorIn).get(rowIn).get(columnIn).get(0).setKey();
+                enemies.get(floorIn).get(rowIn).get(columnIn).get(0).setBoss();
+                Integer[] tutorial = new Integer[2];
+                tutorial[0] = rowIn;
+                tutorial[1] = columnIn;
+                bossRooms.add(tutorial);
+            }else{
+                /*Integer[] tutorial = new Integer[2];
+                tutorial[0] = rowIn;
+                tutorial[1] = columnIn;
+                stairRooms.add(tutorial);*/
+            }
+            return;
+        }
+        rooms.get(floorIn).get(rowIn).set(columnIn, new Sprite(new Texture(sprite)));
+        for(int i=0; i<enemy; i++){
+            enemies.get(floorIn).get(rowIn).get(columnIn).add(new Enemy(random.nextInt(1000)+100,random.nextInt(700)+100,2,random.nextInt(5),floorIn));
+        }
+
+
+        for(int i=0; i<human; i++){
+            Enemy npc = new Enemy(random.nextInt(1000)+100,random.nextInt(700)+100,2,0,floorIn);
+            npc.setHuman();
+            enemies.get(floorIn).get(rowIn).get(columnIn).add(npc);
+        }
+    }
+
+    private List<Integer> addStairs(int floorIn){
+        List<List<Integer>> possibleRooms = new ArrayList<>();
+
+        for(int i=0; i<rooms.get(floorIn).size(); i++){
+            for(int j=0; j<rooms.get(floorIn).get(i).size(); j++){
+                if(rooms.get(floorIn).get(i).get(j) != null && !rooms.get(floorIn).get(i).get(j).getTexture().toString().equals("img4.jpg")){
+                    List<Integer> thisRoom = new ArrayList<>();
+                    thisRoom.add(i);
+                    thisRoom.add(j);
+                    possibleRooms.add(thisRoom);
+                }
+            }
+        }
+        int nextRoom = random.nextInt(possibleRooms.size());
+        /*Integer[] stairs = new Integer[2];
+        stairs[0] = possibleRooms.get(nextRoom).get(0);
+        stairs[1] = possibleRooms.get(nextRoom).get(1);
+        stairRooms.add(stairs);*/
+        addRoom(floorIn,possibleRooms.get(nextRoom).get(0),possibleRooms.get(nextRoom).get(1), "img4.jpg",0,0);
+        addRoom(floorIn+1,possibleRooms.get(nextRoom).get(0),possibleRooms.get(nextRoom).get(1), "img4.jpg",0,0);
+        return possibleRooms.get(nextRoom);
+    }
+
+    private void addKey(int floorIn){
+        List<Enemy> possibleEnemy = new ArrayList<>();
+
+        for(int i=0; i<rooms.get(floorIn).size(); i++){
+            for(int j=0; j<rooms.get(floorIn).get(i).size(); j++){
+                if(rooms.get(floorIn).get(i).get(j) != null && !enemies.get(floorIn).get(i).get(j).isEmpty()){
+                    for(int k=0; k<enemies.get(floorIn).get(i).get(j).size(); k++){
+                        if(enemies.get(floorIn).get(i).get(j).get(k).getHealth()>0){
+                            possibleEnemy.add(enemies.get(floorIn).get(i).get(j).get(k));
                         }
                     }
                 }
             }
         }
+
+        int keyEnemy = random.nextInt(possibleEnemy.size());
+        possibleEnemy.get(keyEnemy).setKey();
     }
 
-    private void addRoom(int floorIn, int rowIn, int columnIn, String sprite, int enemy, int human){
-        rooms.get(floorIn).get(rowIn).set(columnIn, new Sprite(new Texture(sprite)));
-        for(int i=0; i<enemy; i++){
-            enemies.get(floorIn).get(rowIn).get(columnIn).add(new Enemy(random.nextInt(1000)+100,random.nextInt(700)+100,2,random.nextInt(5),1));
+    private void addBoss(int floorIn, String sprite){
+        List<List<Integer>> possibleRooms = new ArrayList<>();
+        int originalRow = row;
+        int originalCol = column;
+
+        for(row=0; row<rooms.get(floorIn).size(); row++){
+            for(column=0; column<rooms.get(floorIn).get(row).size(); column++){
+                if(rooms.get(floorIn).get(row).get(column) != null){
+                    if(column !=0 && rooms.get(floorIn).get(row).get(column-1) == null){// if left is null
+                        List<Integer> thisRoom = new ArrayList<>();
+                        thisRoom.add(row);
+                        thisRoom.add(column-1);
+                        thisRoom.add(1); //direction
+                        possibleRooms.add(thisRoom);
+
+                    }
+                    if(column != maxCol-1 && rooms.get(floorIn).get(row).get(column+1) == null){//if right is null
+                        List<Integer> thisRoom = new ArrayList<>();
+                        thisRoom.add(row);
+                        thisRoom.add(column+1);
+                        thisRoom.add(0); //direction
+                        possibleRooms.add(thisRoom);
+                    }
+                    if(row != 0 && rooms.get(floorIn).get(row-1).get(column) == null){//if top is null
+                        List<Integer> thisRoom = new ArrayList<>();
+                        thisRoom.add(row-1);
+                        thisRoom.add(column);
+                        thisRoom.add(3); //direction
+                        possibleRooms.add(thisRoom);
+                    }
+                    if(row != maxRow-1 && rooms.get(floorIn).get(row+1).get(column) == null){//if bottom is null
+                        List<Integer> thisRoom = new ArrayList<>();
+                        thisRoom.add(row+1);
+                        thisRoom.add(column);
+                        thisRoom.add(2); //direction
+                        possibleRooms.add(thisRoom);
+                    }
+                }
+            }
         }
-        for(int i=0; i<human; i++){
-            Enemy npc = new Enemy(random.nextInt(1000)+100,random.nextInt(700)+100,2,random.nextInt(5),1);
-            npc.setHealth(0);
-            enemies.get(floorIn).get(rowIn).get(columnIn).add(npc);
+        int nextRoom = random.nextInt(possibleRooms.size());
+        int newRow = possibleRooms.get(nextRoom).get(0);
+        int newCol = possibleRooms.get(nextRoom).get(1);
+        int direction = possibleRooms.get(nextRoom).get(2);
+
+        Integer[] bossRoom = new Integer[2];
+        System.out.println("floor: " + floorIn + " row: " + newRow + " column: " + newCol);
+        bossRoom[0] = newRow;
+        bossRoom[1] = newCol;
+        bossRooms.add(bossRoom);
+
+        rooms.get(floorIn).get(newRow).set(newCol, new Sprite(new Texture(sprite)));
+        enemies.get(floorIn).get(newRow).get(newCol).add(new Enemy(1000,500,2,0,floorIn));
+        enemies.get(floorIn).get(newRow).get(newCol).get(0).setBoss();
+
+        connections.get(floorIn).get(newRow).get(newCol).add(direction);
+        if (direction == 0) {
+            newCol -= 1;
+            connections.get(floorIn).get(newRow).get(newCol).add(1);
+        } else if (direction == 1) {
+            newCol += 1;
+            connections.get(floorIn).get(newRow).get(newCol).add(0);
+        } else if (direction == 2) {
+            newRow -= 1;
+            connections.get(floorIn).get(newRow).get(newCol).add(3);
+        } else if (direction == 3) {
+            newRow+= 1;
+            connections.get(floorIn).get(newRow).get(newCol).add(2);
+        }
+
+        row = originalRow;
+        column = originalCol;
+        //return possibleRooms.get(nextRoom);
+    }
+
+    private void respawn(){
+        for(int i=0; i<enemies.get(floor).size(); i++){
+            for(int j=0; j<enemies.get(floor).get(i).size(); j++){
+                for(int k=0; k<enemies.get(floor).get(i).get(j).size(); k++){
+                    enemies.get(floor).get(i).get(j).get(k).respawn();
+                }
+            }
         }
     }
 

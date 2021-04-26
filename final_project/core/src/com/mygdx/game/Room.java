@@ -68,9 +68,9 @@ public class Room extends Actor {
 
     public void setUpBoundaries(){
         if(sprite.getTexture().toString().equals("office-space-no-printer.png")){
-            boundaries.add(new Boundary(208, 432, 440, 408));
-            boundaries.add(new Boundary(848, 432, 440, 408));
-            boundaries.add(new Boundary(1488, 432, 440, 408));
+            boundaries.add(new Boundary(208, 432, 440, 409));
+            boundaries.add(new Boundary(848, 432, 440, 409));
+            boundaries.add(new Boundary(1488, 432, 440, 409));
         }
     }
 

@@ -60,6 +60,8 @@ public class CombatScreen implements Screen {
     //TODO
     //  -fix bug of going back into combat
     //  -fix bug where printer disappears when player loses
+    //  -Figure out why calling “stage.dispose()” causes “GL error 0x501” message
+    //  -figure out the scale sprite issue (haven't seen in a while)
     //  -uncomment Player.get and set health
     //  -uncomment Player.getMoves
     //  -smarter AI if they can heal
@@ -70,11 +72,8 @@ public class CombatScreen implements Screen {
     //       --setScales so I can rescale all
     //       --some getters and setters
     //       --better stuff in attack for checking
-    //  -Some sort of on-screen indication of amount of damage done (like “-x” above health bar while decreasing by x)
-    //  -Figure out why calling “stage.dispose()” causes “GL error 0x501” message
-    //  -figure out the scale sprite issue (haven't seen in a while)
     //  -update comments
-    //  -less hard-coded numbers (HealthBar)
+    //  -less hard-coded numbers (HealthBar, placing UI elements)
     //  -clean the button code
 
 
@@ -208,53 +207,72 @@ public class CombatScreen implements Screen {
 
 
 
-    //set up the UI elements. For now, this is just a button for each move.
-    //I'm using TextButtons for now, but we can easily change to images
-    //will eventually include elements listed above (health, sprites, etc)
+    //set up the UI elements. Health bar, sprites on screen, names, etc.
+    //a lot of this has random hard-coded numbers I need to turn into constants once I have better idea of everything we want here
     private void initUI() {
         setupButtons();
 
         //starting to add additional UI elements (player and enemy sprites and health bars)
         //probably need to use size of sprites to determine positions better
-        player.setPosition((float) width / 5, (float) (height / 2) - 75);
+        player.setPosition( width / 5f,  (height / 2f) - 75);
         player.scaleSprite(2f);
         stage.addActor(player);
         player.positionChanged();
-        enemy.setPosition((float) (width - (width / 6) - enemy.getWidth()), (float) (height / 2) - 75);
+        enemy.setPosition( width - (width / 5f) - enemy.getWidth(),  (height / 2f) - 75);
         enemy.scaleSprite(2f);
         stage.addActor(enemy);
         //this puts player on left, enemy on right
-
-        //HealthBar class with a basic decrementing animation
-        playerHealthBar = new HealthBar(100, 100, height - (float) (height / 4));//will also modify X, Y to be based on sprite size, health
-        stage.addActor(playerHealthBar);
-
-        enemyHealthBar = new HealthBar(enemy.getHealth(), width - 850, height - (float) (height / 4));//will also modify X, Y to be based on sprite size, health
-        stage.addActor(enemyHealthBar);
 
         //set up label style - I just copied the font from Alison's last project, we can change
         //and we can change to images later if need be
         Label.LabelStyle labelStyle = new Label.LabelStyle();
         labelStyle.font = new BitmapFont(Gdx.files.internal("font/font.fnt"));
 
+        Label playerHealthChange = new Label("", labelStyle);
+        playerHealthChange.setSize(250, 200);
+        playerHealthChange.setPosition(((float) width / 4) + player.getWidth()/2, height - (float) (height / 2.5));
+        playerHealthChange.setAlignment(Align.center);
+        stage.addActor(playerHealthChange);
+
+        Label enemyHealthChange = new Label("", labelStyle);
+        enemyHealthChange.setSize(250, 200);
+        enemyHealthChange.setPosition((width - (width / 5f) + enemy.getWidth()/2) + enemy.getWidth()/2, height - (float) (height / 2.5));
+        enemyHealthChange.setAlignment(Align.center);
+        stage.addActor(enemyHealthChange);
+
         //these look the best when they are directly above the health bars and the same length
         //thus the 750 + 40 - this is the length of the black box (background of the health bar)
         //will probably need to define these numbers differently/less hard-coding and make sure it looks good at different scales(?)
 
-        Label playerLabel = new Label("Bill Gates", labelStyle);
-        playerLabel.setSize(750 + 40, 200);
-        playerLabel.setPosition(100, height - (float) (height / 5.5));
-        playerLabel.setAlignment(Align.center);
-        stage.addActor(playerLabel);
+        Label playerNameLabel = new Label("Bill Gates", labelStyle);
+        playerNameLabel.setSize(750 + 40, 200);
+        playerNameLabel.setPosition(100, height - (height / 5.5f));
+        playerNameLabel.setAlignment(Align.center);
+        stage.addActor(playerNameLabel);
 
-        Label enemyLabel = new Label(enemy.getName(), labelStyle);
-        enemyLabel.setSize(750 + 40, 200);
-        enemyLabel.setPosition(width - 850, height - (float) (height / 5.5));
-        enemyLabel.setAlignment(Align.center);
-        stage.addActor(enemyLabel);
+        Label enemyNameLabel = new Label(enemy.getName(), labelStyle);
+        enemyNameLabel.setSize(750 + 40, 200);
+        enemyNameLabel.setPosition(width - 850, height -(height / 5.5f));
+        enemyNameLabel.setAlignment(Align.center);
+        stage.addActor(enemyNameLabel);
+
+
+        //HealthBar class with a basic decrementing animation
+        //I also put the labels with the health bar as well to keep organized (and modify them as part of the animation, which makes sense)
+        playerHealthBar = new HealthBar(100, 100, height - (height / 4f), playerHealthChange, playerNameLabel);//will also modify X, Y to be based on sprite size, health
+        stage.addActor(playerHealthBar);
+
+        enemyHealthBar = new HealthBar(enemy.getHealth(), width - 850, height -  (height / 4f),enemyHealthChange, enemyNameLabel);//will also modify X, Y to be based on sprite size, health
+        stage.addActor(enemyHealthBar);
+
+
+
 
     }
 
+    //I'm using TextButtons for now, but we can easily change to images
+    //this is called once in setupUI, then on every turn that changes the moves available to the player
+    //for example, player heals, decreases healing item by 1, we need to update buttons to reflect that
     private void setupButtons(){
         //Player moves located in player class?
         //for now, assume player moves will work like enemy moves (see enemyTurn above)
@@ -518,9 +536,17 @@ public class CombatScreen implements Screen {
         private float x, y;
         private boolean lastAttack;
         private int i = 0;
+        private Label healthChangeLabel; //used to show damage/amount on each move
+        private Label nameLabel; //used to show name as well as current/total health
+        private String name;
 
-        public HealthBar(int amount, float x, float y){
-            HP = currentHealth = amount;
+
+        public HealthBar(int amount, float x, float y, Label labelForHealthChange, Label labelForName){
+            HP = currentHealth  = amount;
+            healthChangeLabel = labelForHealthChange;
+            nameLabel = labelForName;
+            name = nameLabel.getText().toString();
+            nameLabel.setText(name + "\t " + (int) currentHealth + "/" + (int) HP);
             backgroundBar = new ShapeRenderer();
             frontBar = new ShapeRenderer();
             edgeDifference = 40; //looks good
@@ -532,7 +558,8 @@ public class CombatScreen implements Screen {
 
         //on taking damage, call this
         public void decreaseHealth(int damage){
-            currentHealth-=damage;
+            currentHealth = (currentHealth - damage);
+            //currentHealth-=damage;
             if(currentHealth<=0){
                 //this is the last attack
                 currentHealth = 0;//prevent from going below 0%
@@ -544,6 +571,8 @@ public class CombatScreen implements Screen {
             }
             moveTo =  (currentHealth/HP) * (750); //750 comes from starting length
             if (moveTo != currentLength){//only preform animation if health changes
+                healthChangeLabel.setText("-" + damage);
+                nameLabel.setText(name + "\t " + (int) currentHealth + "/" + (int) HP); //if we want this to decrease in real time or at end, we can
                 animationManager.startAnimation();
             }
         }
@@ -554,6 +583,8 @@ public class CombatScreen implements Screen {
             if(currentHealth > HP) currentHealth = HP; //prevent from going over 100%
             moveTo =  (currentHealth/HP) * (750); //750 comes from starting length
             if(moveTo != currentLength){ //only preform animation if health changes
+                healthChangeLabel.setText("+" + amount);
+                nameLabel.setText(name + "\t " + (int) currentHealth + "/" + (int) HP); //if we want this to decrease in real time or at end, we can
                 animationManager.startAnimation();
             }
         }
@@ -564,13 +595,13 @@ public class CombatScreen implements Screen {
             if (currentLength > moveTo) { //keep decreasing by 3 pixels until we reach spot
                     currentLength-=3;
                     if(currentLength <= moveTo){//end once we reach desired spot or 0 (and 1 side dies)
-                        System.out.println("ending animation");
                         currentLength = moveTo; //set exactly equal (moveTo is a float or we could have gone past it)
                         if(lastAttack) {
                             //commented out for now but if we're switching sprites, we can do here
                             //enemy.sprite = enemy.sprites[1]; //switch enemy sprite as soon as health reaches 0 - as I mentioned above, this is kinda hacky and I need something better
                             //enemy.positionChanged();
                         }
+                        healthChangeLabel.setText("");
                         animationManager.endAnimation();
                     }
             }else if (currentLength < moveTo){ //keep increasing by 3 pixels until we reach spot
@@ -578,6 +609,7 @@ public class CombatScreen implements Screen {
                 if(currentLength >= moveTo){
                     System.out.println("ending animation");
                     currentLength = moveTo; //set exactly equal (moveTo is a float or we could have gone past it)
+                    healthChangeLabel.setText("");
                     animationManager.endAnimation();
                 }
             }

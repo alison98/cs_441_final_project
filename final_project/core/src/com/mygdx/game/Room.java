@@ -16,6 +16,7 @@ public class Room extends Actor {
     private Layout layout;
     private List<Enemy> enemyList;
     private List<Integer> doors;
+    private List<Interactable> interactables;
     private int enemyNum;
     private int humanNum;
     private Random random;
@@ -27,8 +28,9 @@ public class Room extends Actor {
         layout = Layout.getInstance();
         sprite = layout.getRoom();
         doors = layout.possibleRooms();
-        doorImg = new Texture("badlogic.jpg");
+        doorImg = new Texture("door.png");
         setUpEnemies();
+        setUpInteractables();
         setBounds(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
         stair = false;
     }
@@ -49,6 +51,10 @@ public class Room extends Actor {
             enemyList.add(enemy);
         },*/
 
+    }
+
+    public void setUpInteractables(){
+        interactables = layout.getInteractables();
     }
 
     public void tick() {
@@ -74,6 +80,9 @@ public class Room extends Actor {
         }
         for(Enemy enemy: enemyList) {
             enemy.draw(batch, alpha);
+        }
+        for(Interactable interactable : interactables){
+            interactable.draw(batch, alpha);
         }
         if(stair && (layout.getBoss() || layout.downFloor())){
             batch.draw(doorImg, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2, 150, 150);
@@ -103,6 +112,15 @@ public class Room extends Actor {
         return layout.getDoorTouched(player, stair);
     }
 
+    public Interactable getInteractablesTouched(Player player) {
+        for(Interactable interactable : interactables){
+            if(interactable.getBounds().overlaps(player.getBounds())){
+                return interactable;
+            }
+        }
+        return null;
+    }
+
     public Integer roomChange(Player player){
         Integer location = layout.changeRoom(player, stair);
         if(location != null){
@@ -113,6 +131,7 @@ public class Room extends Actor {
                 stair = false;
             }
             setUpEnemies();
+            setUpInteractables();
         }
         return location;
     }

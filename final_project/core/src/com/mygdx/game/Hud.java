@@ -2,15 +2,21 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -18,14 +24,32 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
+import java.beans.Visibility;
+
 public class Hud {
     private Stage stage;
     private ScreenViewport stageViewport;
     private ImageButton selectButton;
+    private Label textBox;
+    private ImageButton upButton;
+    private ImageButton downButton;
+    private ImageButton leftButton;
+    private ImageButton rightButton;
+
 
     public Hud(final SpriteBatch spriteBatch, final GameScreen gameScreen) {
         stageViewport = new ScreenViewport();
         stage = new Stage(stageViewport, spriteBatch);
+
+        textBox = new Label("Hello", new Skin(Gdx.files.internal("skin/plain-james-ui.json"), new TextureAtlas(Gdx.files.internal("skin/plain-james-ui.atlas"))));
+        textBox.setWidth(800);
+        textBox.setHeight(200);
+        textBox.setFontScale(2f);
+        textBox.setAlignment(Align.center);
+        textBox.setPosition(Gdx.graphics.getWidth()/2 - textBox.getWidth()/2, 100);
+        textBox.getStyle().background = new Image(new Texture(Gdx.files.internal("textbox.png"))).getDrawable();
+        textBox.setVisible(false);
+
         selectButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("select-button.png"))));
         selectButton.setPosition(1800, 80);
         selectButton.setVisible(false);
@@ -33,8 +57,28 @@ public class Hud {
         selectButton.addListener(new InputListener(){
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if(gameScreen.room.getDoorTouched(gameScreen.player)){
+                if(inText()){
+                    Interactable interactable = gameScreen.getRoom().getInteractablesTouched(gameScreen.getPlayer());
+                    if(interactable != null){
+                        if(interactable instanceof TutorialPrinter){
+                            ((TutorialPrinter)interactable).fight(gameScreen);
+                        }
+                    }
+                    upButton.setTouchable(Touchable.enabled);
+                    downButton.setTouchable(Touchable.enabled);
+                    leftButton.setTouchable(Touchable.enabled);
+                    rightButton.setTouchable(Touchable.enabled);
+                    textBox.setVisible(false);
+                    return;
+                }
+                if(gameScreen.getRoom().getDoorTouched(gameScreen.getPlayer())){
                     gameScreen.roomChange();
+                }
+                Interactable interactable = gameScreen.getRoom().getInteractablesTouched(gameScreen.getPlayer());
+                if(interactable != null){
+                    if(interactable instanceof TutorialPrinter){
+                        ((TutorialPrinter)interactable).interact(gameScreen);
+                    }
                 }
             }
             @Override
@@ -42,61 +86,66 @@ public class Hud {
                 return true;
             }
         });
+
         Table table = new Table();
-        ImageButton upButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("up-button.png"))));
+        upButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("up-button.png"))));
         upButton.padLeft(160);
         upButton.setTouchable(Touchable.enabled);
         upButton.addListener(new InputListener(){
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                gameScreen.player.setSpeedY(0);
+                gameScreen.getPlayer().setSpeedY(0);
             }
             @Override
             public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
-                gameScreen.player.setSpeedY(20);
+                gameScreen.getPlayer().setSpeedY(20);
                 return true;
             }
         });
-        ImageButton downButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("down-button.png"))));
+
+        downButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("down-button.png"))));
         downButton.padLeft(160);
         downButton.setTouchable(Touchable.enabled);
         downButton.addListener(new InputListener(){
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                gameScreen.player.setSpeedY(0);
+                gameScreen.getPlayer().setSpeedY(0);
             }
             @Override
             public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
-                gameScreen.player.setSpeedY(-20);
+                gameScreen.getPlayer().setSpeedY(-20);
                 return true;
             }
         });
-        ImageButton leftButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("left-button.png"))));
+
+        leftButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("left-button.png"))));
         leftButton.setTouchable(Touchable.enabled);
         leftButton.addListener(new InputListener(){
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                gameScreen.player.setSpeedX(0);
+                gameScreen.getPlayer().setSpeedX(0);
             }
             @Override
             public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
-                gameScreen.player.setSpeedX(-20);
+                gameScreen.getPlayer().setSpeedX(-20);
                 return true;
             }
         });
-        ImageButton rightButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("right-button.png"))));
+
+        rightButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("right-button.png"))));
         rightButton.setTouchable(Touchable.enabled);
         rightButton.addListener(new InputListener(){
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                gameScreen.player.setSpeedX(0);
+                gameScreen.getPlayer().setSpeedX(0);
             }
             @Override
             public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
-                gameScreen.player.setSpeedX(20);
+                gameScreen.getPlayer().setSpeedX(20);
                 return true;
             }
         });
+
         table.add(upButton);
         table.row();
         table.add(leftButton);
@@ -106,6 +155,7 @@ public class Hud {
         table.setPosition(200, 200);
         stage.addActor(table);
         stage.addActor(selectButton);
+        stage.addActor(textBox);
     }
 
     public void setInteractable(){
@@ -116,6 +166,20 @@ public class Hud {
     public void setUninteractable(){
         selectButton.setVisible(false);
         selectButton.setTouchable(Touchable.disabled);
+    }
+
+    public void setText(String message){
+        textBox.setText(message);
+        textBox.setVisible(true);
+        setInteractable();
+        upButton.setTouchable(Touchable.disabled);
+        downButton.setTouchable(Touchable.disabled);
+        leftButton.setTouchable(Touchable.disabled);
+        rightButton.setTouchable(Touchable.disabled);
+    }
+
+    public boolean inText(){
+        return textBox.isVisible();
     }
 
     public Stage getStage(){

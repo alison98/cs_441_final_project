@@ -24,8 +24,8 @@ public class GameScreen implements Screen {
     private OrthographicCamera camera;
     private Hud hud;
     private SpriteBatch spriteBatch;
-    Player player;
-    Room room;
+    private Player player;
+    private Room room;
 
     //so I think an actor can only be on 1 stage at a time
     //and adding player to CombatScreen removes from this stage
@@ -36,6 +36,16 @@ public class GameScreen implements Screen {
     //also need this to make sure player spawns back in valid spot on dying
     //i.e. not on an enemy
     public Room getRoom(){ return room; }
+
+    public Game getGame(){
+        return game;
+    }
+
+    public Player getPlayer(){
+        return player;
+    }
+
+    public Hud getHud(){ return hud; }
 
     public GameScreen(Game g) {
         game = g;
@@ -88,7 +98,8 @@ public class GameScreen implements Screen {
 
     private void checkInteractable(){
         boolean door = room.getDoorTouched(player);
-        if(door){
+        Interactable interactable = room.getInteractablesTouched(player);
+        if(door || interactable != null || hud.inText()){
             hud.setInteractable();
         } else{
             hud.setUninteractable();

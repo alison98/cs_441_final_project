@@ -165,6 +165,9 @@ public class CombatScreen implements Screen {
     private void combatOver(boolean playerWon) {
         if(playerWon){//the player won
             player.setPosition(playerX, playerY);//put back in original spot
+            if(enemy.hasKey()){
+                gameScreen.getHud().setText("The enemy dropped a key!");
+            }
         }else{//player lost
             Random rand = new Random();
             //for now, place player back in the same room

@@ -14,6 +14,7 @@ public class Layout {
     private List<List<List<Sprite>>> rooms;
     private List<List<List<List<Enemy>>>> enemies;
     private List<List<List<List<Integer>>>> connections;
+    private List<List<List<List<Interactable>>>> interactables;
     private List<Integer[]> bossRooms;
     private int floor, row, column;
     private int maxFloor, maxRow, maxCol, maxTunnel, maxLen;
@@ -26,6 +27,7 @@ public class Layout {
     private Layout(){
         rooms = new ArrayList<>();
         enemies = new ArrayList<>();
+        interactables = new ArrayList<>();
         connections = new ArrayList<>();
         //stairRooms = new ArrayList<>();
         bossRooms = new ArrayList<>();
@@ -76,6 +78,8 @@ public class Layout {
     public List<Enemy> getEnemies(){
         return enemies.get(floor).get(row).get(column);
     }
+
+    public List<Interactable> getInteractables() {return interactables.get(floor).get(row).get(column);}
 
     public Boolean getKey(){
         return keys.get(floor);
@@ -199,14 +203,17 @@ public class Layout {
             rooms.add(new ArrayList<List<Sprite>>());
             enemies.add(new ArrayList<List<List<Enemy>>>());
             connections.add(new ArrayList<List<List<Integer>>>());
+            interactables.add(new ArrayList<List<List<Interactable>>>());
             for (int j = 0; j < maxRow; j++) {
                 rooms.get(i).add(new ArrayList<Sprite>());
                 enemies.get(i).add(new ArrayList<List<Enemy>>());
                 connections.get(i).add(new ArrayList<List<Integer>>());
+                interactables.get(i).add(new ArrayList<List<Interactable>>());
                 for (int k = 0; k < maxCol; k++) {
                     rooms.get(i).get(j).add(null);
                     enemies.get(i).get(j).add(new ArrayList<Enemy>());
                     connections.get(i).get(j).add(new ArrayList<Integer>());
+                    interactables.get(i).get(j).add(new ArrayList<Interactable>());
                 }
             }
         }
@@ -218,7 +225,7 @@ public class Layout {
         int originalCol =column;
 
         //tutorial floor
-        addRoom(0, row, column, "office-space-1.png", 1, 0);
+        addRoom(0, row, column, "office-space-no-printer.png", 1, 0);
         connections.get(0).get(row).get(column).add(1);
         column +=1;
         addRoom(0, row, column, "img4.jpg", 0, 0);
@@ -271,7 +278,7 @@ public class Layout {
                 nextCol = nextRoom.get(1);
             }
             addKey(j);
-            addBoss(j,"office-space-2.png");
+            addBoss(j,"office-space-no-printer.png");
         }
         column = originalCol;
     }
@@ -280,9 +287,11 @@ public class Layout {
         if(floorIn ==0){ //tutorial floor
             rooms.get(floorIn).get(rowIn).set(columnIn, new Sprite(new Texture(sprite)));
             if(enemy !=0){
-                enemies.get(floorIn).get(rowIn).get(columnIn).add(new Enemy(1700,100,2,0,floorIn));
-                enemies.get(floorIn).get(rowIn).get(columnIn).get(0).setKey();
-                enemies.get(floorIn).get(rowIn).get(columnIn).get(0).setBoss();
+                //enemies.get(floorIn).get(rowIn).get(columnIn).add(new Enemy(1700,100,2,0,floorIn));
+                //enemies.get(floorIn).get(rowIn).get(columnIn).get(0).setKey();
+                //enemies.get(floorIn).get(rowIn).get(columnIn).get(0).setBoss();
+                interactables.get(floorIn).get(rowIn).get(columnIn).add(new TutorialPrinter("printer-shadow.png", floorIn, rowIn, columnIn, 0));
+                interactables.get(floorIn).get(rowIn).get(columnIn).get(0).setPosition(1528, 200);
                 Integer[] tutorial = new Integer[2];
                 tutorial[0] = rowIn;
                 tutorial[1] = columnIn;
@@ -433,6 +442,10 @@ public class Layout {
                 }
             }
         }
+    }
+
+    public void removeInteractable(int floor, int row, int column, int index){
+        interactables.get(floor).get(row).get(column).remove(index);
     }
 
     public void setEnemies(){

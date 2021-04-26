@@ -189,6 +189,8 @@ public class Enemy extends Actor {
         key = true;
     }
 
+    public boolean hasKey(){ return key; }
+
     public void setBoss(){
         boss = true;
         sprite = new Sprite(new Texture("enemy-printer-12x.png"));

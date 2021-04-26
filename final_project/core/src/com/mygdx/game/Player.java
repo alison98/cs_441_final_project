@@ -83,7 +83,7 @@ public class Player extends Actor {
             this.speedX = 0;
         }
 
-        if(this.getY() + speedY >= Gdx.graphics.getHeight() - this.getHeight() && this.speedY > 0){
+        if(this.getY() + speedY >= Gdx.graphics.getHeight() - this.getHeight() - 110 && this.speedY > 0){
             this.speedY = 0;
         }
         if(this.getY() + speedY <= 0 && this.speedY < 0){

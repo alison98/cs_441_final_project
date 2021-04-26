@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -16,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -25,7 +27,10 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import javax.xml.soap.Text;
@@ -49,22 +54,28 @@ public class CombatScreen implements Screen {
     private GameScreen gameScreen;
     private Attack currentAttack;
     private float playerX, playerY, enemyX, enemyY;
+    //private int frameCounter;
 
 
     //TODO
-    //  -health vars in player
-    //  -GL error 0x501 (caused by stage.dispose)
-    //  -expand on Move ideas
-    //      -add animation (basic movement) for healing
-    //      -decide what happens when trying to heal when at 100%
+    //  -fix bug of going back into combat
+    //  -fix bug where printer disappears when player loses
+    //  -uncomment Player.get and set health
+    //  -uncomment Player.getMoves
+    //  -smarter AI if they can heal
+    //  -other things to add based on how Moves work:
+    //      --Do weapons have durability?
+    //      --Cool-down or certain number of uses of a move per encounter?
+    //  -Decide on sliding or real animation for attack, for animation I'd need:
+    //       --setScales so I can rescale all
+    //       --some getters and setters
+    //       --better stuff in attack for checking
+    //  -Some sort of on-screen indication of amount of damage done (like “-x” above health bar while decreasing by x)
+    //  -Figure out why calling “stage.dispose()” causes “GL error 0x501” message
     //  -figure out the scale sprite issue (haven't seen in a while)
     //  -update comments
-    //  -next:
-    //      -add actual animation, not sliding around (use player code)
-    //      -uncomment code once health vars exist
-    //      -some sort of indication of damage done/attack (name of move and damage done, sprites shake, etc.)
-    //      -no hard-coded numbers (HealthBar)
-    //      -clean the button code
+    //  -less hard-coded numbers (HealthBar)
+    //  -clean the button code
 
 
     //basic constructor
@@ -105,8 +116,6 @@ public class CombatScreen implements Screen {
     //I can do this because its turn-based
     //i.e. we wait for player to select, handler fires, does move, then allows enemy to move, which will then start the process over
     private void tick() {
-        //player.tick();
-        //enemy.tick();
         playerHealthBar.tick();
         enemyHealthBar.tick();
         if(currentAttack!=null) currentAttack.tick(); //if there's an attack ongoing, call it's tick
@@ -119,8 +128,10 @@ public class CombatScreen implements Screen {
         switch (Move.getInstance().getMoveType(selectedWeapon)){
             case ATTACK:
                 System.out.println("dealing " + amount + " to enemy");
+                //amount = 100;
                 enemy.setHealth(enemy.getHealth() - amount);
                 enemyHealthBar.decreaseHealth(amount);
+                //player.setSpeedX(50);
                 currentAttack = new Attack(player, enemy);
                 break;
             case HEALING:
@@ -129,6 +140,9 @@ public class CombatScreen implements Screen {
                 playerHealthBar.increaseHealth(amount);
                 currentAttack = new Attack(player, player); //don't remove - it doesn't do anything yet, but ensures nothing breaks when healing has no effect (healing at 100% for example)
                 //once I decide what I want for healing, I'll replace the attack with that
+                //ALSO, if a move can only be used once, remove it here from the player's move list
+                //my code for buttons will take care of the rest
+                //player.removeMove(selectedItem);
         }
         playerTurn = false;//it is now the enemy's turn, they can go once animations finish
     }
@@ -198,20 +212,78 @@ public class CombatScreen implements Screen {
     //I'm using TextButtons for now, but we can easily change to images
     //will eventually include elements listed above (health, sprites, etc)
     private void initUI() {
+        setupButtons();
+
+        //starting to add additional UI elements (player and enemy sprites and health bars)
+        //probably need to use size of sprites to determine positions better
+        player.setPosition((float) width / 5, (float) (height / 2) - 75);
+        player.scaleSprite(2f);
+        stage.addActor(player);
+        player.positionChanged();
+        enemy.setPosition((float) (width - (width / 6) - enemy.getWidth()), (float) (height / 2) - 75);
+        enemy.scaleSprite(2f);
+        stage.addActor(enemy);
+        //this puts player on left, enemy on right
+
+        //HealthBar class with a basic decrementing animation
+        playerHealthBar = new HealthBar(100, 100, height - (float) (height / 4));//will also modify X, Y to be based on sprite size, health
+        stage.addActor(playerHealthBar);
+
+        enemyHealthBar = new HealthBar(enemy.getHealth(), width - 850, height - (float) (height / 4));//will also modify X, Y to be based on sprite size, health
+        stage.addActor(enemyHealthBar);
+
+        //set up label style - I just copied the font from Alison's last project, we can change
+        //and we can change to images later if need be
+        Label.LabelStyle labelStyle = new Label.LabelStyle();
+        labelStyle.font = new BitmapFont(Gdx.files.internal("font/font.fnt"));
+
+        //these look the best when they are directly above the health bars and the same length
+        //thus the 750 + 40 - this is the length of the black box (background of the health bar)
+        //will probably need to define these numbers differently/less hard-coding and make sure it looks good at different scales(?)
+
+        Label playerLabel = new Label("Bill Gates", labelStyle);
+        playerLabel.setSize(750 + 40, 200);
+        playerLabel.setPosition(100, height - (float) (height / 5.5));
+        playerLabel.setAlignment(Align.center);
+        stage.addActor(playerLabel);
+
+        Label enemyLabel = new Label(enemy.getName(), labelStyle);
+        enemyLabel.setSize(750 + 40, 200);
+        enemyLabel.setPosition(width - 850, height - (float) (height / 5.5));
+        enemyLabel.setAlignment(Align.center);
+        stage.addActor(enemyLabel);
+
+    }
+
+    private void setupButtons(){
         //Player moves located in player class?
         //for now, assume player moves will work like enemy moves (see enemyTurn above)
-
 
         //List<String> playerWeapons = player.getWeapon(); //get list of moves - uncomment once Player class setup for this
         final List<String> playerWeapons = new ArrayList<>();
         playerWeapons.add("sword");
         playerWeapons.add("coffee");
+        playerWeapons.add("coffee");
+
+        final Map<String, Integer> moveOccurrences = new HashMap<>(); //map of weapon name : number of occurrences of this weapon the player has
+        //we can work this this to prevent making 10 buttons for the same 10 healing items
+        //we remove occurrences when used in playerMove, so when setupButtons is called again, this list is smaller, has the accurate info
+
+        //actually count the occurrences
+        for (String currentWeapon : playerWeapons){
+            int occurrences =  Collections.frequency(playerWeapons, currentWeapon);//thanks https://stackoverflow.com/questions/505928/how-to-count-the-number-of-occurrences-of-an-element-in-a-list
+            //System.out.println(currentWeapon + " : " + occurrences);
+            moveOccurrences.put(currentWeapon, occurrences);
+        }
+
 
         int prevButtonIndex = -1;//index of the button which will be used to go back a "page". Will only be used if we have more moves than we can display at once
-        moveButtons = new TextButton[playerWeapons.size()];//make a button for each move
+        moveButtons = new TextButton[moveOccurrences.size()];//make a button for each move
         float nextY = 200;
         float nextX = 150;
-        for (int i = 0; i < playerWeapons.size(); i++) {//set up buttons - a max of 2 rows
+
+
+        for (int i = 0; i < moveOccurrences.size(); i++) {//set up buttons - a max of 2 rows
             final String currentMove = playerWeapons.get(i); //get the current move
             Skin s = new Skin(Gdx.files.internal("skin/plain-james-ui.json")); //random skin from my last project just to test, very ugly, replace (can also switch to image buttons)
             TextButton newMoveButton = new TextButton(currentMove, s);//make a new button on screen with move's name
@@ -232,64 +304,17 @@ public class CombatScreen implements Screen {
                 newMoveButton.addListener(new InputListener() {
                     @Override
                     public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                        nextPage(finalI, finalPrevButtonIndex, finalI, playerWeapons, 0);
+                        nextPage(finalI, finalPrevButtonIndex, finalI, playerWeapons, 0, moveOccurrences);
                         return true;
                     }
                 });
-
-
             } else {//normal input listener for move
-                setHandler(newMoveButton, currentMove);
+                setHandler(newMoveButton, currentMove, moveOccurrences.get(currentMove));
             }
 
             stage.addActor(newMoveButton);
             moveButtons[i] = newMoveButton;
         }
-
-
-
-
-
-        //starting to add additional UI elements (player and enemy sprites and health bars)
-        //probably need to use size of sprites to determine positions better
-        player.setPosition((float) width / 5, (float) (height / 2) - 75);
-        player.scaleSprite(2f);
-        stage.addActor(player);
-        player.positionChanged();
-        enemy.setPosition((float) (width - (width / 6) - enemy.getWidth()), (float) (height / 2) - 75);
-        enemy.scaleSprite(2f);
-        stage.addActor(enemy);
-        //this puts player on left, enemy on right
-
-        //HealthBar class with a basic decrementing animation
-        playerHealthBar = new HealthBar(100, 100, height - (float) (height /4 ));//will also modify X, Y to be based on sprite size, health
-        stage.addActor(playerHealthBar);
-
-        enemyHealthBar = new HealthBar(enemy.getHealth(), width - 850, height - (float) (height / 4));//will also modify X, Y to be based on sprite size, health
-        stage.addActor(enemyHealthBar);
-
-
-        //set up label style - I just copied the font from Alison's last project, we can change
-        //and we can change to images later if need be
-        Label.LabelStyle labelStyle = new Label.LabelStyle();
-        labelStyle.font = new BitmapFont(Gdx.files.internal("font/font.fnt"));
-
-        //these look the best when they are directly above the health bars and the same length
-        //thus the 750 + 40 - this is the length of the black box (background of the health bar)
-        //will probably need to define these numbers differently/less hard-coding and make sure it looks good at different scales(?)
-
-        Label playerLabel = new Label("Bill Gates", labelStyle);
-        playerLabel.setSize(750 + 40, 200);
-        playerLabel.setPosition(100,height - (float) (height/5.5));
-        playerLabel.setAlignment(Align.center);
-        stage.addActor(playerLabel);
-
-        Label enemyLabel = new Label(enemy.getName(), labelStyle);
-        enemyLabel.setSize(750 + 40, 200);
-        enemyLabel.setPosition(width - 850,height - (float) (height/5.5));
-        enemyLabel.setAlignment(Align.center);
-        stage.addActor(enemyLabel);
-
     }
 
     /*
@@ -301,9 +326,11 @@ public class CombatScreen implements Screen {
      * @param button the button to modify
      * @content the string to display on the button and make listener for, represents a move
      */
-    public void setHandler(TextButton button, final String content) {
-        button.setText(content);
+    public void setHandler(TextButton button, final String content, int occurrences) {
+        if(occurrences > 1) button.setText(content + " x" + occurrences);
+        else button.setText(content);
         button.clearListeners();
+        button.setVisible(true);
         switch (Move.getInstance().getMoveType(content)){ //we can set color of button based on move type
             case ATTACK: //red for attack
                 button.getStyle().fontColor = Color.WHITE;
@@ -325,8 +352,19 @@ public class CombatScreen implements Screen {
             //but only call playerTurn if it is the player's turn (set to true at start and at end of enemyTurn)
             //and if there's no active animations (dealt with by animationManager)
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                if (playerTurn && !animationActive)
-                    playerTurn(content);
+                if (playerTurn && !animationActive){
+                    playerTurn(content); //player does their turn
+                    //a possibility is that a move can only be used once
+                    //in that case, we need to reset the buttons with the player's newly decreased move list
+                    //NOTE - I'd like a slightly better system (some moves won't require a reset, we only need to change at most one button per turn) but this is by far the easiest solution
+                    //we could easily add a check here - save the size of the move list before calling player turn, compare here, if its different, need a button reset
+                    for(TextButton currentButton : moveButtons){ //we reset buttons
+                        currentButton.setText("");
+                        currentButton.clearListeners();
+                        currentButton.setVisible(false);
+                    }
+                    setupButtons();//and then setup buttons again
+                }
                 return true;
             }
         });
@@ -346,7 +384,7 @@ public class CombatScreen implements Screen {
      * @param nextStartingIndex - index of playerWeapons to start at for this group/page of buttons
      * @param prevStartingIndex - index of the start of the last page, useful for setting up prevPage
      */
-    public void nextPage(final int lastButtonIndex, final int prevButtonIndex, final int nextStartingIndex, final List<String> playerWeapons, final int prevStartingIndex) {
+    public void nextPage(final int lastButtonIndex, final int prevButtonIndex, final int nextStartingIndex, final List<String> playerWeapons, final int prevStartingIndex, final Map<String, Integer> moveOccurrences) {
 
         //System.out.println("next" + nextStartingIndex);
 
@@ -360,7 +398,7 @@ public class CombatScreen implements Screen {
         moveButtons[prevButtonIndex].addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                prevPage(lastButtonIndex, prevStartingIndex, prevButtonIndex, playerWeapons);
+                prevPage(lastButtonIndex, prevStartingIndex, prevButtonIndex, playerWeapons, moveOccurrences);
                 return true;
             }
         });
@@ -372,7 +410,7 @@ public class CombatScreen implements Screen {
             moveButtons[lastButtonIndex].addListener(new InputListener() {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                    nextPage(lastButtonIndex, prevButtonIndex, nextStartingIndex + lastButtonIndex - 1, playerWeapons, nextStartingIndex);
+                    nextPage(lastButtonIndex, prevButtonIndex, nextStartingIndex + lastButtonIndex - 1, playerWeapons, nextStartingIndex, moveOccurrences);
                     return true;
                 }
             });
@@ -385,7 +423,7 @@ public class CombatScreen implements Screen {
         for (int currentButton = 0; currentButton < numberOfEntries; currentButton++) {
             if (playerWeapons.size() > currentWeaponIndex) {//have an element to display
                 if (currentButton != prevButtonIndex) {//if its not the previous button
-                    setHandler(moveButtons[currentButton], playerWeapons.get(currentWeaponIndex));//add corresponding text and handler
+                    setHandler(moveButtons[currentButton], playerWeapons.get(currentWeaponIndex), moveOccurrences.get(playerWeapons.get(currentWeaponIndex)));//add corresponding text and handler
                     currentWeaponIndex++;//increment which element to grab
                     //this won't be increment when we're at previous button, keeping us in sync (otherwise we'd skip that element by setting previous)
                 }
@@ -411,7 +449,7 @@ public class CombatScreen implements Screen {
      * @param prevButtonIndex - index of the 1st button on the last row - its text will say "prev button" and allow us to "scroll" between pages
      * @param nextButtonIndex - index of the last button on the last row - its text will say "next button" and allow us to "scroll" between pages
      */
-    public void prevPage(final int lastButtonIndex, final int prevStartingIndex, final int prevButtonIndex, final List<String> playerWeapons) {
+    public void prevPage(final int lastButtonIndex, final int prevStartingIndex, final int prevButtonIndex, final List<String> playerWeapons, final Map<String, Integer> moveOccurrences) {
 
         //System.out.println(prevStartingIndex);
 
@@ -429,7 +467,7 @@ public class CombatScreen implements Screen {
             moveButtons[prevButtonIndex].addListener(new InputListener() {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                    prevPage(lastButtonIndex, prevStartingIndex - lastButtonIndex, prevButtonIndex, playerWeapons);
+                    prevPage(lastButtonIndex, prevStartingIndex - lastButtonIndex, prevButtonIndex, playerWeapons, moveOccurrences);
                     return true;
                 }
             });
@@ -445,7 +483,7 @@ public class CombatScreen implements Screen {
         moveButtons[lastButtonIndex].addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                nextPage(lastButtonIndex, prevButtonIndex, prevStartingIndex + finalEntriesDisplayed, playerWeapons, prevStartingIndex);//use entries displayed to pass correct next index
+                nextPage(lastButtonIndex, prevButtonIndex, prevStartingIndex + finalEntriesDisplayed, playerWeapons, prevStartingIndex, moveOccurrences);//use entries displayed to pass correct next index
                 return true;
             }
         });
@@ -458,7 +496,7 @@ public class CombatScreen implements Screen {
                 //System.out.println("nop");
             }else{
                 //System.out.println(currentButton);
-                setHandler(moveButtons[currentButton], playerWeapons.get(currentWeaponIndex));//add corresponding text and handler
+                setHandler(moveButtons[currentButton], playerWeapons.get(currentWeaponIndex), moveOccurrences.get(playerWeapons.get(currentWeaponIndex)));//add corresponding text and handler
                 currentWeaponIndex++;//increment which element to grab
                 //this won't be increment when we're at previous button, keeping us in sync (otherwise we'd skip that element by setting previous)
             }
@@ -526,6 +564,7 @@ public class CombatScreen implements Screen {
             if (currentLength > moveTo) { //keep decreasing by 3 pixels until we reach spot
                     currentLength-=3;
                     if(currentLength <= moveTo){//end once we reach desired spot or 0 (and 1 side dies)
+                        System.out.println("ending animation");
                         currentLength = moveTo; //set exactly equal (moveTo is a float or we could have gone past it)
                         if(lastAttack) {
                             //commented out for now but if we're switching sprites, we can do here
@@ -537,6 +576,7 @@ public class CombatScreen implements Screen {
             }else if (currentLength < moveTo){ //keep increasing by 3 pixels until we reach spot
                 currentLength+=3;
                 if(currentLength >= moveTo){
+                    System.out.println("ending animation");
                     currentLength = moveTo; //set exactly equal (moveTo is a float or we could have gone past it)
                     animationManager.endAnimation();
                 }
@@ -584,19 +624,33 @@ public class CombatScreen implements Screen {
             attacker = a;
             victim = v;
             startingPosition = currentPosition = a.getX();
-            targetPosition = v.getX();
+            if(v == enemy) targetPosition = enemy.getHitbox().x;
+            else targetPosition = v.getX(); //change to hitbox
             goingRight = targetPosition > currentPosition;
             if(goingRight) pixelsPerTick = 25;//increase x
             else pixelsPerTick = -25;
-            //System.out.println(goingRight + " from " + currentPosition + " to " + targetPosition);
+            System.out.println(goingRight + " from " + currentPosition + " to " + targetPosition);
             animationManager.startAnimation();
         }
 
         public void tick(){
 
             if(goingRight){
-                if(currentPosition >= targetPosition) pixelsPerTick*=-1;//once we reach victim, move back
+                if(currentPosition >= targetPosition){
+                    //if(attacker == player) player.setSpeedX(-50);
+                    pixelsPerTick*=-1;//once we reach victim, move back
+                }
                 if(currentPosition <= startingPosition && pixelsPerTick<0){
+
+                    /*
+                    if(attacker == player){
+                        //player.walkFrame = 8;
+                        player.move();
+                        player.setSpeedX(0);
+                    }
+                     */
+
+
                     pixelsPerTick = 0;//stop movement
                     animationManager.endAnimation();//and tell manager we're done
                 }
@@ -607,6 +661,16 @@ public class CombatScreen implements Screen {
                     animationManager.endAnimation();//and tell manager we're done
                 }
             }
+
+            /*
+            if(attacker == player){
+                player.move();
+                player.scaleSprite(2f);
+            }
+            else attacker.moveBy(pixelsPerTick, 0);
+             */
+
+
             attacker.moveBy(pixelsPerTick, 0);
             currentPosition = attacker.getX();
         }
@@ -655,7 +719,7 @@ public class CombatScreen implements Screen {
         public void endAnimation(){
             if(currentActiveAnimations > 0) currentActiveAnimations--;
             if(currentActiveAnimations == 0){
-                //System.out.println("done with all animations");
+                System.out.println("done with all animations");
                 animationActive = false;
                 //can call an event to trigger next function
                 //playerTurn is never explicitly called, its done via buttons

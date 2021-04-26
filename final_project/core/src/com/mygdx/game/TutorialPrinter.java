@@ -15,7 +15,7 @@ public class TutorialPrinter extends Interactable{
 
     @Override
     public void interact(GameScreen game){
-        game.getHud().setText("The printer attacks!");
+        game.getHud().setText("Just as you begin to enter 8000 into\nthe machine, it suddenly starts moving!", "Two red eyes open under the scanner,\nand the printer attacks!");
     }
 
     public void fight(GameScreen game){

@@ -28,7 +28,7 @@ public class Room extends Actor {
         layout = Layout.getInstance();
         sprite = layout.getRoom();
         doors = layout.possibleRooms();
-        doorImg = new Texture("door.png");
+        doorImg = new Texture("small/floor.png");
         setUpEnemies();
         setUpInteractables();
         setBounds(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());

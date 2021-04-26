@@ -358,7 +358,7 @@ public class Layout {
             }
         }
 
-        int keyEnemy = random.nextInt(possibleEnemy.size());
+        int keyEnemy = random.nextInt(possibleEnemy.size());//I got an error here once, "bound must be positive" (possibleEnemy.size() <=0)
         possibleEnemy.get(keyEnemy).setKey();
     }
 

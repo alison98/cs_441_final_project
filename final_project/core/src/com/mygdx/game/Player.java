@@ -18,8 +18,9 @@ public class Player extends Actor {
     private ArrayList<Sprite> walkingSprites;
     private int walkFrame;
     private int frameCounter;
+    private GameScreen gameScreen;
 
-    public Player(){
+    public Player(GameScreen gameScreenIn){
         walkingSprites = new ArrayList<Sprite>();
         walkingSprites.add(new Sprite(new Texture("player-4x/player-walk-left2.png"))); //0
         walkingSprites.add(new Sprite(new Texture("player-4x/player-walk-left3.png"))); //1
@@ -32,12 +33,13 @@ public class Player extends Actor {
         walkingSprites.add(new Sprite(new Texture("player-resized6x.png"))); //8
         walkFrame = 0;
         sprite = walkingSprites.get(walkFrame);
-        this.setBounds(this.sprite.getX(), this.sprite.getY(), this.sprite.getWidth(), this.sprite.getHeight());
-        bounds = new Rectangle(this.sprite.getX(), this.sprite.getY(), this.sprite.getWidth(), this.sprite.getHeight());
+        this.setBounds(this.sprite.getX(), this.sprite.getY(), this.sprite.getWidth(), this.sprite.getHeight()/2);
+        bounds = new Rectangle(this.sprite.getX(), this.sprite.getY(), this.sprite.getWidth(), (this.sprite.getHeight()/2) - 15);
         this.setOrigin(this.sprite.getWidth() / 2, this.sprite.getHeight() / 2);
         speedX = 0;
         speedY = 0;
         frameCounter = 0;
+        gameScreen = gameScreenIn;
     }
 
     public void setSpeedX(int speedXIn){
@@ -72,22 +74,28 @@ public class Player extends Actor {
     @Override
     public void positionChanged(){
         sprite.setPosition(getX(), getY());
-        this.bounds.set(getX(), getY(), this.sprite.getWidth(), this.sprite.getHeight());
+        this.bounds.set(getX(), getY(), this.sprite.getWidth(), (this.sprite.getHeight()/2) - 15);
     }
 
     public void move(){
-        if(this.getX() + speedX >= Gdx.graphics.getWidth() - this.getWidth() && this.speedX > 0){
+        if(this.getX() + speedX >= Gdx.graphics.getWidth() - this.getWidth() - 5 && this.speedX > 0){
             this.speedX = 0;
         }
-        if(this.getX() + speedX <= 0 && this.speedX < 0){
+        if(this.getX() + speedX - 5 <= 0 && this.speedX < 0){
             this.speedX = 0;
         }
-
-        if(this.getY() + speedY >= Gdx.graphics.getHeight() - this.getHeight() - 110 && this.speedY > 0){
+        if(this.getY() + speedY >= Gdx.graphics.getHeight() - this.getHeight() - 150 && this.speedY > 0){
             this.speedY = 0;
         }
-        if(this.getY() + speedY <= 0 && this.speedY < 0){
+        if(this.getY() + speedY - 5 <= 0 && this.speedY < 0){
             this.speedY = 0;
+        }
+        Rectangle newBounds = new Rectangle(bounds.getX() + speedX, bounds.getY() + speedY, bounds.width, bounds.height);
+        for(Boundary boundary : gameScreen.getRoom().getBoundaries()){
+            if(newBounds.overlaps(boundary.getBounds())){
+                this.speedY = 0;
+                this.speedX = 0;
+            }
         }
         if(frameCounter < 4){
             frameCounter++;

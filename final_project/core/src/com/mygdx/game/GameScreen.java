@@ -56,7 +56,7 @@ public class GameScreen implements Screen {
         hud = new Hud(spriteBatch, this);
         hud.setText("Welcome to your first day on the job!\n Press A to continue", "Your first task is to make eight thousand copies\n of the new mandatory overtime notice", "Find the printer in the break room to get started");
         camera = new OrthographicCamera();
-        player = new Player();
+        player = new Player(this);
         player.setPosition(500, 300);
         room = new Room();
         stage.addActor(room);

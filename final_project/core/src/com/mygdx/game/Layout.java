@@ -21,6 +21,7 @@ public class Layout {
     private List<Rectangle> hitboxes;
     private List<Boolean> keys, bosses;
     private Random random;
+    private Texture stairUpImg;
 
 
     //Singleton class
@@ -49,13 +50,15 @@ public class Layout {
 
         generateMap();
 
+        stairUpImg = new Texture("stairs-up.png");
+
         hitboxes = new ArrayList<>();
         //Bounds can change based on room image
         Rectangle left = new Rectangle(0, Gdx.graphics.getHeight()/2, 50, 150);
         Rectangle right = new Rectangle(Gdx.graphics.getWidth()-50, Gdx.graphics.getHeight()/2, 50, 150);
-        Rectangle top = new Rectangle(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()-50, 150, 50);
-        Rectangle bottom = new Rectangle(Gdx.graphics.getWidth()/2, 0, 150, 50);
-        Rectangle stair = new Rectangle(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2, 150, 150);
+        Rectangle top = new Rectangle(1008, 888, 72, 50);
+        Rectangle bottom = new Rectangle(1008, 0, 72, 50);
+        Rectangle stair = new Rectangle(Gdx.graphics.getWidth() - stairUpImg.getWidth(), Gdx.graphics.getHeight() - Gdx.graphics.getHeight()/3, stairUpImg.getWidth(), stairUpImg.getHeight());
         hitboxes.add(left);
         hitboxes.add(right);
         hitboxes.add(top);
@@ -154,7 +157,7 @@ public class Layout {
                 respawn();
                 floor -=1;
             }
-            player.moveBy(200,0);
+            //player.moveBy(200,0);
             return 4;
         }
 

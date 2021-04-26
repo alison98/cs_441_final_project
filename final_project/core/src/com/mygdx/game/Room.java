@@ -17,20 +17,29 @@ public class Room extends Actor {
     private List<Enemy> enemyList;
     private List<Integer> doors;
     private List<Interactable> interactables;
+    private List<Boundary> boundaries;
     private int enemyNum;
     private int humanNum;
     private Random random;
     private boolean stair;
+    private Texture sideDoorImg;
     private Texture doorImg;
+    private Texture stairUpImg;
+    private Texture stairDownImg;
 
     public Room(){
         random = new Random();
         layout = Layout.getInstance();
         sprite = layout.getRoom();
         doors = layout.possibleRooms();
-        doorImg = new Texture("small/floor.png");
+        doorImg = new Texture("door.png");
+        sideDoorImg = new Texture("small/floor.png");
+        stairUpImg = new Texture("stairs-up.png");
+        stairDownImg = new Texture("stairs-down.png");
+        boundaries = new ArrayList<Boundary>();
         setUpEnemies();
         setUpInteractables();
+        setUpBoundaries();
         setBounds(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
         stair = false;
     }
@@ -57,10 +66,22 @@ public class Room extends Actor {
         interactables = layout.getInteractables();
     }
 
+    public void setUpBoundaries(){
+        if(sprite.getTexture().toString().equals("office-space-no-printer.png")){
+            boundaries.add(new Boundary(208, 432, 440, 408));
+            boundaries.add(new Boundary(848, 432, 440, 408));
+            boundaries.add(new Boundary(1488, 432, 440, 408));
+        }
+    }
+
     public void tick() {
         for(Enemy enemy: enemyList){
             enemy.tick();
         }
+    }
+
+    public List<Boundary> getBoundaries(){
+        return boundaries;
     }
 
     @Override
@@ -69,13 +90,13 @@ public class Room extends Actor {
         doors = layout.possibleRooms();
         for(int i=0; i<doors.size(); i++){
             if(doors.get(i)==0){
-                batch.draw(doorImg, 0, Gdx.graphics.getHeight()/2, 50, 150);
+                batch.draw(sideDoorImg, 0, Gdx.graphics.getHeight()/2, 50, 150);
             }else if(doors.get(i)==1){
-                batch.draw(doorImg, Gdx.graphics.getWidth()-50, Gdx.graphics.getHeight()/2, 50, 150);
+                batch.draw(sideDoorImg, Gdx.graphics.getWidth()-50, Gdx.graphics.getHeight()/2, 50, 150);
             }else if(doors.get(i)==2){
-                batch.draw(doorImg, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()-50, 150, 50);
+                batch.draw(doorImg, 1008, 888);
             }else if(doors.get(i)==3){
-                batch.draw(doorImg, Gdx.graphics.getWidth()/2, 0, 150, 50);
+                batch.draw(sideDoorImg, 1008, 0, 72, 50);
             }
         }
         for(Enemy enemy: enemyList) {
@@ -85,7 +106,11 @@ public class Room extends Actor {
             interactable.draw(batch, alpha);
         }
         if(stair && (layout.getBoss() || layout.downFloor())){
-            batch.draw(doorImg, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2, 150, 150);
+            if(layout.downFloor()){
+                batch.draw(stairDownImg, Gdx.graphics.getWidth() - stairDownImg.getWidth(), Gdx.graphics.getHeight()  - Gdx.graphics.getHeight()/3);
+            } else{
+                batch.draw(stairUpImg, Gdx.graphics.getWidth() - stairUpImg.getWidth(), Gdx.graphics.getHeight() - Gdx.graphics.getHeight()/3);
+            }
         }
     }
 
@@ -132,6 +157,7 @@ public class Room extends Actor {
             }
             setUpEnemies();
             setUpInteractables();
+            setUpBoundaries();
         }
         return location;
     }

@@ -271,7 +271,7 @@ public class Layout {
                 nextCol = nextRoom.get(1);
             }
             addKey(j);
-            addBoss(j,"office-space-1.png");
+            addBoss(j,"office-space-2.png");
         }
         column = originalCol;
     }

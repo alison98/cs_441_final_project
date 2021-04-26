@@ -57,7 +57,7 @@ public class Enemy extends Actor {
 
     private void initSprites(){
         sprites = new Sprite[2];
-        sprites[0] = new Sprite(new Texture("badlogic.jpg"));
+        sprites[0] = new Sprite(new Texture("enemy-printer-4x.png"));
         sprites[1] = new Sprite(new Texture("player-resized6x.png")); //change to random human character
         name = "Monster";
     }
@@ -191,7 +191,7 @@ public class Enemy extends Actor {
 
     public void setBoss(){
         boss = true;
-        sprite = new Sprite(new Texture("enemy1.png"));
+        sprite = new Sprite(new Texture("enemy-printer-12x.png"));
         positionChanged();
     }
 

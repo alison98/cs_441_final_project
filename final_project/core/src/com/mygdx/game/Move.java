@@ -11,14 +11,13 @@ import java.util.Random;
  * We can have different weapons be represented by different moves as well.
  */
 public class Move {
-    private static Move instance;
-    //Fields
 
-    private Map<String, List<Integer>> movelist;//Map where key is the names of weapons and value is min and max damage
+    private static Move instance;
+
+    private Map<String, MoveData> movelist;//Map where key is the names of weapons and value is a MoveData object (with range and move type)
     private List<List<String>> enemyWeapons;
 
 
-    //Getters
     public List<String> getEnemyWeapons(int level) {
         return enemyWeapons.get(level);
     }
@@ -27,12 +26,14 @@ public class Move {
     private Move(){
         //Set up all possible moves in game
         movelist = new HashMap<>();
-        movelist.put("sword", setDamage(10,20));
+        movelist.put("sword", new MoveData(setDamage(10, 20), MoveData.MoveType.ATTACK));
+        movelist.put("coffee", new MoveData(setDamage(10, 20), MoveData.MoveType.HEALING));
 
         //Set up weapons/abilities for enemies
         enemyWeapons = new ArrayList<>();
         List<String> floor0 = new ArrayList<>();
         floor0.add("sword");
+        floor0.add("coffee"); //testing enemy healing itself
         List<String> floor1 = new ArrayList<>();
         floor1.add("sword");
         List<String> floor2 = new ArrayList<>();
@@ -54,10 +55,14 @@ public class Move {
 
     //function called from CombatScreen to get a random value in the Move's range
     public int getDamage(String weapon){
-        List<Integer> range = movelist.get(weapon);
+        List<Integer> range = movelist.get(weapon).getRange();
         Random random = new Random();
         int temp = random.nextInt(range.get(1)-range.get(0));
         return range.get(0)+temp;
+    }
+
+    public MoveData.MoveType getMoveType(String weapon){
+        return movelist.get(weapon).getMoveType();
     }
 
     public List<Integer> setDamage(int min, int max){

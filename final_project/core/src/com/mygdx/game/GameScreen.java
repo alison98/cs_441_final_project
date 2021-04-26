@@ -33,6 +33,10 @@ public class GameScreen implements Screen {
     //I have no idea why I don't get this problem with the enemy
     public Stage getStage(){ return stage; }
 
+    //also need this to make sure player spawns back in valid spot on dying
+    //i.e. not on an enemy
+    public Room getRoom(){ return room; }
+
     public GameScreen(Game g) {
         game = g;
         stage = new Stage(new ScreenViewport());

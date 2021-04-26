@@ -321,7 +321,7 @@ public class Layout {
                 }
             }
         }
-        int nextRoom = random.nextInt(possibleRooms.size());
+        int nextRoom = random.nextInt(possibleRooms.size()); //BTW I got a crash here once (1/100 chance) where possibleRooms.size() was 0 (I think)
         /*Integer[] stairs = new Integer[2];
         stairs[0] = possibleRooms.get(nextRoom).get(0);
         stairs[1] = possibleRooms.get(nextRoom).get(1);

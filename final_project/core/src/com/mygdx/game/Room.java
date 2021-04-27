@@ -51,6 +51,8 @@ public class Room extends Actor {
             boundaries.add(new Boundary(208, 432, 440, 409));
             boundaries.add(new Boundary(848, 432, 440, 409));
             boundaries.add(new Boundary(1488, 432, 440, 409));
+        }else{
+            boundaries.clear();
         }
     }
 

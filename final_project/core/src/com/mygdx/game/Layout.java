@@ -48,7 +48,7 @@ public class Layout {
         //Initial location
         floor = 0;
         row = random.nextInt(maxRow);
-        column = random.nextInt(maxCol-1);
+        column = random.nextInt(maxCol-1)+1;
 
         generateMap();
 
@@ -131,23 +131,38 @@ public class Layout {
     }
 
     public Integer changeRoom(Player player){
+        if(bossRooms.get(floor)[0] == row && bossRooms.get(floor)[1] == column && !getBoss()){
+            return -1;
+        }
         if(hitboxes.get(0).overlaps(player.getBounds())){
-            if (checkRoom(0)){
+            if (bossRooms.get(floor)[0] == row
+                    && bossRooms.get(floor)[1] == column - 1 && !getKey()) {
+                return -1;
+            }else if (checkRoom(0)){
                 column -=1;
                 return 0;
             }
         }else if(hitboxes.get(1).overlaps(player.getBounds())){
-            if (checkRoom(1)){
+            if (bossRooms.get(floor)[0] == row
+                    && bossRooms.get(floor)[1] == column + 1 && !getKey()) {
+                return -1;
+            }else if (checkRoom(1)){
                 column +=1;
                 return 1;
             }
         }else if(hitboxes.get(2).overlaps(player.getBounds())){
-            if (checkRoom(2)){
+            if (bossRooms.get(floor)[0] == row - 1
+                    && bossRooms.get(floor)[1] == column && !getKey()) {
+                return -1;
+            }else if (checkRoom(2)){
                 row -=1;
                 return 2;
             }
         }else if(hitboxes.get(3).overlaps(player.getBounds())){
-            if (checkRoom(3)){
+            if (bossRooms.get(floor)[0] == row + 1
+                    && bossRooms.get(floor)[1] == column && !getKey()) {
+                return -1;
+            }else if (checkRoom(3)){
                 row +=1;
                 return 3;
             }
@@ -186,28 +201,14 @@ public class Layout {
         return false;
     }
 
-    private boolean checkRoom(int direction){
+    private Boolean checkRoom(int direction){
         return connections.get(floor).get(row).get(column).contains(direction);
     }
 
     public List<Integer> possibleRooms(){
         List<Integer> doors = new ArrayList<>();
         for(int i=0;i<4;i++) {
-            if (i == 0 &&bossRooms.get(floor)[0] == row
-                    && bossRooms.get(floor)[1] == column - 1 && !getKey()) {
-                //do nothing add -1
-            } else if (i == 1 && bossRooms.get(floor)[0] == row
-                    && bossRooms.get(floor)[1] == column + 1 && !getKey()) {
-                //do nothing add -2
-            } else if (i == 2 && bossRooms.get(floor)[0] == row - 1
-                    && bossRooms.get(floor)[1] == column && !getKey()) {
-                //do nothing add -3
-            } else if (i == 3 && bossRooms.get(floor)[0] == row + 1
-                    && bossRooms.get(floor)[1] == column && !getKey()) {
-                //do nothing add -4
-            }else if(bossRooms.get(floor)[0] == row && bossRooms.get(floor)[1] == column && !getBoss()){
-                //do nothing
-            }else if(checkRoom(i)){
+            if(checkRoom(i)){
                 doors.add(i);
             }
         }
@@ -242,11 +243,11 @@ public class Layout {
 
         //tutorial floor
         addRoom(0, row, column, "office-space-no-printer.png", 1, 0);
-        connections.get(0).get(row).get(column).add(1);
-        column +=1;
+        connections.get(0).get(row).get(column).add(0);
+        column -=1;
 
         addRoom(0, row, column, "img4.jpg", 0, 0);
-        connections.get(0).get(row).get(column).add(0);
+        connections.get(0).get(row).get(column).add(1);
         List<Integer[]> stairUp = new ArrayList<>();
         Integer[] stairs = new Integer[3];
         stairs[0] = row;
@@ -363,7 +364,7 @@ public class Layout {
 
         for(int i=0; i<rooms.get(floorIn).size(); i++){
             for(int j=0; j<rooms.get(floorIn).get(i).size(); j++){
-                if(!(stairRooms.get(floorIn).get(0)[0]==i && stairRooms.get(floorIn).get(0)[1]==j)){
+                if(rooms.get(floorIn).get(i).get(j) != null && !(stairRooms.get(floorIn).get(0)[0]==i && stairRooms.get(floorIn).get(0)[1]==j)){
                 //if(rooms.get(floorIn).get(i).get(j) != null && !rooms.get(floorIn).get(i).get(j).getTexture().toString().equals("img4.jpg")){
                     List<Integer> thisRoom = new ArrayList<>();
                     thisRoom.add(i);
@@ -460,7 +461,7 @@ public class Layout {
         bossRooms.add(bossRoom);
 
         rooms.get(floorIn).get(newRow).set(newCol, new Sprite(new Texture(sprite)));
-        enemies.get(floorIn).get(newRow).get(newCol).add(new Enemy(1000,500,2,0,floorIn));
+        enemies.get(floorIn).get(newRow).get(newCol).add(new Enemy(1000,300,2,0,floorIn));
         enemies.get(floorIn).get(newRow).get(newCol).get(0).setBoss();
 
         connections.get(floorIn).get(newRow).get(newCol).add(direction);

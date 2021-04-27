@@ -118,6 +118,8 @@ public class GameScreen implements Screen {
                 player.setPosition(player.getX(),70);
             }else if(location == 3){
                 player.setPosition(player.getX(),Gdx.graphics.getHeight() - player.getHeight()-70);
+            }else if(location == -1){
+                hud.setText("Door is locked!");
             }
         }
     }

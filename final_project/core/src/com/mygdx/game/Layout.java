@@ -102,8 +102,6 @@ public class Layout {
         bosses.set(floorIn, true);
     }
 
-
-
     public boolean getDoorTouched(Player player){
         if(hitboxes.get(0).overlaps(player.getBounds())){
             if (checkRoom(0)){
@@ -242,7 +240,7 @@ public class Layout {
         int originalCol =column;
 
         //tutorial floor
-        addRoom(0, row, column, "office-space-no-printer.png", 1, 0);
+        addRoom(0, row, column, "office-space-no-printer.png", 0, 0);
         connections.get(0).get(row).get(column).add(0);
         column -=1;
 
@@ -333,10 +331,7 @@ public class Layout {
     private void addRoom(int floorIn, int rowIn, int columnIn, String sprite, int enemy, int human){
         if(floorIn ==0){ //tutorial floor
             rooms.get(floorIn).get(rowIn).set(columnIn, new Sprite(new Texture(sprite)));
-            if(enemy !=0){
-                //enemies.get(floorIn).get(rowIn).get(columnIn).add(new Enemy(1700,100,2,0,floorIn));
-                //enemies.get(floorIn).get(rowIn).get(columnIn).get(0).setKey();
-                //enemies.get(floorIn).get(rowIn).get(columnIn).get(0).setBoss();
+            if(rooms.get(floorIn).get(rowIn).get(columnIn).getTexture().toString().equals("office-space-no-printer.png")){
                 interactables.get(floorIn).get(rowIn).get(columnIn).add(new TutorialPrinter("printer-shadow.png", floorIn, rowIn, columnIn, 0));
                 interactables.get(floorIn).get(rowIn).get(columnIn).get(0).setPosition(1528, 200);
                 Integer[] tutorial = new Integer[2];

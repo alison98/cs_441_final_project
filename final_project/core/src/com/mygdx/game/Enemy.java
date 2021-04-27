@@ -19,7 +19,7 @@ public class Enemy extends Actor {
     private boolean fight, key, boss, human;
     private Rectangle hitbox;
     private List<String> weapon;
-    private int level, health;
+    private int level, health, experience;
     private Move abilities;
     private String name;
     private Random random;
@@ -49,6 +49,7 @@ public class Enemy extends Actor {
         random = new Random();
         level = random.nextInt(10)+floor;
         health = floor*100 + random.nextInt(100);
+        experience = level*2;
     }
 
     public Rectangle getHitbox(){
@@ -177,6 +178,10 @@ public class Enemy extends Actor {
 
     public int getHealth(){
         return health;
+    }
+
+    public int getExperience(){
+        return experience;
     }
 
     public boolean getFight(){

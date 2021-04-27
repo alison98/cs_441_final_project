@@ -21,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Queue;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
@@ -35,14 +36,16 @@ public class Hud {
     private ImageButton downButton;
     private ImageButton leftButton;
     private ImageButton rightButton;
+    private Queue<String> textQueue;
 
 
     public Hud(final SpriteBatch spriteBatch, final GameScreen gameScreen) {
         stageViewport = new ScreenViewport();
         stage = new Stage(stageViewport, spriteBatch);
+        textQueue = new Queue<String>();
 
         textBox = new Label("Hello", new Skin(Gdx.files.internal("skin/plain-james-ui.json"), new TextureAtlas(Gdx.files.internal("skin/plain-james-ui.atlas"))));
-        textBox.setWidth(800);
+        textBox.setWidth(1200);
         textBox.setHeight(200);
         textBox.setFontScale(2f);
         textBox.setAlignment(Align.center);
@@ -58,17 +61,21 @@ public class Hud {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 if(inText()){
-                    Interactable interactable = gameScreen.getRoom().getInteractablesTouched(gameScreen.getPlayer());
-                    if(interactable != null){
-                        if(interactable instanceof TutorialPrinter){
-                            ((TutorialPrinter)interactable).fight(gameScreen);
+                    if(textQueue.isEmpty()){
+                        Interactable interactable = gameScreen.getRoom().getInteractablesTouched(gameScreen.getPlayer());
+                        if(interactable != null){
+                            if(interactable instanceof TutorialPrinter){
+                                ((TutorialPrinter)interactable).fight(gameScreen);
+                            }
                         }
+                        upButton.setTouchable(Touchable.enabled);
+                        downButton.setTouchable(Touchable.enabled);
+                        leftButton.setTouchable(Touchable.enabled);
+                        rightButton.setTouchable(Touchable.enabled);
+                        textBox.setVisible(false);
+                    } else {
+                        textBox.setText(textQueue.removeFirst());
                     }
-                    upButton.setTouchable(Touchable.enabled);
-                    downButton.setTouchable(Touchable.enabled);
-                    leftButton.setTouchable(Touchable.enabled);
-                    rightButton.setTouchable(Touchable.enabled);
-                    textBox.setVisible(false);
                     return;
                 }
                 if(gameScreen.getRoom().getDoorTouched(gameScreen.getPlayer())){
@@ -168,8 +175,11 @@ public class Hud {
         selectButton.setTouchable(Touchable.disabled);
     }
 
-    public void setText(String message){
-        textBox.setText(message);
+    public void setText(String... messages){
+        for(String message : messages){
+            textQueue.addLast(message);
+        }
+        textBox.setText(textQueue.removeFirst());
         textBox.setVisible(true);
         setInteractable();
         upButton.setTouchable(Touchable.disabled);

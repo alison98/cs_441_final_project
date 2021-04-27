@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Player extends Actor {
 
@@ -18,6 +19,9 @@ public class Player extends Actor {
     private ArrayList<Sprite> walkingSprites;
     private int walkFrame;
     private int frameCounter;
+    private List<String> weapon;
+    private int level, health, experience;
+    private Move abilities;
 
     public Player(){
         walkingSprites = new ArrayList<Sprite>();
@@ -38,6 +42,39 @@ public class Player extends Actor {
         speedX = 0;
         speedY = 0;
         frameCounter = 0;
+        weapon = new ArrayList<>();
+        weapon.add("sword");
+        level = 1;
+        health = 100;
+        experience = 0;
+    }
+
+    public List<String> getWeapon(){
+        return weapon;
+    }
+
+    public int getLevel(){
+        return level;
+    }
+
+    public int getHealth(){
+        return health;
+    }
+
+    public void setHealth(int healthIn){
+        health = healthIn;
+    }
+
+    public int getExperience(){
+        return experience;
+    }
+
+    public void increaseExperience(int amount){
+        experience += amount;
+        if(experience <=100){
+            level +=1;
+            experience -=100;
+        }
     }
 
     public void setSpeedX(int speedXIn){
@@ -83,7 +120,7 @@ public class Player extends Actor {
             this.speedX = 0;
         }
 
-        if(this.getY() + speedY >= Gdx.graphics.getHeight() - this.getHeight() - 110 && this.speedY > 0){
+        if(this.getY() + speedY >= Gdx.graphics.getHeight() - this.getHeight()/* - 110*/ && this.speedY > 0){
             this.speedY = 0;
         }
         if(this.getY() + speedY <= 0 && this.speedY < 0){

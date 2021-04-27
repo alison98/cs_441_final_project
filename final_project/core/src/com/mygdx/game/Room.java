@@ -20,7 +20,6 @@ public class Room extends Actor {
     private int enemyNum;
     private int humanNum;
     private Random random;
-    private boolean stair;
     private Texture doorImg;
 
     public Room(){
@@ -32,7 +31,6 @@ public class Room extends Actor {
         setUpEnemies();
         setUpInteractables();
         setBounds(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
-        stair = false;
     }
 
     private void setUpEnemies(){
@@ -84,7 +82,7 @@ public class Room extends Actor {
         for(Interactable interactable : interactables){
             interactable.draw(batch, alpha);
         }
-        if(stair && (layout.getBoss() || layout.downFloor())){
+        if(layout.isStairs() && (layout.getBoss() || layout.downFloor())){
             batch.draw(doorImg, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2, 150, 150);
         }
     }
@@ -109,7 +107,7 @@ public class Room extends Actor {
     }
 
     public boolean getDoorTouched(Player player){
-        return layout.getDoorTouched(player, stair);
+        return layout.getDoorTouched(player);
     }
 
     public Interactable getInteractablesTouched(Player player) {
@@ -122,14 +120,9 @@ public class Room extends Actor {
     }
 
     public Integer roomChange(Player player){
-        Integer location = layout.changeRoom(player, stair);
+        Integer location = layout.changeRoom(player);
         if(location != null){
             sprite = layout.getRoom();
-            if(sprite.getTexture().toString().equals("img4.jpg")){
-                stair = true;
-            }else{
-                stair = false;
-            }
             setUpEnemies();
             setUpInteractables();
         }

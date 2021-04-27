@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -16,6 +17,7 @@ public class Layout {
     private List<List<List<List<Integer>>>> connections;
     private List<List<List<List<Interactable>>>> interactables;
     private List<Integer[]> bossRooms;
+    private List<List<Integer[]>> stairRooms;
     private int floor, row, column;
     private int maxFloor, maxRow, maxCol, maxTunnel, maxLen;
     private List<Rectangle> hitboxes;
@@ -29,7 +31,7 @@ public class Layout {
         enemies = new ArrayList<>();
         interactables = new ArrayList<>();
         connections = new ArrayList<>();
-        //stairRooms = new ArrayList<>();
+        stairRooms = new ArrayList<>();
         bossRooms = new ArrayList<>();
         keys = new ArrayList<>();
         bosses = new ArrayList<>();
@@ -99,7 +101,7 @@ public class Layout {
 
 
 
-    public boolean getDoorTouched(Player player, boolean stair){
+    public boolean getDoorTouched(Player player){
         if(hitboxes.get(0).overlaps(player.getBounds())){
             if (checkRoom(0)){
                 return true;
@@ -116,7 +118,7 @@ public class Layout {
             if (checkRoom(3)){
                 return true;
             }
-        }else if(stair && hitboxes.get(4).overlaps(player.getBounds())){
+        }else if(isStairs() && hitboxes.get(4).overlaps(player.getBounds())){
             if(getBoss() || downFloor()) {
                 return true;
             }
@@ -125,7 +127,7 @@ public class Layout {
         return false;
     }
 
-    public Integer changeRoom(Player player, boolean stair){
+    public Integer changeRoom(Player player){
         if(hitboxes.get(0).overlaps(player.getBounds())){
             if (checkRoom(0)){
                 column -=1;
@@ -146,7 +148,7 @@ public class Layout {
                 row +=1;
                 return 3;
             }
-        }else if(stair && hitboxes.get(4).overlaps(player.getBounds())){
+        }else if(isStairs() && hitboxes.get(4).overlaps(player.getBounds())){
             if(!downFloor() && getBoss()){
                 respawn();
                 floor +=1;
@@ -161,13 +163,24 @@ public class Layout {
         return null;
     }
 
-    public boolean downFloor(){
-        if(floor +1 < rooms.size() && rooms.get(floor+1).get(row).get(column) != null &&
-                rooms.get(floor+1).get(row).get(column).getTexture().toString().equals("img4.jpg")){
-            return false;
-        }else{
-            return true;
+    public boolean downFloor() {
+        for (int i = 0; i < stairRooms.get(floor).size(); i++) {
+            if (stairRooms.get(floor).get(i)[0] == row && stairRooms.get(floor).get(i)[1] == column && stairRooms.get(floor).get(i)[2] == 0) {
+            /*if(floor +1 < rooms.size() && rooms.get(floor+1).get(row).get(column) != null &&
+                rooms.get(floor+1).get(row).get(column).getTexture().toString().equals("img4.jpg")){*/
+                return true;
+            }
         }
+        return false;
+    }
+
+    public boolean isStairs(){
+        for (int i = 0; i < stairRooms.get(floor).size(); i++) {
+            if (stairRooms.get(floor).get(i)[0] == row && stairRooms.get(floor).get(i)[1] == column) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean checkRoom(int direction){
@@ -179,16 +192,16 @@ public class Layout {
         for(int i=0;i<4;i++) {
             if (i == 0 &&bossRooms.get(floor)[0] == row
                     && bossRooms.get(floor)[1] == column - 1 && !getKey()) {
-                //do nothing
+                //do nothing add -1
             } else if (i == 1 && bossRooms.get(floor)[0] == row
                     && bossRooms.get(floor)[1] == column + 1 && !getKey()) {
-                //do nothing
+                //do nothing add -2
             } else if (i == 2 && bossRooms.get(floor)[0] == row - 1
                     && bossRooms.get(floor)[1] == column && !getKey()) {
-                //do nothing
+                //do nothing add -3
             } else if (i == 3 && bossRooms.get(floor)[0] == row + 1
                     && bossRooms.get(floor)[1] == column && !getKey()) {
-                //do nothing
+                //do nothing add -4
             }else if(bossRooms.get(floor)[0] == row && bossRooms.get(floor)[1] == column && !getBoss()){
                 //do nothing
             }else if(checkRoom(i)){
@@ -228,9 +241,25 @@ public class Layout {
         addRoom(0, row, column, "office-space-no-printer.png", 1, 0);
         connections.get(0).get(row).get(column).add(1);
         column +=1;
+
         addRoom(0, row, column, "img4.jpg", 0, 0);
         connections.get(0).get(row).get(column).add(0);
+        List<Integer[]> stairUp = new ArrayList<>();
+        Integer[] stairs = new Integer[3];
+        stairs[0] = row;
+        stairs[1] = column;
+        stairs[2] = 1;
+        stairUp.add(stairs);
+        stairRooms.add(stairUp);
+
         addRoom(1, row, column, "img4.jpg", 0, 0);
+        List<Integer[]> stairDown = new ArrayList<>();
+        Integer[] stairs2 = new Integer[3];
+        stairs2[0] = row;
+        stairs2[1] = column;
+        stairs2[2] = 0;
+        stairDown.add(stairs2);
+        stairRooms.add(stairDown);
         keys.add(false);
         bosses.add(false);
 
@@ -243,10 +272,24 @@ public class Layout {
             bosses.add(false);
             for (int k=0; k<maxTunnel; k++) {
                 int length = random.nextInt(maxLen) + 1;
-                int direction = random.nextInt(4);
+                List<Integer> possibleDir = new ArrayList<>();
+                if (currCol != 0){ /*Left*/
+                    possibleDir.add(0);
+                }
+                if(currCol != maxCol - 1) {/*Right*/
+                    possibleDir.add(1);
+                }
+                if(currRow != 0){/*Up*/
+                    possibleDir.add(2);
+                }
+                if(currRow != maxRow - 1){/*Down*/
+                    possibleDir.add(3);
+                }
+                Collections.shuffle(possibleDir);
+                int direction = possibleDir.get(0);
                 for (int i = 0; i < length; i++) {
-                    if ((direction == 0 && currCol == 0) /*Left*/ || (direction == 1 && currCol == maxCol - 1)/*Right*/
-                            || (direction == 2 && currRow == 0)/*Up*/ || (direction == 3 && currRow == maxRow - 1)/*Down*/) {
+                    if ((direction == 0 && currCol == 0) || (direction == 1 && currCol == maxCol - 1)
+                            || (direction == 2 && currRow == 0)|| (direction == 3 && currRow == maxRow - 1)) {
                         break;
                     }
                     connections.get(j).get(currRow).get(currCol).add(direction);
@@ -296,11 +339,6 @@ public class Layout {
                 tutorial[0] = rowIn;
                 tutorial[1] = columnIn;
                 bossRooms.add(tutorial);
-            }else{
-                /*Integer[] tutorial = new Integer[2];
-                tutorial[0] = rowIn;
-                tutorial[1] = columnIn;
-                stairRooms.add(tutorial);*/
             }
             return;
         }
@@ -322,7 +360,8 @@ public class Layout {
 
         for(int i=0; i<rooms.get(floorIn).size(); i++){
             for(int j=0; j<rooms.get(floorIn).get(i).size(); j++){
-                if(rooms.get(floorIn).get(i).get(j) != null && !rooms.get(floorIn).get(i).get(j).getTexture().toString().equals("img4.jpg")){
+                if(!(stairRooms.get(floorIn).get(0)[0]==i && stairRooms.get(floorIn).get(0)[1]==j)){
+                //if(rooms.get(floorIn).get(i).get(j) != null && !rooms.get(floorIn).get(i).get(j).getTexture().toString().equals("img4.jpg")){
                     List<Integer> thisRoom = new ArrayList<>();
                     thisRoom.add(i);
                     thisRoom.add(j);
@@ -331,12 +370,20 @@ public class Layout {
             }
         }
         int nextRoom = random.nextInt(possibleRooms.size()); //BTW I got a crash here once (1/100 chance) where possibleRooms.size() was 0 (I think)
-        /*Integer[] stairs = new Integer[2];
+        Integer[] stairs = new Integer[3];
         stairs[0] = possibleRooms.get(nextRoom).get(0);
         stairs[1] = possibleRooms.get(nextRoom).get(1);
-        stairRooms.add(stairs);*/
+        stairs[2] = 1;
+        stairRooms.get(floorIn).add(stairs);
         addRoom(floorIn,possibleRooms.get(nextRoom).get(0),possibleRooms.get(nextRoom).get(1), "img4.jpg",0,0);
         addRoom(floorIn+1,possibleRooms.get(nextRoom).get(0),possibleRooms.get(nextRoom).get(1), "img4.jpg",0,0);
+        List<Integer[]> stairDown = new ArrayList<>();
+        Integer[] stairs2 = new Integer[3];
+        stairs2[0] = possibleRooms.get(nextRoom).get(0);
+        stairs2[1] = possibleRooms.get(nextRoom).get(1);
+        stairs2[2] = 0;
+        stairDown.add(stairs2);
+        stairRooms.add(stairDown);
         return possibleRooms.get(nextRoom);
     }
 
@@ -405,7 +452,6 @@ public class Layout {
         int direction = possibleRooms.get(nextRoom).get(2);
 
         Integer[] bossRoom = new Integer[2];
-        System.out.println("floor: " + floorIn + " row: " + newRow + " column: " + newCol);
         bossRoom[0] = newRow;
         bossRoom[1] = newCol;
         bossRooms.add(bossRoom);
@@ -448,8 +494,14 @@ public class Layout {
         interactables.get(floor).get(row).get(column).remove(index);
     }
 
-    public void setEnemies(){
-        //enemies.get(floor).get(row).get(column)[0] -= 1;
-        //enemies.get(floor).get(row).get(column)[1] += 1;
+    public void defeat(){
+        for(int i=0; i<stairRooms.get(floor).size(); i++){
+            if(stairRooms.get(floor).get(i)[2] == 0){
+                row = stairRooms.get(floor).get(i)[0];
+                column = stairRooms.get(floor).get(i)[1];
+                //Player position may also need to change
+                respawn();
+            }
+        }
     }
 }

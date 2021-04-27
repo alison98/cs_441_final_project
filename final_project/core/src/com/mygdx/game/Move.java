@@ -33,7 +33,7 @@ public class Move {
         enemyWeapons = new ArrayList<>();
         List<String> floor0 = new ArrayList<>();
         floor0.add("sword");
-        floor0.add("coffee"); //testing enemy healing itself
+        //floor0.add("coffee"); //testing enemy healing itself
         List<String> floor1 = new ArrayList<>();
         floor1.add("sword");
         List<String> floor2 = new ArrayList<>();

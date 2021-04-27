@@ -47,6 +47,8 @@ public class Player extends Actor {
         gameScreen = gameScreenIn;
         weapon = new ArrayList<>();
         weapon.add("sword");
+        weapon.add("coffee");
+        weapon.add("coffee");
         level = 1;
         health = 100;
         experience = 0;
@@ -54,6 +56,11 @@ public class Player extends Actor {
 
     public List<String> getWeapon(){
         return weapon;
+    }
+
+    //for items that can only be used once (healing for now, we can better define later)
+    public void removeWeapon(String weaponToRemove){
+        weapon.remove(weaponToRemove);
     }
 
     public int getLevel(){

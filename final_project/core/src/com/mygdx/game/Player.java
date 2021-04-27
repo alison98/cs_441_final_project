@@ -87,7 +87,7 @@ public class Player extends Actor {
         if(this.getY() + speedY >= Gdx.graphics.getHeight() - this.getHeight() - 150 && this.speedY > 0){
             this.speedY = 0;
         }
-        if(this.getY() + speedY - 5 <= 0 && this.speedY < 0){
+        if(this.getY() + speedY - 20 <= 0 && this.speedY < 0){
             this.speedY = 0;
         }
         Rectangle newBounds = new Rectangle(bounds.getX() + speedX, bounds.getY() + speedY, bounds.width, bounds.height);

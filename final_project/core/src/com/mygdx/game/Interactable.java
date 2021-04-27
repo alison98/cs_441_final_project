@@ -14,7 +14,7 @@ public class Interactable extends Actor {
     public Interactable(String image, int floorIn, int rowIn, int columnIn, int indexIn){
         sprite = new Sprite(new Texture(image));
         this.setBounds(this.sprite.getX(), this.sprite.getY(), this.sprite.getWidth(), this.sprite.getHeight());
-        bounds = new Rectangle(this.sprite.getX(), this.sprite.getY(), this.sprite.getWidth(), this.sprite.getHeight());
+        bounds = new Rectangle(this.sprite.getX() - 50, this.sprite.getY() - 50, this.sprite.getWidth() + 50, this.sprite.getHeight() + 50);
         this.setOrigin(this.sprite.getWidth() / 2, this.sprite.getHeight() / 2);
         floor = floorIn;
         row = rowIn;
@@ -29,7 +29,7 @@ public class Interactable extends Actor {
     @Override
     public void positionChanged(){
         sprite.setPosition(getX(), getY());
-        this.bounds.set(getX(), getY(), this.sprite.getWidth(), this.sprite.getHeight());
+        this.bounds.set(getX(), getY() - 30, this.sprite.getWidth(), this.sprite.getHeight() + 30);
     }
 
     @Override

@@ -67,10 +67,16 @@ public class Room extends Actor {
     }
 
     public void setUpBoundaries(){
+        boundaries.clear();
         if(sprite.getTexture().toString().equals("office-space-no-printer.png")){
             boundaries.add(new Boundary(208, 432, 440, 409));
             boundaries.add(new Boundary(848, 432, 440, 409));
             boundaries.add(new Boundary(1488, 432, 440, 409));
+            boundaries.add(new Boundary(208, 16, 448, 216));
+            boundaries.add(new Boundary(848, 16, 448, 216));
+            boundaries.add(new Boundary(1488, 16, 16, 56));
+            boundaries.add(new Boundary(1488, 192, 584, 150));
+            boundaries.add(new Boundary(1720, 136, 152, 40));
         }
     }
 

@@ -20,7 +20,7 @@ public class Player extends Actor {
     private int walkFrame;
     private int frameCounter;
     private List<String> weapon;
-    private int level, health, experience;
+    private int level, health, maxHealth, experience;
     private Move abilities;
     private GameScreen gameScreen;
 
@@ -50,7 +50,7 @@ public class Player extends Actor {
         weapon.add("coffee");
         weapon.add("coffee");
         level = 1;
-        health = 100;
+        maxHealth = health = 100;
         experience = 0;
     }
 
@@ -67,12 +67,15 @@ public class Player extends Actor {
         return level;
     }
 
+    public int getMaxHealth() {return maxHealth; }
+
     public int getHealth(){
         return health;
     }
 
     public void setHealth(int healthIn){
         health = healthIn;
+        if(health > maxHealth) health = maxHealth; //for healing (don't go past max)
     }
 
     public int getExperience(){

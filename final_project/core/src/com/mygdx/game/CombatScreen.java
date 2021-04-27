@@ -55,17 +55,21 @@ public class CombatScreen implements Screen {
     private GameScreen gameScreen;
     private Attack currentAttack;
     private float playerX, playerY, enemyX, enemyY;
-    //private int frameCounter;
 
 
     //TODO
-    //  -fix bug of going back into combat
-    //      --I haven't been able to replicate yet
-    //  -fix bug where printer disappears when player loses
-    //      --something to do with tutorial screen
-    //  -Figure out why calling “stage.dispose()” causes “GL error 0x501” message
-    //  -figure out the scale sprite issue
-    //       --haven't seen in a while
+    // -FOR WED:
+    //      -fix bug of going back into combat
+    //          --I haven't been able to replicate yet
+    //      -fix bug where printer disappears when player loses
+    //          --this is because the interactable is removed before combat ends
+    //          --decide what happens when player dies first - we might want predefined save points or something to go back to
+    //      -figure out the scale sprite issue
+    //           --haven't seen in a while
+    //      -update comments
+    //      -less hard-coded numbers (HealthBar, placing UI elements)
+    //      -clean the button code
+    // -FOR FRI/BEYOND:
     //  -other things to add based on how Moves work:
     //      --Do weapons have durability?
     //      --Cool-down or certain number of uses of a move per encounter?
@@ -77,9 +81,7 @@ public class CombatScreen implements Screen {
     //       --setScales so I can rescale all
     //       --some getters and setters
     //       --better stuff in attack for checking
-    //  -update comments
-    //  -less hard-coded numbers (HealthBar, placing UI elements)
-    //  -clean the button code
+
 
 
     //basic constructor
@@ -111,8 +113,10 @@ public class CombatScreen implements Screen {
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         tick();
-        stage.act();
-        stage.draw();
+        if(stage != null) { //get GL 0x501 error without this check
+            stage.act();
+            stage.draw();
+        }
     }
 
 
@@ -131,7 +135,7 @@ public class CombatScreen implements Screen {
         int amount = Move.getInstance().getDamage(selectedWeapon);//get damage in the move's range
         switch (Move.getInstance().getMoveType(selectedWeapon)){
             case ATTACK:
-                //amount = 100;
+                amount = 100;
                 System.out.println("dealing " + amount + " to enemy");
                 enemy.setHealth(enemy.getHealth() - amount);
                 enemyHealthBar.decreaseHealth(amount);
@@ -217,10 +221,9 @@ public class CombatScreen implements Screen {
         enemy.scaleSprite(1f);
         player.scaleSprite(1f);//back to original size
         gameScreen.getStage().addActor(player);//necessary, or player won't reappear - IDK why I don't need for enemy
-        //gameScreen.getStage().addActor(enemy);
+        //gameScreen.getStage().addActor(enemy); //unnecessary
         this.dispose();//This causes GL error 0x501, even if we don't do stage.clear() above, I don't know why
         game.setScreen(gameScreen);
-
 
     }
 
@@ -278,10 +281,10 @@ public class CombatScreen implements Screen {
 
         //HealthBar class with a basic decrementing animation
         //I also put the labels with the health bar as well to keep organized (and modify them as part of the animation, which makes sense)
-        playerHealthBar = new HealthBar(player.getHealth(), 100, height - (height / 4f), playerHealthChange, playerNameLabel);//will also modify X, Y to be based on sprite size, health
+        playerHealthBar = new HealthBar(player.getHealth(), player.getMaxHealth(), 100, height - (height / 4f), playerHealthChange, playerNameLabel);//will also modify X, Y to be based on sprite size, health
         stage.addActor(playerHealthBar);
 
-        enemyHealthBar = new HealthBar(enemy.getHealth(), width - 850, height -  (height / 4f),enemyHealthChange, enemyNameLabel);//will also modify X, Y to be based on sprite size, health
+        enemyHealthBar = new HealthBar(enemy.getHealth(), enemy.getMaxHealth() ,width - 850, height -  (height / 4f),enemyHealthChange, enemyNameLabel);//will also modify X, Y to be based on sprite size, health
         stage.addActor(enemyHealthBar);
 
 
@@ -541,7 +544,7 @@ public class CombatScreen implements Screen {
     //uses basic rectangles for now, can modify to images (or anything later)
     public class HealthBar extends Actor {
 
-        private float HP;
+        private float maxHealth;
         private float currentHealth;
         private ShapeRenderer backgroundBar;
         private ShapeRenderer frontBar;
@@ -556,16 +559,17 @@ public class CombatScreen implements Screen {
         private String name;
 
 
-        public HealthBar(int amount, float x, float y, Label labelForHealthChange, Label labelForName){
-            HP = currentHealth  = amount;
+        public HealthBar(int currHealth, int maximumHealth, float x, float y, Label labelForHealthChange, Label labelForName){
+            maxHealth = maximumHealth;
+            currentHealth  = currHealth;
             healthChangeLabel = labelForHealthChange;
             nameLabel = labelForName;
             name = nameLabel.getText().toString();
-            nameLabel.setText(name + "\t " + (int) currentHealth + "/" + (int) HP);
+            nameLabel.setText(name + "\t " + (int) currentHealth + "/" + (int) maxHealth);
             backgroundBar = new ShapeRenderer();
             frontBar = new ShapeRenderer();
             edgeDifference = 40; //looks good
-            currentLength = moveTo = 750; //looks good, will make parameter or function of sprite
+            currentLength = moveTo = (currentHealth/maxHealth) * (750); //looks good, will make parameter or function of sprite
             this.x = x;
             this.y = y;
             lastAttack = false;
@@ -584,10 +588,10 @@ public class CombatScreen implements Screen {
                     //I'll try to think of something better
                 }
             }
-            moveTo =  (currentHealth/HP) * (750); //750 comes from starting length
+            moveTo =  (currentHealth/maxHealth) * (750); //750 comes from starting length
             if (moveTo != currentLength){//only preform animation if health changes
                 healthChangeLabel.setText("-" + damage);
-                nameLabel.setText(name + "\t " + (int) currentHealth + "/" + (int) HP); //if we want this to decrease in real time or at end, we can
+                nameLabel.setText(name + "\t " + (int) currentHealth + "/" + (int) maxHealth); //if we want this to decrease in real time or at end, we can
                 animationManager.startAnimation();
             }
         }
@@ -595,11 +599,11 @@ public class CombatScreen implements Screen {
         //on healing, call this
         public void increaseHealth(int amount){
             currentHealth+=amount;
-            if(currentHealth > HP) currentHealth = HP; //prevent from going over 100%
-            moveTo =  (currentHealth/HP) * (750); //750 comes from starting length
+            if(currentHealth > maxHealth) currentHealth = maxHealth; //prevent from going over 100%
+            moveTo =  (currentHealth/maxHealth) * (750); //750 comes from starting length
             if(moveTo != currentLength){ //only preform animation if health changes
                 healthChangeLabel.setText("+" + amount);
-                nameLabel.setText(name + "\t " + (int) currentHealth + "/" + (int) HP); //if we want this to decrease in real time or at end, we can
+                nameLabel.setText(name + "\t " + (int) currentHealth + "/" + (int) maxHealth); //if we want this to decrease in real time or at end, we can
                 animationManager.startAnimation();
             }
         }
@@ -795,7 +799,9 @@ public class CombatScreen implements Screen {
     @Override
     public void hide() {}
 
+    //I am not a libGDX expert, if there's more I should be doing here lmk or add it
     public void dispose() {
         stage.dispose();
+        stage = null; //we get the GL 0x501 error without this - we still try to have the stage act in render for some reason
     }
 }

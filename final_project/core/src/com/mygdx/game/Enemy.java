@@ -19,7 +19,7 @@ public class Enemy extends Actor {
     private boolean fight, key, boss, human;
     private Rectangle hitbox;
     private List<String> weapon;
-    private int level, health, experience;
+    private int level, maxHealth, health, experience;
     private Move abilities;
     private String name;
     private Random random;
@@ -48,7 +48,7 @@ public class Enemy extends Actor {
 
         random = new Random();
         level = random.nextInt(10)+floor;
-        health = floor*100 + random.nextInt(100);
+        maxHealth = health = floor*100 + random.nextInt(100);
         experience = level*2;
     }
 
@@ -176,6 +176,10 @@ public class Enemy extends Actor {
         return level;
     }
 
+    public int getMaxHealth(){
+        return maxHealth;
+    }
+
     public int getHealth(){
         return health;
     }
@@ -209,6 +213,7 @@ public class Enemy extends Actor {
 
     public void setHealth(int healthIn){
         health = healthIn;
+        if(health > maxHealth) health = maxHealth; //for healing (don't go past max)
         if(health<=0) {
             fight = false;
             sprite = sprites[1];

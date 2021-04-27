@@ -66,8 +66,9 @@ public class CombatScreen implements Screen {
     //          --decide what happens when player dies first - we might want predefined save points or something to go back to
     //      -figure out the scale sprite issue
     //           --haven't seen in a while
+    //          --my best guess is that we scaled a sprite, then switched sprites halfway through?
     //      -update comments
-    //      -less hard-coded numbers (HealthBar, placing UI elements)
+    //      -less hard-coded numbers (placing UI elements)
     //      -clean the button code
     // -FOR FRI/BEYOND:
     //  -other things to add based on how Moves work:
@@ -84,11 +85,11 @@ public class CombatScreen implements Screen {
 
 
 
-    //basic constructor
-    public CombatScreen(Game g, Enemy e, Player p, GameScreen gameScreen) { //player is optional? might have access from elsewhere
+    public CombatScreen(Game g, Enemy e, Player p, GameScreen gameScreen) {
         game = g;
         enemy = e;
         player = p;
+        //need to save starting positions so we can place back after
         enemyX = e.getX();
         enemyY = e.getY();
         playerX = p.getX();
@@ -96,11 +97,12 @@ public class CombatScreen implements Screen {
         stage = new Stage(new ScreenViewport());
         width = Gdx.graphics.getWidth();
         height = Gdx.graphics.getHeight();
-        playerTurn = true;
-        animationActive = false;
+        //next 3 deal with the turn-based system
+        playerTurn = true; //player can only go when its their turn
+        animationActive = false; //a move can only begin once all animations are done (set by animation manager)
         animationManager = new AnimationManager(2);//right now, max animations at one time is 2 - decreasing health bar and sprite moving across screen
         this.gameScreen = gameScreen;
-        initUI();
+        initUI(); //set up on screen elements
     }
 
     @Override
@@ -110,7 +112,7 @@ public class CombatScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(1, 1, 1, 1);
+        Gdx.gl.glClearColor(1, 1, 1, 1); //white background
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         tick();
         if(stage != null) { //get GL 0x501 error without this check
@@ -120,10 +122,11 @@ public class CombatScreen implements Screen {
     }
 
 
-    //on every tick we may play an idle animation or check for something. otherwise, all combat stuff is handled by other functions
+    //on every tick we play any active animations. all combat stuff is handled by other functions
     //I can do this because its turn-based
     //i.e. we wait for player to select, handler fires, does move, then allows enemy to move, which will then start the process over
     private void tick() {
+        //health bar's tick function causes health to change in real-time
         playerHealthBar.tick();
         enemyHealthBar.tick();
         if(currentAttack!=null) currentAttack.tick(); //if there's an attack ongoing, call it's tick
@@ -133,22 +136,22 @@ public class CombatScreen implements Screen {
     //activated on selection/handler
     private void playerTurn(String selectedWeapon) {
         int amount = Move.getInstance().getDamage(selectedWeapon);//get damage in the move's range
-        switch (Move.getInstance().getMoveType(selectedWeapon)){
+        switch (Move.getInstance().getMoveType(selectedWeapon)){ //deal with different types of moves
             case ATTACK:
-                amount = 100;
-                System.out.println("dealing " + amount + " to enemy");
+                //amount = 100;
+                //System.out.println("dealing " + amount + " to enemy");
                 enemy.setHealth(enemy.getHealth() - amount);
                 enemyHealthBar.decreaseHealth(amount);
                 //player.setSpeedX(50);
                 currentAttack = new Attack(player, enemy);
                 break;
             case HEALING:
-                System.out.println("healing " + amount + " to self");
-                player.setHealth(player.getHealth() + amount); //need health var in player
+                //System.out.println("healing " + amount + " to self");
+                player.setHealth(player.getHealth() + amount);
                 playerHealthBar.increaseHealth(amount);
                 currentAttack = new Attack(player, player); //don't remove - it doesn't do anything yet, but ensures nothing breaks when healing has no effect (healing at 100% for example)
                 //once I decide what I want for healing, I'll replace the attack with that
-                player.removeWeapon(selectedWeapon); //if a move can only be ued once, remove from player's list
+                player.removeWeapon(selectedWeapon); //if a move can only be used once, remove from player's list
                 //we can define what is single-use, number of moves, etc later in MoveData
                 //for now, I'll just assume healing items are single use
         }
@@ -159,14 +162,13 @@ public class CombatScreen implements Screen {
     public void enemyTurn() {
         List<String> enemyWeapons = enemy.getWeapon(); //get list of moves
         Random rand = new Random(); //pick one (random for now)
-        //double check that using same Rand is random
         //I'll probably want to make a smarter choice - only heal when low
         String selectedWeapon = enemyWeapons.get(rand.nextInt(enemyWeapons.size()));//get random weapon
         int amount = Move.getInstance().getDamage(selectedWeapon);//get damage in the move's range
-        switch (Move.getInstance().getMoveType(selectedWeapon)){
+        switch (Move.getInstance().getMoveType(selectedWeapon)){ //deal with different types of moves
             case ATTACK:
                 //amount = 100;
-                System.out.println("dealing " + amount + " to player");
+                //System.out.println("dealing " + amount + " to player");
                 player.setHealth(player.getHealth() - amount);
                 playerHealthBar.decreaseHealth(amount);//start animation
                 currentAttack = new Attack(enemy, player);
@@ -177,6 +179,9 @@ public class CombatScreen implements Screen {
                 enemyHealthBar.increaseHealth(amount);
                 currentAttack = new Attack(enemy, enemy); //don't remove - it doesn't do anything yet, but ensures nothing breaks when healing has no effect (healing at 100% for example)
                 //once I decide what I want for healing, I'll replace the attack with that
+                //enemy.removeWeapon(selectedWeapon); //if a move can only be used once, remove from player's list
+                //we can define what is single-use, number of moves, etc later in MoveData
+                //for now, I'll just assume healing items are single use
         }
         playerTurn = true;//it is now the player's turn, they can go once animations finish
 
@@ -192,10 +197,10 @@ public class CombatScreen implements Screen {
                 gameScreen.getHud().setText("The enemy dropped a key!");
             }
         }else{//player lost
+            //for now, place player back in the same room with 20 health - we can decide what to do instead later
+            //but player needs to be far enough away from enemy to not instantly restart fight and not stuck on collision
             player.setHealth(20);//for now
             Random rand = new Random();
-            //for now, place player back in the same room
-            //but player needs to be far enough away from enemy to not instantly restart fight
             boolean outOfBounds; //used with boundary checking
             do{
                 outOfBounds = false;
@@ -215,14 +220,13 @@ public class CombatScreen implements Screen {
         }
 
         //common to both
-        //does clearing stage remove player? - trying to figure out why I need to re-add player to game screen
-        stage.clear();
+        stage.clear();//does clearing stage remove player? - trying to figure out why I need to re-add player to game screen
         enemy.setPosition(enemyX, enemyY); //reset enemy back to starting position
         enemy.scaleSprite(1f);
         player.scaleSprite(1f);//back to original size
         gameScreen.getStage().addActor(player);//necessary, or player won't reappear - IDK why I don't need for enemy
         //gameScreen.getStage().addActor(enemy); //unnecessary
-        this.dispose();//This causes GL error 0x501, even if we don't do stage.clear() above, I don't know why
+        this.dispose();
         game.setScreen(gameScreen);
 
     }
@@ -234,7 +238,7 @@ public class CombatScreen implements Screen {
     private void initUI() {
         setupButtons();
 
-        //starting to add additional UI elements (player and enemy sprites and health bars)
+        //put sprites on screen
         //probably need to use size of sprites to determine positions better
         player.setPosition( width / 5f,  (height / 2f) - 75);
         player.scaleSprite(2f);
@@ -250,6 +254,7 @@ public class CombatScreen implements Screen {
         Label.LabelStyle labelStyle = new Label.LabelStyle();
         labelStyle.font = new BitmapFont(Gdx.files.internal("font/font.fnt"));
 
+        //these 2 labels display the change in health per turn
         Label playerHealthChange = new Label("", labelStyle);
         playerHealthChange.setSize(250, 200);
         playerHealthChange.setPosition(((float) width / 4) + player.getWidth()/2, height - (float) (height / 2.5));
@@ -262,29 +267,33 @@ public class CombatScreen implements Screen {
         enemyHealthChange.setAlignment(Align.center);
         stage.addActor(enemyHealthChange);
 
-        //these look the best when they are directly above the health bars and the same length
-        //thus the 750 + 40 - this is the length of the black box (background of the health bar)
-        //will probably need to define these numbers differently/less hard-coding and make sure it looks good at different scales(?)
 
+        //I'm trying to replace some of the hard-coded numbers with constants
+        final int LABEL_AND_HEALTHBAR_LENGTH = 750;
+        final int LABEL_AND_HEALTHBAR_HEIGHT = 75;
+        final int LABEL_AND_HEALTHBAR_OFFSET = 40; //a health bar is 2 rectangles - the background/longer one has length =  LABEL_AND_HEALTHBAR_LENGTH + LABEL_AND_HEALTHBAR_OFFSET
+
+        //2 labels for name and current/total health
+        //these look the best when they are directly above the health bars and the same length, so they reuse the constants
+        //will probably need to define these numbers differently/less hard-coding and make sure it looks good at different scales(?)
         Label playerNameLabel = new Label("Bill Gates", labelStyle);
-        playerNameLabel.setSize(750 + 40, 200);
+        playerNameLabel.setSize(LABEL_AND_HEALTHBAR_LENGTH + LABEL_AND_HEALTHBAR_OFFSET, 200);
         playerNameLabel.setPosition(100, height - (height / 5.5f));
         playerNameLabel.setAlignment(Align.center);
         stage.addActor(playerNameLabel);
 
         Label enemyNameLabel = new Label(enemy.getName(), labelStyle);
-        enemyNameLabel.setSize(750 + 40, 200);
+        enemyNameLabel.setSize(LABEL_AND_HEALTHBAR_LENGTH + LABEL_AND_HEALTHBAR_OFFSET, 200);
         enemyNameLabel.setPosition(width - 850, height -(height / 5.5f));
         enemyNameLabel.setAlignment(Align.center);
         stage.addActor(enemyNameLabel);
 
-
         //HealthBar class with a basic decrementing animation
         //I also put the labels with the health bar as well to keep organized (and modify them as part of the animation, which makes sense)
-        playerHealthBar = new HealthBar(player.getHealth(), player.getMaxHealth(), 100, height - (height / 4f), playerHealthChange, playerNameLabel);//will also modify X, Y to be based on sprite size, health
+        playerHealthBar = new HealthBar(player.getHealth(), player.getMaxHealth(), 100, height - (height / 4f), playerHealthChange, playerNameLabel, LABEL_AND_HEALTHBAR_LENGTH, LABEL_AND_HEALTHBAR_HEIGHT,LABEL_AND_HEALTHBAR_OFFSET);//will also modify X, Y to be based on sprite size, health
         stage.addActor(playerHealthBar);
 
-        enemyHealthBar = new HealthBar(enemy.getHealth(), enemy.getMaxHealth() ,width - 850, height -  (height / 4f),enemyHealthChange, enemyNameLabel);//will also modify X, Y to be based on sprite size, health
+        enemyHealthBar = new HealthBar(enemy.getHealth(), enemy.getMaxHealth() ,width - 850, height -  (height / 4f),enemyHealthChange, enemyNameLabel, LABEL_AND_HEALTHBAR_LENGTH, LABEL_AND_HEALTHBAR_HEIGHT,LABEL_AND_HEALTHBAR_OFFSET);//will also modify X, Y to be based on sprite size, health
         stage.addActor(enemyHealthBar);
 
 
@@ -296,33 +305,30 @@ public class CombatScreen implements Screen {
     //this is called once in setupUI, then on every turn that changes the moves available to the player
     //for example, player heals, decreases healing item by 1, we need to update buttons to reflect that
     private void setupButtons(){
-        //Player moves located in player class?
-        //for now, assume player moves will work like enemy moves (see enemyTurn above)
-
         final List<String> playerWeapons = player.getWeapon(); //get list of moves
 
-        final Map<String, Integer> moveOccurrences = new HashMap<>(); //map of weapon name : number of occurrences of this weapon the player has
+        final Map<String, Integer> moveOccurrences = new HashMap<>(); //map of (weapon name : number of occurrences of this weapon the player has)
         //we can work this this to prevent making 10 buttons for the same 10 healing items
         //we remove occurrences when used in playerMove, so when setupButtons is called again, this list is smaller, has the accurate info
 
         //actually count the occurrences
         for (String currentWeapon : playerWeapons){
             int occurrences =  Collections.frequency(playerWeapons, currentWeapon);//thanks https://stackoverflow.com/questions/505928/how-to-count-the-number-of-occurrences-of-an-element-in-a-list
-            //System.out.println(currentWeapon + " : " + occurrences);
             moveOccurrences.put(currentWeapon, occurrences);
         }
 
-
         int prevButtonIndex = -1;//index of the button which will be used to go back a "page". Will only be used if we have more moves than we can display at once
-        moveButtons = new TextButton[moveOccurrences.size()];//make a button for each move
+        moveButtons = new TextButton[moveOccurrences.size()];//make a button for each unique move
+        //starting position of 1st button
         float nextY = 200;
         float nextX = 150;
-
 
         for (int i = 0; i < moveOccurrences.size(); i++) {//set up buttons - a max of 2 rows
             final String currentMove = playerWeapons.get(i); //get the current move
             Skin s = new Skin(Gdx.files.internal("skin/plain-james-ui.json")); //random skin from my last project just to test, very ugly, replace (can also switch to image buttons)
-            TextButton newMoveButton = new TextButton(currentMove, s);//make a new button on screen with move's name
+            TextButton newMoveButton;
+            if(moveButtons.length > i) newMoveButton = moveButtons[i]; //reuse existing button if it already exists
+            else newMoveButton = new TextButton(currentMove, s);//make a new button on screen with move's name
             newMoveButton.setSize(250, 100); //good size for now
             newMoveButton.setPosition(nextX, nextY);
             newMoveButton.setColor(Color.WHITE);
@@ -363,7 +369,7 @@ public class CombatScreen implements Screen {
      * @content the string to display on the button and make listener for, represents a move
      */
     public void setHandler(TextButton button, final String content, int occurrences) {
-        if(occurrences > 1) button.setText(content + " x" + occurrences);
+        if(occurrences > 1) button.setText(content + " x" + occurrences); //used to display how many of a certain move we have
         else button.setText(content);
         button.clearListeners();
         button.setVisible(true);
@@ -544,41 +550,38 @@ public class CombatScreen implements Screen {
     //uses basic rectangles for now, can modify to images (or anything later)
     public class HealthBar extends Actor {
 
-        private float maxHealth;
+        private final float maxHealth;
         private float currentHealth;
-        private ShapeRenderer backgroundBar;
-        private ShapeRenderer frontBar;
-        private float edgeDifference;
+        private final ShapeRenderer backgroundBar, frontBar;
+        private final float x, y, edgeDifference, lengthOfBar, heightOfBar; //needed to draw bars
         private float currentLength;
         private float moveTo; //pixel to decrease or increase health bar to
-        private float x, y;
         private boolean lastAttack;
-        private int i = 0;
-        private Label healthChangeLabel; //used to show damage/amount on each move
-        private Label nameLabel; //used to show name as well as current/total health
-        private String name;
+        private final Label healthChangeLabel, nameLabel; //used to show damage/amount on each move and name with current/total health
+        private final String name;
 
 
-        public HealthBar(int currHealth, int maximumHealth, float x, float y, Label labelForHealthChange, Label labelForName){
-            maxHealth = maximumHealth;
+        public HealthBar(int currHealth, int maximumHealth, float x, float y, Label labelForHealthChange, Label labelForName, int length, int height, int offset){
             currentHealth  = currHealth;
-            healthChangeLabel = labelForHealthChange;
-            nameLabel = labelForName;
-            name = nameLabel.getText().toString();
-            nameLabel.setText(name + "\t " + (int) currentHealth + "/" + (int) maxHealth);
-            backgroundBar = new ShapeRenderer();
-            frontBar = new ShapeRenderer();
-            edgeDifference = 40; //looks good
-            currentLength = moveTo = (currentHealth/maxHealth) * (750); //looks good, will make parameter or function of sprite
+            maxHealth = maximumHealth;
             this.x = x;
             this.y = y;
+            healthChangeLabel = labelForHealthChange;
+            nameLabel = labelForName;
+            name = nameLabel.getText().toString(); //grab name of actor from existing label
+            nameLabel.setText(name + "\t " + (int) currentHealth + "/" + (int) maxHealth);
+            lengthOfBar = length;
+            heightOfBar = height;
+            edgeDifference = offset;
+            backgroundBar = new ShapeRenderer();
+            frontBar = new ShapeRenderer();
+            currentLength = moveTo = (currentHealth/maxHealth) * (lengthOfBar);
             lastAttack = false;
         }
 
         //on taking damage, call this
         public void decreaseHealth(int damage){
-            currentHealth = (currentHealth - damage);
-            //currentHealth-=damage;
+            currentHealth -= damage;
             if(currentHealth<=0){
                 //this is the last attack
                 currentHealth = 0;//prevent from going below 0%
@@ -588,7 +591,7 @@ public class CombatScreen implements Screen {
                     //I'll try to think of something better
                 }
             }
-            moveTo =  (currentHealth/maxHealth) * (750); //750 comes from starting length
+            moveTo =  (currentHealth/maxHealth) * (lengthOfBar);
             if (moveTo != currentLength){//only preform animation if health changes
                 healthChangeLabel.setText("-" + damage);
                 nameLabel.setText(name + "\t " + (int) currentHealth + "/" + (int) maxHealth); //if we want this to decrease in real time or at end, we can
@@ -600,7 +603,7 @@ public class CombatScreen implements Screen {
         public void increaseHealth(int amount){
             currentHealth+=amount;
             if(currentHealth > maxHealth) currentHealth = maxHealth; //prevent from going over 100%
-            moveTo =  (currentHealth/maxHealth) * (750); //750 comes from starting length
+            moveTo =  (currentHealth/maxHealth) * (lengthOfBar);
             if(moveTo != currentLength){ //only preform animation if health changes
                 healthChangeLabel.setText("+" + amount);
                 nameLabel.setText(name + "\t " + (int) currentHealth + "/" + (int) maxHealth); //if we want this to decrease in real time or at end, we can
@@ -611,7 +614,7 @@ public class CombatScreen implements Screen {
 
 
         public void tick(){
-            if (currentLength > moveTo) { //keep decreasing by 3 pixels until we reach spot
+            if (currentLength > moveTo) { //keep decreasing by 3 pixels until we reach spot (smooth but quick value, can tweak)
                     currentLength-=3;
                     if(currentLength <= moveTo){//end once we reach desired spot or 0 (and 1 side dies)
                         currentLength = moveTo; //set exactly equal (moveTo is a float or we could have gone past it)
@@ -623,7 +626,7 @@ public class CombatScreen implements Screen {
                         healthChangeLabel.setText("");
                         animationManager.endAnimation();
                     }
-            }else if (currentLength < moveTo){ //keep increasing by 3 pixels until we reach spot
+            }else if (currentLength < moveTo){ //keep increasing by 3 pixels until we reach spot (smooth but quick value, can tweak)
                 currentLength+=3;
                 if(currentLength >= moveTo){
                     currentLength = moveTo; //set exactly equal (moveTo is a float or we could have gone past it)
@@ -632,14 +635,14 @@ public class CombatScreen implements Screen {
                 }
             }
 
-            //draw the shapes
+            //draw the shapes - a smaller red bar on top of a longer black bar
             backgroundBar.setAutoShapeType(true);
             backgroundBar.begin(ShapeRenderer.ShapeType.Filled);
-            backgroundBar.rect(x, y, 750 + edgeDifference, 75 + edgeDifference);
+            backgroundBar.rect(x, y, lengthOfBar + edgeDifference, heightOfBar + edgeDifference);
             backgroundBar.setColor(Color.BLACK);
             backgroundBar.end();
             frontBar.begin(ShapeRenderer.ShapeType.Filled);
-            frontBar.rect( x + (edgeDifference/2), y + (edgeDifference/2), currentLength, 75);
+            frontBar.rect( x + (edgeDifference/2), y + (edgeDifference/2), currentLength, heightOfBar);
             frontBar.setColor(Color.RED);
             frontBar.end();
 
@@ -744,7 +747,7 @@ public class CombatScreen implements Screen {
      */
     public class AnimationManager{
 
-        private int totalAnimations;
+        private final int totalAnimations;
         private int currentActiveAnimations;
 
         //constructor, called with the maximum number of animations that can be active at once

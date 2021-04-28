@@ -57,8 +57,12 @@ public class Room extends Actor {
             boundaries.add(new Boundary(1488, 16, 16, 56));
             boundaries.add(new Boundary(1488, 192, 584, 150));
             boundaries.add(new Boundary(1720, 136, 152, 40));
-        }else {
-            boundaries.clear();
+        } else if(sprite.getTexture().toString().equals("server-closet.png")){
+            boundaries.add(new Boundary(280, 344, 160, 336));
+            boundaries.add(new Boundary(776, 344, 160, 336));
+            boundaries.add(new Boundary(968, 344, 160, 336));
+            boundaries.add(new Boundary(520, 752, 96, 328));
+            boundaries.add(new Boundary(1704, 560, 16, 520));
         }
     }
 

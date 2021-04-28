@@ -168,6 +168,11 @@ public class Enemy extends Actor {
         return super.remove();
     }
 
+    //for items that can only be used once (healing for now, we can better define later)
+    public void removeWeapon(String weaponToRemove){
+        weapon.remove(weaponToRemove);
+    }
+
     public List<String> getWeapon(){
         return weapon;
     }
@@ -231,7 +236,7 @@ public class Enemy extends Actor {
 
     public void respawn(){
         if(!boss && !human) {
-            health = floor * 100 + random.nextInt(100);
+            maxHealth = health = floor * 100 + random.nextInt(100);
             fight = true;
             sprite = sprites[0];
             scaleSprite(1f);

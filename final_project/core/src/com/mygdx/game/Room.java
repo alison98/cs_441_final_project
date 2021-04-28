@@ -67,9 +67,9 @@ public class Room extends Actor {
             }else if(doors.get(i)==1){
                 batch.draw(sideDoorImg, Gdx.graphics.getWidth()-50, Gdx.graphics.getHeight()/2, 50, 150);
             }else if(doors.get(i)==2){
-                batch.draw(doorImg, 1008, 888);
+                batch.draw(doorImg, Gdx.graphics.getWidth()/2-doorImg.getWidth()/2, 888);
             }else if(doors.get(i)==3){
-                batch.draw(sideDoorImg, 1008, 0, 72, 50);
+                batch.draw(sideDoorImg, Gdx.graphics.getWidth()/2-63, 0, 126, 50);
             }
         }
         for(Enemy enemy: enemyList) {

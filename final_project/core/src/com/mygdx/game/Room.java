@@ -135,4 +135,12 @@ public class Room extends Actor {
         }
         return location;
     }
+
+    public void defeat(){
+        layout.defeat();
+        sprite = layout.getRoom();
+        enemyList = layout.getEnemies();
+        setUpInteractables();
+        setUpBoundaries();
+    }
 }

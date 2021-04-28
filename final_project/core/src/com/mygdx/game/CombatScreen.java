@@ -327,8 +327,8 @@ public class CombatScreen implements Screen {
             final String currentMove = playerWeapons.get(i); //get the current move
             Skin s = new Skin(Gdx.files.internal("skin/plain-james-ui.json")); //random skin from my last project just to test, very ugly, replace (can also switch to image buttons)
             TextButton newMoveButton;
-            if(moveButtons.length > i) newMoveButton = moveButtons[i]; //reuse existing button if it already exists
-            else newMoveButton = new TextButton(currentMove, s);//make a new button on screen with move's name
+            //if(moveButtons.length > i) newMoveButton = moveButtons[i]; //this doesn't work, find another way to reuse/check
+            newMoveButton = new TextButton(currentMove, s);//make a new button on screen with move's name
             newMoveButton.setSize(250, 100); //good size for now
             newMoveButton.setPosition(nextX, nextY);
             newMoveButton.setColor(Color.WHITE);

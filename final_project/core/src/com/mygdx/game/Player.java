@@ -114,6 +114,30 @@ public class Player extends Actor {
         positionChanged();
     }
 
+    public void setBig(){
+        walkingSprites.set(0, new Sprite(new Texture("player-walk-left2.png"))); //0
+        walkingSprites.set(1, new Sprite(new Texture("player-walk-left3.png"))); //1
+        walkingSprites.set(2, new Sprite(new Texture("player-walk-left4.png"))); //2
+        walkingSprites.set(3, new Sprite(new Texture("player-walk-left3.png"))); //3
+        walkingSprites.set(4, new Sprite(new Texture("player-walk-right2.png"))); //4
+        walkingSprites.set(5, new Sprite(new Texture("player-walk-right3.png"))); //5
+        walkingSprites.set(6, new Sprite(new Texture("player-walk-right4.png"))); //6
+        walkingSprites.set(7, new Sprite(new Texture("player-walk-right3.png"))); //7
+        positionChanged();
+    }
+
+    public void setSmall(){
+        walkingSprites.set(0, new Sprite(new Texture("player-4x/player-walk-left2.png"))); //0
+        walkingSprites.set(1, new Sprite(new Texture("player-4x/player-walk-left3.png"))); //1
+        walkingSprites.set(2, new Sprite(new Texture("player-4x/player-walk-left4.png"))); //2
+        walkingSprites.set(3, new Sprite(new Texture("player-4x/player-walk-left3.png"))); //3
+        walkingSprites.set(4, new Sprite(new Texture("player-4x/player-walk-right2.png"))); //4
+        walkingSprites.set(5, new Sprite(new Texture("player-4x/player-walk-right3.png"))); //5
+        walkingSprites.set(6, new Sprite(new Texture("player-4x/player-walk-right4.png"))); //6
+        walkingSprites.set(7, new Sprite(new Texture("player-4x/player-walk-right3.png"))); //7
+        positionChanged();
+    }
+
     @Override
     public void draw(Batch batch, float alpha){
         sprite.draw(batch);
@@ -126,7 +150,7 @@ public class Player extends Actor {
     }
 
     public void move(){
-        if(this.getX() + speedX >= Gdx.graphics.getWidth() - this.getWidth() - 5 && this.speedX > 0){
+        if(this.getX() + speedX >= Gdx.graphics.getWidth() - this.getWidth() && this.speedX > 0){
             this.speedX = 0;
         }
         if(this.getX() + speedX - 5 <= 0 && this.speedX < 0){
@@ -139,8 +163,8 @@ public class Player extends Actor {
             this.speedY = 0;
         }
         Rectangle newBounds = new Rectangle(bounds.getX() + speedX, bounds.getY() + speedY, bounds.width, bounds.height);
-        for(Boundary boundary : gameScreen.getRoom().getBoundaries()){
-            if(newBounds.overlaps(boundary.getBounds())){
+        for(Rectangle boundary : Boundary.getInstance().getBoundaries()){
+            if(newBounds.overlaps(boundary)){
                 this.speedY = 0;
                 this.speedX = 0;
             }

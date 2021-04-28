@@ -209,8 +209,8 @@ public class CombatScreen implements Screen {
                 //System.out.println(width + " , " + height);
                 //then we need to make sure its a valid spot (no overlaps)
                 Rectangle newBounds = new Rectangle(player.getX(), player.getY(), player.getBounds().width, player.getBounds().height);
-                for(Boundary boundary : gameScreen.getRoom().getBoundaries()){
-                    if(newBounds.overlaps(boundary.getBounds())){
+                for(Rectangle boundary : Boundary.getInstance().getBoundaries()){
+                    if(newBounds.overlaps(boundary)){
                         //we need to try again
                         outOfBounds = true;
                         break;

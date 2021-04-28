@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
 import java.util.ArrayList;
@@ -17,7 +18,6 @@ public class Room extends Actor {
     private List<Enemy> enemyList;
     private List<Integer> doors;
     private List<Interactable> interactables;
-    private List<Boundary> boundaries;
     private int enemyNum;
     private int humanNum;
     private Random random;
@@ -25,9 +25,11 @@ public class Room extends Actor {
     private Texture doorImg;
     private Texture stairUpImg;
     private Texture stairDownImg;
+    private Boundary boundary;
 
     public Room(){
         random = new Random();
+        boundary = Boundary.getInstance();
         layout = Layout.getInstance();
         sprite = layout.getRoom();
         doors = layout.possibleRooms();
@@ -35,7 +37,6 @@ public class Room extends Actor {
         sideDoorImg = new Texture("small/floor.png");
         stairUpImg = new Texture("stairs-up.png");
         stairDownImg = new Texture("stairs-down.png");
-        boundaries = new ArrayList<Boundary>();
         enemyList = layout.getEnemies();
         setUpInteractables();
         setUpBoundaries();
@@ -47,33 +48,13 @@ public class Room extends Actor {
     }
 
     public void setUpBoundaries(){
-        boundaries.clear();
-        if(sprite.getTexture().toString().equals("office-space-no-printer.png")){
-            boundaries.add(new Boundary(208, 432, 440, 409));
-            boundaries.add(new Boundary(848, 432, 440, 409));
-            boundaries.add(new Boundary(1488, 432, 440, 409));
-            boundaries.add(new Boundary(208, 16, 448, 216));
-            boundaries.add(new Boundary(848, 16, 448, 216));
-            boundaries.add(new Boundary(1488, 16, 16, 56));
-            boundaries.add(new Boundary(1488, 192, 584, 150));
-            boundaries.add(new Boundary(1720, 136, 152, 40));
-        } else if(sprite.getTexture().toString().equals("server-closet.png")){
-            boundaries.add(new Boundary(280, 344, 160, 336));
-            boundaries.add(new Boundary(776, 344, 160, 336));
-            boundaries.add(new Boundary(968, 344, 160, 336));
-            boundaries.add(new Boundary(520, 752, 96, 328));
-            boundaries.add(new Boundary(1704, 560, 16, 520));
-        }
+        boundary.setBoundaries(sprite.getTexture().toString());
     }
 
     public void tick() {
         for(Enemy enemy: enemyList){
             enemy.tick();
         }
-    }
-
-    public List<Boundary> getBoundaries(){
-        return boundaries;
     }
 
     @Override
@@ -143,6 +124,11 @@ public class Room extends Actor {
         Integer location = layout.changeRoom(player);
         if(location != null){
             sprite = layout.getRoom();
+            if(sprite.getTexture().toString().equals("office-space-no-printer.png")){
+                player.setSmall();
+            } else{
+                player.setBig();
+            }
             enemyList = layout.getEnemies();
             setUpInteractables();
             setUpBoundaries();

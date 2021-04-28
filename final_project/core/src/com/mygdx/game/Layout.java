@@ -244,7 +244,7 @@ public class Layout {
         connections.get(0).get(row).get(column).add(0);
         column -=1;
 
-        addRoom(0, row, column, "img4.jpg", 0, 0);
+        addRoom(0, row, column, "server-closet.png", 0, 0);
         connections.get(0).get(row).get(column).add(1);
         List<Integer[]> stairUp = new ArrayList<>();
         Integer[] stairs = new Integer[3];
@@ -254,7 +254,7 @@ public class Layout {
         stairUp.add(stairs);
         stairRooms.add(stairUp);
 
-        addRoom(1, row, column, "img4.jpg", 0, 0);
+        addRoom(1, row, column, "blank-room.png", 0, 0);
         List<Integer[]> stairDown = new ArrayList<>();
         Integer[] stairs2 = new Integer[3];
         stairs2[0] = row;
@@ -312,7 +312,7 @@ public class Layout {
                         //need to change to random room
                         //if certain room do something else
                         int stairRoom = random.nextInt(2);
-                        addRoom(j, currRow, currCol, "img3.jpg", random.nextInt(2) + 1, 0);
+                        addRoom(j, currRow, currCol, "blank-room.png", random.nextInt(2) + 1, 0);
 
                     }
                 }
@@ -374,8 +374,8 @@ public class Layout {
         stairs[1] = possibleRooms.get(nextRoom).get(1);
         stairs[2] = 1;
         stairRooms.get(floorIn).add(stairs);
-        addRoom(floorIn,possibleRooms.get(nextRoom).get(0),possibleRooms.get(nextRoom).get(1), "img4.jpg",0,0);
-        addRoom(floorIn+1,possibleRooms.get(nextRoom).get(0),possibleRooms.get(nextRoom).get(1), "img4.jpg",0,0);
+        addRoom(floorIn,possibleRooms.get(nextRoom).get(0),possibleRooms.get(nextRoom).get(1), "blank-room.png",0,0);
+        addRoom(floorIn+1,possibleRooms.get(nextRoom).get(0),possibleRooms.get(nextRoom).get(1), "blank-room.png",0,0);
         List<Integer[]> stairDown = new ArrayList<>();
         Integer[] stairs2 = new Integer[3];
         stairs2[0] = possibleRooms.get(nextRoom).get(0);

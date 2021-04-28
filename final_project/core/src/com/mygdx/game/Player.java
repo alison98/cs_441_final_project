@@ -147,6 +147,7 @@ public class Player extends Actor {
     public void positionChanged(){
         sprite.setPosition(getX(), getY());
         this.bounds.set(getX(), getY(), this.sprite.getWidth(), (this.sprite.getHeight()/2) - 15);
+        this.setBounds(this.sprite.getX(), this.sprite.getY(), this.sprite.getWidth(), this.sprite.getHeight()/2);
     }
 
     public void move(){

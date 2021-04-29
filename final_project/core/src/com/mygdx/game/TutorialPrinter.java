@@ -19,7 +19,7 @@ public class TutorialPrinter extends Interactable{
     }
 
     public void fight(GameScreen game){
-        Enemy tutorialPrinter = new Enemy(1528,200,2,0, 0);
+        Enemy tutorialPrinter = new Enemy(1528,200,2,0, 0, null);
         tutorialPrinter.setKey();
         tutorialPrinter.setBoss();
         game.getPlayer().setCombat();

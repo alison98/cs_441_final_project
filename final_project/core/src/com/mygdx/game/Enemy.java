@@ -13,7 +13,7 @@ import java.util.Random;
 public class Enemy extends Actor {
     private Sprite[] sprites;
     private Sprite sprite;
-    private int speed, type, floor;
+    private int speed, speedX,speedY, type, floor;
     private float initX, initY;
     private boolean horizontal, direction;
     private boolean fight, key, boss, human;
@@ -23,13 +23,16 @@ public class Enemy extends Actor {
     private Move abilities;
     private String name;
     private Random random;
+    private List<Integer> movement;
 
-    public Enemy(int x, int y, int speedIn, int typeIn, int floorIn){
+    public Enemy(int x, int y, int speedIn, int typeIn, int floorIn, List<Integer> movementIn){
         initSprites();
         sprite = sprites[0];
         initX = x;
         initY = y;
         speed = speedIn;
+        speedX = speedIn;
+        speedY = speedIn;
         type = typeIn;
         horizontal = true;
         direction = true;
@@ -40,6 +43,7 @@ public class Enemy extends Actor {
         setBounds(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
         hitbox = new Rectangle(getX(), getY(), getWidth(), getHeight());
         setPosition(initX, initY);
+        movement = movementIn;
 
         //get the weapons based on level
         floor = floorIn;
@@ -48,7 +52,8 @@ public class Enemy extends Actor {
 
         random = new Random();
         level = random.nextInt(10)+floor;
-        maxHealth = health = floor*100 + random.nextInt(100);
+        maxHealth = health = 1;
+        //maxHealth = health = floor*100 + random.nextInt(100);
         experience = level*2;
     }
 
@@ -71,15 +76,27 @@ public class Enemy extends Actor {
         if(!fight){
             return;
         }
-        if (type == 1) { // side to side
+        if(type ==1){
+            moveRandom();
+        }else if (type == 2) { // side to side
             moveHorizontal();
-        }else if(type ==2){ //up and down
+        }else if(type ==3){ //up and down
             moveVertical();
-        }else if(type ==3){ //clockwise
+        }else if(type ==4){ //clockwise
             moveClockwise();
-        }else if(type ==4) { //counter-clockwise
+        }else if(type ==5) { //counter-clockwise
             moveCounterClockwise();
         }
+    }
+
+    public void moveRandom(){
+        if(getX()< movement.get(0) || getX() + sprite.getWidth() > movement.get(1)){
+            speedX = -speedX;
+        }
+        if(getY() < movement.get(2) || getY() + sprite.getHeight() > movement.get(3)){
+            speedY = -speedY;
+        }
+        moveBy(speedX,speedY);
     }
 
     public void moveHorizontal(){

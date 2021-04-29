@@ -22,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
@@ -179,13 +180,11 @@ public class CombatScreen implements Screen {
                 enemyHealthBar.increaseHealth(amount);
                 currentAttack = new Attack(enemy, enemy); //don't remove - it doesn't do anything yet, but ensures nothing breaks when healing has no effect (healing at 100% for example)
                 //once I decide what I want for healing, I'll replace the attack with that
-                //enemy.removeWeapon(selectedWeapon); //if a move can only be used once, remove from player's list
+                enemy.removeWeapon(selectedWeapon); //if a move can only be used once, remove from player's list
                 //we can define what is single-use, number of moves, etc later in MoveData
                 //for now, I'll just assume healing items are single use
         }
         playerTurn = true;//it is now the player's turn, they can go once animations finish
-
-
     }
 
     //called when either side wins
@@ -197,9 +196,12 @@ public class CombatScreen implements Screen {
                 gameScreen.getHud().setText("The enemy dropped a key!");
             }
         }else{//player lost
-            //for now, place player back in the same room with 20 health - we can decide what to do instead later
-            //but player needs to be far enough away from enemy to not instantly restart fight and not stuck on collision
-            player.setHealth(20);//for now
+            //place player back at this floor's stairs
+            //and far enough away from enemy to not instantly restart fight and not stuck on collision
+            player.setHealth(100);//I also want to reset moves
+            //change room back to stairs, reset enemies
+            Layout.getInstance().defeat();
+            gameScreen.getRoom().defeat();
             Random rand = new Random();
             boolean outOfBounds; //used with boundary checking
             do{

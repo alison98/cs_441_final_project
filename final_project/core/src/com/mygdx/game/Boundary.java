@@ -95,6 +95,37 @@ public class Boundary extends Actor {
             location4.add(432);
             location4.add(752);
             enemyLocations.add(location4);
+        } else if(filename.equals("cafeteria.png")){
+            boundaries.add(new Rectangle(440, 288, 320, 240));
+            boundaries.add(new Rectangle(440, 608, 320, 248));
+            boundaries.add(new Rectangle(1160, 288, 320, 248));
+            boundaries.add(new Rectangle(1160, 608, 320, 240));
+            boundaries.add(new Rectangle(1768, 328, 160, 576));
+            List<Integer> location1 = new ArrayList<>();
+            location1.add(160);
+            location1.add(400);
+            location1.add(48);
+            location1.add(856);
+            enemyLocations.add(location1);
+            List<Integer> location2 = new ArrayList<>();
+            location2.add(800);
+            location2.add(1128);
+            location2.add(48);
+            location2.add(856);
+            enemyLocations.add(location2);
+            List<Integer> location3 = new ArrayList<>();
+            location3.add(1512);
+            location3.add(1720);
+            location3.add(48);
+            location3.add(856);
+            enemyLocations.add(location3);
+            List<Integer> location4 = new ArrayList<>();
+            location4.add(48);
+            location4.add(2032);
+            location4.add(48);
+            location4.add(264);
+            enemyLocations.add(location4);
+
         } else if(filename.equals("blank-room.png")){
             List<Integer> location1 = new ArrayList<>();
             location1.add(150);

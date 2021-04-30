@@ -109,6 +109,7 @@ public class Layout {
         roomNames.add("blank-room.png");
         roomNames.add("server-closet.png");
         roomNames.add("conference-room.png");
+        roomNames.add("cafeteria.png");
     }
 
     public boolean getDoorTouched(Player player){

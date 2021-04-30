@@ -252,7 +252,8 @@ public class Layout {
         connections.get(0).get(row).get(column).add(0);
         column -=1;
 
-        addRoom(0, row, column, "server-closet.png", 0, 0);
+        int firstRoom = random.nextInt(roomNames.size());
+        addRoom(0, row, column, roomNames.get(firstRoom), 0, 0);
         connections.get(0).get(row).get(column).add(1);
         List<Integer[]> stairUp = new ArrayList<>();
         Integer[] stairs = new Integer[3];
@@ -262,7 +263,9 @@ public class Layout {
         stairUp.add(stairs);
         stairRooms.add(stairUp);
 
-        addRoom(1, row, column, roomNames.get(random.nextInt(roomNames.size())), 0, 0);
+        List<String> available = new ArrayList<>(roomNames);
+        available.remove(firstRoom);
+        addRoom(1, row, column, available.get(random.nextInt(available.size())), 0, 0);
         List<Integer[]> stairDown = new ArrayList<>();
         Integer[] stairs2 = new Integer[3];
         stairs2[0] = row;
@@ -388,7 +391,10 @@ public class Layout {
         stairs[2] = 1;
         stairRooms.get(floorIn).add(stairs);
         //addRoom(floorIn,possibleRooms.get(nextRoom).get(0),possibleRooms.get(nextRoom).get(1), "blank-room.png",0,0);
-        addRoom(floorIn+1,possibleRooms.get(nextRoom).get(0),possibleRooms.get(nextRoom).get(1), roomNames.get(random.nextInt(roomNames.size())),0,0);
+        String prevFloor = rooms.get(floorIn).get(stairs[0]).get(stairs[1]).getTexture().toString();
+        List<String> available = new ArrayList<>(roomNames);
+        available.remove(prevFloor);
+        addRoom(floorIn+1,possibleRooms.get(nextRoom).get(0),possibleRooms.get(nextRoom).get(1), available.get(random.nextInt(available.size())),0,0);
         List<Integer[]> stairDown = new ArrayList<>();
         Integer[] stairs2 = new Integer[3];
         stairs2[0] = possibleRooms.get(nextRoom).get(0);

@@ -78,6 +78,9 @@ public class Layout {
         return instance;
     }
 
+    //matt needed for putting back at stairs
+    public Texture getStairUpImg(){return stairUpImg;}
+
     public Sprite getRoom(){
         return rooms.get(floor).get(row).get(column);
     }

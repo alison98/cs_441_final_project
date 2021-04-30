@@ -76,9 +76,6 @@ public class CombatScreen implements Screen {
     //      -fix bug where printer disappears when player loses
     //          --this is because the interactable is removed before combat ends
     //          --decide what happens when player dies first - we might want predefined save points or something to go back to
-    //      -figure out the scale sprite issue
-    //           --haven't seen in a while
-    //          --my best guess is that we scaled a sprite, then switched sprites halfway through?
     // -OTHER:
     //      -update comments
     //      -less hard-coded numbers (placing UI elements)
@@ -167,6 +164,7 @@ public class CombatScreen implements Screen {
         //I'll probably want to make a smarter choice - only heal when low
         String selectedWeapon = enemyWeapons.get(rand.nextInt(enemyWeapons.size()));//get random weapon
         int amount = Move.getInstance().getDamage(selectedWeapon);//get damage in the move's range
+        if(!enemy.hasKey()) amount = 100; //fast death for testing
         switch (Move.getInstance().getMoveType(selectedWeapon)){ //deal with different types of moves
             case ATTACK:
                 //amount = 100;
@@ -198,28 +196,12 @@ public class CombatScreen implements Screen {
             }
         }else{//player lost
             //place player back at this floor's stairs
-            //and far enough away from enemy to not instantly restart fight and not stuck on collision
             player.setHealth(100);//I also want to reset moves
             //change room back to stairs, reset enemies
             Layout.getInstance().defeat();
             gameScreen.getRoom().defeat();
-            Random rand = new Random();
-            boolean outOfBounds; //used with boundary checking
-            do{
-                outOfBounds = false;
-                //so pick a random spot in the room (away from the walls to not hit a door as well)
-                player.setPosition(rand.nextInt(width-150), rand.nextInt(height-150));
-                //System.out.println(width + " , " + height);
-                //then we need to make sure its a valid spot (no overlaps)
-                Rectangle newBounds = new Rectangle(player.getX(), player.getY(), player.getBounds().width, player.getBounds().height);
-                for(Rectangle boundary : Boundary.getInstance().getBoundaries()){
-                    if(newBounds.overlaps(boundary)){
-                        //we need to try again
-                        outOfBounds = true;
-                        break;
-                    }
-                }
-            } while (gameScreen.getRoom().checkCollisions(player) != null && !outOfBounds);//if random spot overlaps with enemy or an existing boundary, try again
+            Texture stairUpImg = Layout.getInstance().getStairUpImg();
+            player.setPosition(Gdx.graphics.getWidth() - stairUpImg.getWidth(), Gdx.graphics.getHeight() - Gdx.graphics.getHeight()/3); //this should put us back at stairs, still need to double check with derrick
         }
 
         //common to both
@@ -335,6 +317,7 @@ public class CombatScreen implements Screen {
             newMoveButton.setSize(250, 100); //good size for now
             newMoveButton.setPosition(nextX, nextY);
             newMoveButton.setColor(Color.WHITE);
+            newMoveButton.getLabel().setFontScale(2f, 2f);
             nextX += 300;
             if (nextX + 250 >= width) {//hit side of screen, start new row
                 nextX = 150;

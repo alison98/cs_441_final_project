@@ -56,6 +56,13 @@ public class MoveData {
     private int cooldownLength; //measured in turns, 0 for no cooldown
     private int turnsSinceUsed; //measure turns since the move was used, once it equals cooldownLength, it can be used again
 
+    //could be very generalized - attack or heal
+    enum  StatusEffect {
+        BURNING,
+        BLEEDING,
+        HEALING
+    }
+
     //other ideas
     //status effect (does damage or healing over a number of turns)
     //probability of something happening (critical, more damage, some healing, idk)

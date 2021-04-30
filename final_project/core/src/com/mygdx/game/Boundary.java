@@ -96,9 +96,9 @@ public class Boundary extends Actor {
             location4.add(752);
             enemyLocations.add(location4);
         } else if(filename.equals("cafeteria.png")){
-            boundaries.add(new Rectangle(440, 288, 320, 240));
+            boundaries.add(new Rectangle(440, 208, 320, 240));
             boundaries.add(new Rectangle(440, 608, 320, 248));
-            boundaries.add(new Rectangle(1160, 288, 320, 248));
+            boundaries.add(new Rectangle(1160, 208, 320, 248));
             boundaries.add(new Rectangle(1160, 608, 320, 240));
             boundaries.add(new Rectangle(1768, 328, 160, 576));
             List<Integer> location1 = new ArrayList<>();
@@ -123,7 +123,7 @@ public class Boundary extends Actor {
             location4.add(48);
             location4.add(2032);
             location4.add(48);
-            location4.add(264);
+            location4.add(184);
             enemyLocations.add(location4);
 
         } else if(filename.equals("blank-room.png")){

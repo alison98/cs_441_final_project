@@ -106,7 +106,7 @@ public class Layout {
 
     private void addRoomNames(){
         roomNames = new ArrayList<>();
-        roomNames.add("blank-room.png");
+        //roomNames.add("blank-room.png");
         roomNames.add("server-closet.png");
         roomNames.add("conference-room.png");
         roomNames.add("cafeteria.png");

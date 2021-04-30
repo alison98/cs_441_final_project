@@ -56,10 +56,21 @@ public class CombatScreen implements Screen {
     private GameScreen gameScreen;
     private Attack currentAttack;
     private float playerX, playerY, enemyX, enemyY;
+    private long startTime, stopTime; //for checking if button is held down or clicked, easier than GestureListener
 
 
     //TODO
-    // -FOR WED:
+    // -FEATURES:
+    //      -refine idea of displaying move info on long press
+    //          --specifically, how to display this to the user (Drew's HUD?)
+    //      -other things to add based on how Moves work:
+    //          --Do weapons have durability?
+    //          --Cool-down or certain number of uses of a move per encounter?
+    //          --Can AI heal? if so make their choices smarter
+    //      -add UI elements that use xp
+    //          --display level
+    //          --display increase in user's xp?
+    // -BUGS:
     //      -fix bug of going back into combat
     //          --I haven't been able to replicate yet
     //      -fix bug where printer disappears when player loses
@@ -68,21 +79,11 @@ public class CombatScreen implements Screen {
     //      -figure out the scale sprite issue
     //           --haven't seen in a while
     //          --my best guess is that we scaled a sprite, then switched sprites halfway through?
+    // -OTHER:
     //      -update comments
     //      -less hard-coded numbers (placing UI elements)
     //      -clean the button code
-    // -FOR FRI/BEYOND:
-    //  -other things to add based on how Moves work:
-    //      --Do weapons have durability?
-    //      --Cool-down or certain number of uses of a move per encounter?
-    //      --Can AI heal? if so make their choices smarter
-    //  -add UI elements that use xp
-    //      --display level
-    //      --display increase in user's xp?
-    //  -Decide on sliding or real animation for attack, for animation I'd need:
-    //       --setScales so I can rescale all
-    //       --some getters and setters
-    //       --better stuff in attack for checking
+
 
 
 
@@ -316,7 +317,7 @@ public class CombatScreen implements Screen {
         //actually count the occurrences
         for (String currentWeapon : playerWeapons){
             int occurrences =  Collections.frequency(playerWeapons, currentWeapon);//thanks https://stackoverflow.com/questions/505928/how-to-count-the-number-of-occurrences-of-an-element-in-a-list
-            moveOccurrences.put(currentWeapon, occurrences);
+            moveOccurrences.put(currentWeapon, occurrences);//probably add a check for if the move is valid (hasn't exceeded uses per turn, cooldown ready)
         }
 
         int prevButtonIndex = -1;//index of the button which will be used to go back a "page". Will only be used if we have more moves than we can display at once
@@ -389,27 +390,45 @@ public class CombatScreen implements Screen {
                 button.setColor(Color.WHITE);
         }
         button.addListener(new InputListener() {
+
             @Override
-            //when the user clicks a button for a move, call playerTurn with said move
-            //don't just send with damage as parameter, as that would be same damage for same move
-            //this setup will call getDamage (to get a random damage in range) every time
-            //but only call playerTurn if it is the player's turn (set to true at start and at end of enemyTurn)
-            //and if there's no active animations (dealt with by animationManager)
+            //just start a stopwatch. all actual behavior in touchUp.
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                if (playerTurn && !animationActive){
-                    playerTurn(content); //player does their turn
-                    //a possibility is that a move can only be used once
-                    //in that case, we need to reset the buttons with the player's newly decreased move list
-                    //NOTE - I'd like a slightly better system (some moves won't require a reset, we only need to change at most one button per turn) but this is by far the easiest solution
-                    //we could easily add a check here - save the size of the move list before calling player turn, compare here, if its different, need a button reset
-                    for(TextButton currentButton : moveButtons){ //we reset buttons
-                        currentButton.setText("");
-                        currentButton.clearListeners();
-                        currentButton.setVisible(false);
-                    }
-                    setupButtons();//and then setup buttons again
-                }
+                startTime = System.currentTimeMillis();
                 return true;
+            }
+
+            @Override
+            //two possibilities - button was held or clicked
+            //if held, just display info about the move
+            //if pressed, actually preform the move
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button){
+                stopTime = System.currentTimeMillis();
+                //System.out.println("start: " + startTime + "\nstop: " + stopTime + "\n elapsed: " + (stopTime-startTime));
+                if(stopTime - startTime >= 2000 ){ //holding down, display info about move
+                    //I'd like to call this after we notice they're holding down, but don't know an efficient solution yet
+                    System.out.println(content);//for now just print out, but maybe try to reuse Drew's HUD
+                }else{ //just clicking
+                    //when the user clicks a button for a move, call playerTurn with said move
+                    //don't just send with damage as parameter, as that would be same damage for same move
+                    //this setup will call getDamage (to get a random damage in range) every time
+                    //but only call playerTurn if it is the player's turn (set to true at start and at end of enemyTurn)
+                    //and if there's no active animations (dealt with by animationManager)
+                    if (playerTurn && !animationActive){
+                        playerTurn(content); //player does their turn
+                        //a possibility is that a move can only be used once
+                        //in that case, we need to reset the buttons with the player's newly decreased move list
+                        //NOTE - I'd like a slightly better system (some moves won't require a reset, we only need to change at most one button per turn) but this is by far the easiest solution
+                        //we could easily add a check here - save the size of the move list before calling player turn, compare here, if its different, need a button reset
+                        for(TextButton currentButton : moveButtons){ //we reset buttons
+                            currentButton.setText("");
+                            currentButton.clearListeners();
+                            currentButton.setVisible(false);
+                        }
+                        setupButtons();//and then setup buttons again
+                    }
+                }
+
             }
         });
     }

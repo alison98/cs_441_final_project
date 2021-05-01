@@ -194,6 +194,7 @@ public class CombatScreen implements Screen {
             if(enemy.hasKey()){
                 gameScreen.getHud().setText("The enemy dropped a key!");
             }
+            enemy.defeated();
         }else{//player lost
             //place player back at this floor's stairs
             player.setHealth(100);//I also want to reset moves

@@ -7,36 +7,24 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Event;
-import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-import com.badlogic.gdx.scenes.scene2d.ui.TextField;
-
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
-import javax.xml.soap.Text;
 
 public class CombatScreen implements Screen {
 
@@ -48,7 +36,7 @@ public class CombatScreen implements Screen {
     private int width;
     private Player player;
     private Enemy enemy;
-    private boolean playerTurn;
+    private boolean isPlayerTurn;
     private TextButton[] moveButtons;
     private HealthBar playerHealthBar;
     private HealthBar enemyHealthBar;
@@ -57,23 +45,29 @@ public class CombatScreen implements Screen {
     private GameScreen gameScreen;
     private Attack currentAttack;
     private float playerX, playerY, enemyX, enemyY;
-    private long startTime, stopTime; //for checking if button is held down or clicked, easier than GestureListener
     private Label textBox; //to display move info
     private boolean touchDown; //to only display move info when mousing over (not on actually using)
+    private boolean statusEffectsInProgress;
+    private int statusEffectsIndex;
 
 
     //TODO
     // -FEATURES:
-    //      -refine idea of displaying move info on long press
-    //          --specifically, how to display this to the user (Drew's HUD?)
+    //      -name of attack/UI indication of what's happening
+    //          --with multiple status effects, it can become very confusing quickly
+    //          --probably just show name of move and if it was a status effect or not
     //      -other things to add based on how Moves work:
     //          --Do weapons have durability?
     //          --Cool-down or certain number of uses of a move per encounter?
+    //          --I've taken care of the 2 points above already (although I haven't tested)
     //          --Can AI heal? if so make their choices smarter
     //      -add UI elements that use xp
     //          --display level
     //          --display increase in user's xp?
     // -BUGS:
+    //      -test all the new stuff I added to moves
+    //          --need a better solution to duplicates - imagine enemy and player using same move
+    //          --duplicates and multiple simultaneous effects will probably break
     //      -fix bug of going back into combat
     //          --I haven't been able to replicate yet
     //      -fix bug where printer disappears when player loses
@@ -100,7 +94,7 @@ public class CombatScreen implements Screen {
         width = Gdx.graphics.getWidth();
         height = Gdx.graphics.getHeight();
         //next 3 deal with the turn-based system
-        playerTurn = true; //player can only go when its their turn
+        isPlayerTurn = true; //player can only go when its their turn
         animationActive = false; //a move can only begin once all animations are done (set by animation manager)
         animationManager = new AnimationManager(2);//right now, max animations at one time is 2 - decreasing health bar and sprite moving across screen
         this.gameScreen = gameScreen;
@@ -135,17 +129,49 @@ public class CombatScreen implements Screen {
         if(currentAttack!=null) currentAttack.tick(); //if there's an attack ongoing, call it's tick
     }
 
+    //start chain of events for the player's turn
+    //begin their status effects
+    private void beginPlayerTurn() {
+        //System.out.println("setup player turn");
+        statusEffectsInProgress = true;
+        statusEffectsIndex = 0;
+        performPlayerStatusEffects();
+    }
 
-    //activated on selection/handler
-    private void playerTurn(String selectedWeapon) {
-        int amount = Move.getInstance().getDamage(selectedWeapon);//get damage in the move's range
-        switch (Move.getInstance().getMoveType(selectedWeapon)){ //deal with different types of moves
+    //called for every one of the player's current status effects, then playerTurn() can be called
+    //i.e. all status effects will go, then player can do move for current turn
+    public void performPlayerStatusEffects(){
+        //System.out.println("enter player status effect");
+        //System.out.println("num of status effects : " + player.getOngoingStatusEffects().size());
+        if(statusEffectsIndex < player.getOngoingStatusEffects().size()){
+            String statusEffect = player.getOngoingStatusEffects().get(statusEffectsIndex);
+            //System.out.println("performing " + statusEffect);
+            int amount = Move.getInstance().useStatusEffect(statusEffect, player.getOngoingStatusEffects());//change to status effect range
+            playerTurn(Move.getInstance().getStatusEffectMoveType(statusEffect), amount, statusEffect);
+            statusEffectsIndex++;
+            //System.out.println("next index : " + statusEffectsIndex + " size of list " + player.getOngoingStatusEffects().size());
+        }else{
+            statusEffectsInProgress = false;
+            statusEffectsIndex = 0;
+        }
+    }
+
+    //activated on selection/handler, after all status effects are done
+    private void performSelectedPlayerMove(String selectedWeapon) {
+        //System.out.println("player's turn");
+        //System.out.println(player.getWeapon().size());
+        int amount = Move.getInstance().useMove(selectedWeapon, player.getWeapon(), player.getOngoingStatusEffects());
+        //System.out.println(player.getWeapon().size());
+        playerTurn(Move.getInstance().getMoveType(selectedWeapon), amount, selectedWeapon);
+        isPlayerTurn = false;//it is now the enemy's turn, they can go once animations finish
+    }
+
+    public void playerTurn(MoveData.MoveType type, int amount, String nameOfMove){
+        switch (type){ //deal with different types of moves
             case ATTACK:
-                //amount = 100;
                 //System.out.println("dealing " + amount + " to enemy");
                 enemy.setHealth(enemy.getHealth() - amount);
                 enemyHealthBar.decreaseHealth(amount);
-                //player.setSpeedX(50);
                 currentAttack = new Attack(player, enemy);
                 break;
             case HEALING:
@@ -154,41 +180,67 @@ public class CombatScreen implements Screen {
                 playerHealthBar.increaseHealth(amount);
                 currentAttack = new Attack(player, player); //don't remove - it doesn't do anything yet, but ensures nothing breaks when healing has no effect (healing at 100% for example)
                 //once I decide what I want for healing, I'll replace the attack with that
-                player.removeWeapon(selectedWeapon); //if a move can only be used once, remove from player's list
-                //we can define what is single-use, number of moves, etc later in MoveData
-                //for now, I'll just assume healing items are single use
         }
-        playerTurn = false;//it is now the enemy's turn, they can go once animations finish
     }
 
+
+    public void beginEnemyTurn(){
+        //System.out.println("setup enemy's turn");
+        statusEffectsInProgress = true;
+        statusEffectsIndex = 0;
+        performEnemyStatusEffects();
+    }
+
+
+    public void performEnemyStatusEffects(){
+        //System.out.println("enter enemy status effect");
+        if(statusEffectsIndex < enemy.getOngoingStatusEffects().size()){
+            String statusEffect = enemy.getOngoingStatusEffects().get(statusEffectsIndex);
+            //System.out.println("performing " + statusEffect);
+            int amount = Move.getInstance().useStatusEffect(statusEffect, enemy.getOngoingStatusEffects());//change to status effect range
+            enemyTurn(Move.getInstance().getStatusEffectMoveType(statusEffect), amount, statusEffect);
+            statusEffectsIndex++;
+        }else{
+            statusEffectsInProgress = false;
+            statusEffectsIndex = 0;
+            performSelectedEnemyMove();
+        }
+    }
+
+
+
     //called once all animations finish (the player's turn ends)
-    public void enemyTurn() {
+    //named "selected" move, but that's for consistency for now (until I make an AI and stop random choices)
+    public void performSelectedEnemyMove() {
+        //System.out.println("enemy's turn");
         List<String> enemyWeapons = enemy.getWeapon(); //get list of moves
         Random rand = new Random(); //pick one (random for now)
         //I'll probably want to make a smarter choice - only heal when low
         String selectedWeapon = enemyWeapons.get(rand.nextInt(enemyWeapons.size()));//get random weapon
-        int amount = Move.getInstance().getDamage(selectedWeapon);//get damage in the move's range
-        if(!enemy.hasKey()) amount = 100; //fast death for testing
-        switch (Move.getInstance().getMoveType(selectedWeapon)){ //deal with different types of moves
+        int amount = Move.getInstance().useMove(selectedWeapon, enemy.getWeapon(), enemy.getOngoingStatusEffects());
+        enemyTurn(Move.getInstance().getMoveType(selectedWeapon), amount, selectedWeapon);
+        isPlayerTurn = true;//it is now the player's turn, they can go once animations finish
+    }
+
+    //common functionality for a turn and a status effect
+    //look at type, use amount, modify health bars, etc.
+    public void enemyTurn(MoveData.MoveType type, int amount, String nameOfMove) {
+        switch (type) { //deal with different types of moves
             case ATTACK:
-                //amount = 100;
                 //System.out.println("dealing " + amount + " to player");
                 player.setHealth(player.getHealth() - amount);
                 playerHealthBar.decreaseHealth(amount);//start animation
                 currentAttack = new Attack(enemy, player);
                 break;
             case HEALING:
-                System.out.println("healing " + amount + " to enemy");
+                //System.out.println("healing " + amount + " to enemy");
                 enemy.setHealth(enemy.getHealth() + amount);
                 enemyHealthBar.increaseHealth(amount);
                 currentAttack = new Attack(enemy, enemy); //don't remove - it doesn't do anything yet, but ensures nothing breaks when healing has no effect (healing at 100% for example)
                 //once I decide what I want for healing, I'll replace the attack with that
-                enemy.removeWeapon(selectedWeapon); //if a move can only be used once, remove from player's list
-                //we can define what is single-use, number of moves, etc later in MoveData
-                //for now, I'll just assume healing items are single use
         }
-        playerTurn = true;//it is now the player's turn, they can go once animations finish
     }
+
 
     //called when either side wins
     //called from animationsManager (we don't want to exit until animations are done)
@@ -217,6 +269,10 @@ public class CombatScreen implements Screen {
         gameScreen.getStage().addActor(player);//necessary, or player won't reappear - IDK why I don't need for enemy
         //gameScreen.getStage().addActor(enemy); //unnecessary
         this.dispose();
+        Move.getInstance().resetMoves(enemy.getWeapon());//for any moves that have "per encounter" variables
+        Move.getInstance().resetMoves(player.getWeapon());
+        player.getOngoingStatusEffects().clear(); //status effects don't transfer between encounters
+        enemy.getOngoingStatusEffects().clear();
         game.setScreen(gameScreen);
 
     }
@@ -315,7 +371,11 @@ public class CombatScreen implements Screen {
         //actually count the occurrences
         for (String currentWeapon : playerWeapons){
             int occurrences =  Collections.frequency(playerWeapons, currentWeapon);//thanks https://stackoverflow.com/questions/505928/how-to-count-the-number-of-occurrences-of-an-element-in-a-list
-            moveOccurrences.put(currentWeapon, occurrences);//probably add a check for if the move is valid (hasn't exceeded uses per turn, cooldown ready)
+            //System.out.println(currentWeapon + " has " + occurrences);
+            if(Move.getInstance().isCurrentlyAvailable(currentWeapon) ){
+                //System.out.println("and isCurrentlyAvailable");
+                moveOccurrences.put(currentWeapon, occurrences);//probably add a check for if the move is valid (hasn't exceeded uses per turn, cooldown ready)
+            }//else System.out.println("and is not CurrentlyAvailable");
         }
 
         int prevButtonIndex = -1;//index of the button which will be used to go back a "page". Will only be used if we have more moves than we can display at once
@@ -424,8 +484,8 @@ public class CombatScreen implements Screen {
                 //this setup will call getDamage (to get a random damage in range) every time
                 //but only call playerTurn if it is the player's turn (set to true at start and at end of enemyTurn)
                 //and if there's no active animations (dealt with by animationManager)
-                if (playerTurn && !animationActive) {
-                    playerTurn(content); //player does their turn
+                if (isPlayerTurn && !animationActive && !statusEffectsInProgress) {
+                    performSelectedPlayerMove(content); //player does their turn
 
                     //a possibility is that a move can only be used once
                     //in that case, we need to reset the buttons with the player's newly decreased move list
@@ -616,7 +676,7 @@ public class CombatScreen implements Screen {
             if(currentHealth<=0){
                 //this is the last attack
                 currentHealth = 0;//prevent from going below 0%
-                if(playerTurn) {
+                if(isPlayerTurn) {
                     lastAttack = true; //we can use this to switch sprites as soon as health bar reaches 0
                     //kinda hacky and relies on health bar going faster than player attack
                     //I'll try to think of something better
@@ -809,11 +869,12 @@ public class CombatScreen implements Screen {
                 //playerTurn is never explicitly called, its done via buttons
                 //so we just check if animations are active and its the player's turn
                 //but enemy will automatically go without a class like this
-                if(!playerTurn && enemyHealthBar.currentHealth <= 0){
-                    combatOver(true); //enemy's health is <=0 and animations are done, player wins
-                }
-                else if(!playerTurn) enemyTurn();//enemy is not dead, and its their turn
-                else if(playerTurn && playerHealthBar.currentHealth <= 0) combatOver(false);//player died, animations over enemy wins
+                if(!isPlayerTurn && enemyHealthBar.currentHealth <= 0) combatOver(true); //enemy's health is <=0 and animations are done, player wins
+                else if(!isPlayerTurn && statusEffectsInProgress) performEnemyStatusEffects(); //in the middle of the enemy's turn, performing their status effects
+                else if(!isPlayerTurn && !statusEffectsInProgress) beginEnemyTurn();//enemy is not dead, and its their turn
+                else if(isPlayerTurn && playerHealthBar.currentHealth <= 0) combatOver(false);//player died, animations over enemy wins
+                else if(isPlayerTurn && statusEffectsInProgress) performPlayerStatusEffects(); //in the middle of the player's turn, performing their status effects
+                else if(isPlayerTurn && !statusEffectsInProgress) beginPlayerTurn(); //player is not dead and its the start of their turn
             }
         }
 

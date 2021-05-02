@@ -72,6 +72,11 @@ public class Move {
         return damage;
     }
 
+    public String toString(String move){
+        MoveData selectedMove = movelist.get(move);
+        return move + "\n" + selectedMove.getMoveType() + "\n" + selectedMove.getRange().get(0) + " - " + selectedMove.getRange().get(1);
+    }
+
     //other things this class may have/need
     //  -relation to specific weapons
     //  -a type (weapon, other abilities we may add later)

@@ -19,6 +19,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -57,6 +58,8 @@ public class CombatScreen implements Screen {
     private Attack currentAttack;
     private float playerX, playerY, enemyX, enemyY;
     private long startTime, stopTime; //for checking if button is held down or clicked, easier than GestureListener
+    private Label textBox; //to display move info
+    private boolean touchDown; //to only display move info when mousing over (not on actually using)
 
 
     //TODO
@@ -102,6 +105,7 @@ public class CombatScreen implements Screen {
         animationManager = new AnimationManager(2);//right now, max animations at one time is 2 - decreasing health bar and sprite moving across screen
         this.gameScreen = gameScreen;
         initUI(); //set up on screen elements
+        touchDown = false;
     }
 
     @Override
@@ -282,8 +286,19 @@ public class CombatScreen implements Screen {
         enemyHealthBar = new HealthBar(enemy.getHealth(), enemy.getMaxHealth() ,width - 850, height -  (height / 4f),enemyHealthChange, enemyNameLabel, LABEL_AND_HEALTHBAR_LENGTH, LABEL_AND_HEALTHBAR_HEIGHT,LABEL_AND_HEALTHBAR_OFFSET);//will also modify X, Y to be based on sprite size, health
         stage.addActor(enemyHealthBar);
 
+        //Label to display info about a move
+        //I was going to use Drew's Hud, but I would have needed to set the direction buttons as invisible, move the text box up, reset for the game screen, show/hide text without interacting, etc.
+        //so I just made my own to keep things simple (but used same textBox setup)
+        textBox = new Label("Hello", new Skin(Gdx.files.internal("skin/plain-james-ui.json"), new TextureAtlas(Gdx.files.internal("skin/plain-james-ui.atlas"))));
+        textBox.setWidth(1200);
+        textBox.setHeight(200);
+        textBox.setFontScale(2f);
+        textBox.setAlignment(Align.center);
+        textBox.setPosition(width/2f - textBox.getWidth()/2, height/2f - textBox.getHeight());
+        textBox.getStyle().background = new Image(new Texture(Gdx.files.internal("textbox.png"))).getDrawable();
+        textBox.setVisible(false);
 
-
+        stage.addActor(textBox);
 
     }
 
@@ -375,45 +390,56 @@ public class CombatScreen implements Screen {
         }
         button.addListener(new InputListener() {
 
+            //click then drag over button to display its info
             @Override
-            //just start a stopwatch. all actual behavior in touchUp.
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor){
+                if(!touchDown) { //touch down is always fired first, so we know if its a click or enter at this point
+                    textBox.setText(Move.getInstance().toString(content));
+                    textBox.setVisible(true);
+                }
+            }
+
+            //release click/drag to stop showing info
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor){
+                textBox.setText("sword\nattack\nx-y dmg");
+                textBox.setVisible(false);
+            }
+
+            //this is the beginning of actually preforming a move
+            //its always fired before enter(), so I use it to tell enter if we should display info or not
+            //i.e. don't display info if we just clicked and are using move
+            @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                startTime = System.currentTimeMillis();
+                touchDown = true;
                 return true;
             }
 
+            //actually preform the move
             @Override
-            //two possibilities - button was held or clicked
-            //if held, just display info about the move
-            //if pressed, actually preform the move
             public void touchUp(InputEvent event, float x, float y, int pointer, int button){
-                stopTime = System.currentTimeMillis();
-                //System.out.println("start: " + startTime + "\nstop: " + stopTime + "\n elapsed: " + (stopTime-startTime));
-                if(stopTime - startTime >= 2000 ){ //holding down, display info about move
-                    //I'd like to call this after we notice they're holding down, but don't know an efficient solution yet
-                    System.out.println(content);//for now just print out, but maybe try to reuse Drew's HUD
-                }else{ //just clicking
-                    //when the user clicks a button for a move, call playerTurn with said move
-                    //don't just send with damage as parameter, as that would be same damage for same move
-                    //this setup will call getDamage (to get a random damage in range) every time
-                    //but only call playerTurn if it is the player's turn (set to true at start and at end of enemyTurn)
-                    //and if there's no active animations (dealt with by animationManager)
-                    if (playerTurn && !animationActive){
-                        playerTurn(content); //player does their turn
-                        //a possibility is that a move can only be used once
-                        //in that case, we need to reset the buttons with the player's newly decreased move list
-                        //NOTE - I'd like a slightly better system (some moves won't require a reset, we only need to change at most one button per turn) but this is by far the easiest solution
-                        //we could easily add a check here - save the size of the move list before calling player turn, compare here, if its different, need a button reset
-                        for(TextButton currentButton : moveButtons){ //we reset buttons
-                            currentButton.setText("");
-                            currentButton.clearListeners();
-                            currentButton.setVisible(false);
-                        }
-                        setupButtons();//and then setup buttons again
-                    }
-                }
+                touchDown = false;
+                //when the user clicks a button for a move, call playerTurn with said move
+                //don't just send with damage as parameter, as that would be same damage for same move
+                //this setup will call getDamage (to get a random damage in range) every time
+                //but only call playerTurn if it is the player's turn (set to true at start and at end of enemyTurn)
+                //and if there's no active animations (dealt with by animationManager)
+                if (playerTurn && !animationActive) {
+                    playerTurn(content); //player does their turn
 
+                    //a possibility is that a move can only be used once
+                    //in that case, we need to reset the buttons with the player's newly decreased move list
+                    //NOTE - I'd like a slightly better system (some moves won't require a reset, we only need to change at most one button per turn) but this is by far the easiest solution
+                    //we could easily add a check here - save the size of the move list before calling player turn, compare here, if its different, need a button reset
+                    for (TextButton currentButton : moveButtons) { //we reset buttons
+                        currentButton.setText("");
+                        currentButton.clearListeners();
+                        currentButton.setVisible(false);
+                    }
+                    setupButtons();//and then setup buttons again, we'll be using an updated move list
+                }
             }
+
         });
     }
 

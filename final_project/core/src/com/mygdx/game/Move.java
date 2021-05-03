@@ -26,10 +26,66 @@ public class Move {
     private Move(){
         //Set up all possible moves in game
         movelist = new HashMap<>();
-        movelist.put("sword", new MoveData(setDamage(10, 20), MoveData.MoveType.ATTACK));
-        //movelist.get("sword").setStatusEffect(true, MoveData.MoveType.ATTACK, setDamage(50, 60), 10); //another test case
-        movelist.put("coffee", new MoveData(setDamage(10, 20), MoveData.MoveType.HEALING));
-        movelist.get("coffee").setStatusEffect(true, MoveData.MoveType.HEALING, setDamage(50, 60), 2);//test case - 2 turn healing status effect
+        //I switched to a builder
+
+        //starting to set up some more moves (I need more and will keep thinking, especially for different enemy sprites)
+        //player and enemy cannot use the same moves right now, so I've separated here and may take further precautions (or fix the limitation)
+        //I'd also like to randomize some stats, but I'd need to change a bit to do so (same limitation as point above)
+        //I also need to think about balance and making things interesting
+
+        //test case I didn't feel like removing yet
+        movelist.put("sword", new MoveData.Builder(setDamage(10, 20), MoveData.MoveType.ATTACK).build()); //bare minimum  - name, range, type
+
+        //some player attacks
+        movelist.put("Stapler", new MoveData.Builder(setDamage(15, 25), MoveData.MoveType.ATTACK)
+                .setCooldown(2)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2) //bleeding
+                .build()); //bare minimum  - name, range, type
+        movelist.put("Paper Clip", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK)
+                .setDurability(3)
+                .build());
+        movelist.put("Keyboard", new MoveData.Builder(setDamage(10, 20), MoveData.MoveType.ATTACK)
+                .setDurability(2)
+                .build());
+        movelist.put("Mug", new MoveData.Builder(setDamage(10, 20), MoveData.MoveType.ATTACK)
+                .setCooldown(1)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(10, 20), 1) //burning
+                .build());
+        movelist.put("Tie", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK).build());
+
+        //some player healing moves
+        movelist.put("coffee", new MoveData.Builder(setDamage(20, 40), MoveData.MoveType.HEALING)
+                .setDurability(1) //single use
+                .setStatusEffect(MoveData.MoveType.HEALING, setDamage(10, 20), 2) //adding a status effect to this one
+                .build());
+        movelist.put("Tea", new MoveData.Builder(setDamage(20, 40), MoveData.MoveType.HEALING)
+                .setDurability(1) //single use
+                .setStatusEffect(MoveData.MoveType.HEALING, setDamage(10, 20), 2)
+                .build());
+        movelist.put("Donut", new MoveData.Builder(setDamage(10, 15), MoveData.MoveType.HEALING)
+                .setDurability(2) //can use twice
+                .build());
+        movelist.put("Sandwich", new MoveData.Builder(setDamage(10, 20), MoveData.MoveType.HEALING)
+                .setDurability(1) //single use
+                .build());
+
+        //some enemy attacks
+        movelist.put("Paper Cut", new MoveData.Builder(setDamage(10, 20), MoveData.MoveType.ATTACK)
+                .setCooldown(2)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2)
+                .build());
+        movelist.put("Slam Lid", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK)
+                .build());
+
+
+        //enemy healing?
+        //I haven't decided if these should exist
+        //if they do, they'll be much weaker, rarer, and I need a smarter AI
+        movelist.put("Paper Refill", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.HEALING)
+                .build());
+
+
+
 
         //Set up weapons/abilities for enemies
         enemyWeapons = new ArrayList<>();
@@ -69,11 +125,7 @@ public class Move {
     //for printing info about a move in combat screen
     //will need to add other info (cooldowns, uses per encounter, etc)
     public String toString(String move){
-        MoveData selectedMove = movelist.get(move);
-        String ret = move + " - " + selectedMove.getMoveType() + "\n" + selectedMove.getRange().get(0) + " - " + selectedMove.getRange().get(1);
-        if(movelist.get(move).getHasStatusEffect()) ret += "\n" + movelist.get(move).getStatusEffectType() + " status effect, " +  movelist.get(move).getStatusEffectRange().get(0) + " - " + movelist.get(move).getStatusEffectRange().get(1);
-        else ret+= "\nno status effect";
-        return ret;
+        return movelist.get(move).toString();
     }
 
 

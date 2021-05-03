@@ -21,35 +21,11 @@ public class MoveData {
     private List<Integer> range;
     private MoveType movetype;
 
-    public MoveData(List<Integer> r, MoveType t){
-        range = r;
-        movetype = t;
-        if(movetype == MoveType.HEALING){ //make healing items single use for now
-            //like I mention below, this constructor will be expanded once I decide on what I'm doing
-            //so this is just for testing for now
-            hasDurability = true;
-            currentDurability = durability = 1;
-        }
-    }
-
     public List<Integer> getRange() { return range; }
 
     public MoveType getMoveType() { return movetype; }
 
-
-    //starting to think about other effects and ideas, and how they'd work
-    //I haven't hooked anything up yet, and might not use all/any of these ideas
-
-    //could use enums or booleans, I haven't decided yet
-    enum Durability {
-        LIMITED_USE,
-        UNLIMITED_USE,
-    }
-    enum EncounterUses {
-        LIMITED_USE,
-        UNLIMITED_USE
-    }
-
+    //the optional stuff
     private boolean hasDurability; //true means limited use, will break eventually
     private int currentDurability;
     private int durability; //number of total uses when hasDurability is true, undefined and unused otherwise
@@ -60,27 +36,20 @@ public class MoveData {
     private int currentUsesPerEncounter;//copy used during an encounter, decrement on each move and reset on exiting
     //once 0, remove from move list, but re-add on exiting combat
 
-    //could have a boolean to be consistent, but 0 works here
+    //could have boolean to be consistent, but 0 works here
     private int cooldownLength; //measured in turns, 0 for no cooldown
     private int turnsSinceUsed; //measure turns since the move was used, once it equals cooldownLength, it can be used again
 
 
 
-    //do I need a name for the status effect
+    //do I need a name for the status effect?
     private boolean hasStatusEffect; //true if this move has a status effect
     private MoveType statusEffectType; //type of status effect if hasStatusEffect is true, undefined otherwise
     private List<Integer> statusEffectRange; //range of amount of status effect if hasStatusEffect is true, undefined otherwise
     private int duration; //number of turns status effect is active for if hasStatusEffect is true, undefined otherwise
     private int currentDuration;
 
-    //just for now, will probably go to constructor later
-    public void setStatusEffect(boolean hasStatusEffect, MoveType type, List<Integer> range, int duration){
-        this.hasStatusEffect = hasStatusEffect;
-        this.statusEffectType = type;
-        this.statusEffectRange = range;
-        this.duration = this.currentDuration = duration;
-    }
-
+    //I need getters for these as they almost act like a MoveData inside a MoveData
     public boolean getHasStatusEffect() { return hasStatusEffect; }
 
     public MoveType getStatusEffectType() { return statusEffectType;}
@@ -102,21 +71,16 @@ public class MoveData {
     //this is what we call to use a move now, rather than just getRange/damage
     //it'll automatically update all values for characteristics
     //i.e. decrement durability, currentUsesPerEncounter, etc. if need be
-    //I'll need to pass in the player or move list though to propagate changes
     public int useMove(String nameOfMove, List<String> moves, List<String> statusEffects){
-        //System.out.println("using " + nameOfMove);
         //update values
         if(cooldownLength != 0) turnsSinceUsed = 0; //if this has cooldown, reset turns since used so we can start counting again
         if(hasUsesPerEncounter) currentUsesPerEncounter++; //if we can only use it a certain amount of times each battle, increment current uses
         if(hasDurability) currentDurability--; //if it can be broken, decrement the use
-        //System.out.println("before removing : " + moves.size());
         if(hasDurability && currentDurability == 0) {//then check if it should be removed from player's list (if durability is 0)
             moves.remove(nameOfMove);//once I figure out where/hwo to pass in player move list, remove current move from it here
-            currentDurability =  durability; //then reset durability in case we have copies? - need to really test
+            currentDurability =  durability; //then reset durability in case we have copies? - this is what I'm looking into next
         }
-        //System.out.println("after removing: " + moves.size());
         if(hasStatusEffect) { //right now this allows overlaps, can change (use move with status effect twice, get 2 status effects and so on)
-            //System.out.println("adding to status effects");
             statusEffects.add(nameOfMove); //add to ongoingStatusEffects
         }
         return randomAmountInRange(getRange());
@@ -156,6 +120,112 @@ public class MoveData {
     public void resetMove(){
         if(hasUsesPerEncounter) currentUsesPerEncounter = usesPerEncounter;
         if(cooldownLength != 0) turnsSinceUsed = cooldownLength; //this will make sure the cooldown isn't active when starting next turn
+    }
+
+    @Override
+    public String toString(){
+        String ret = movetype + ": " + getRange().get(0) + " - " + getRange().get(1);
+        if(hasDurability) ret+= ". " + currentDurability + " uses remaining.";
+        else ret+= ". Infinite uses remaining.";
+        if(hasUsesPerEncounter) ret+= "\nUses Per Encounter: " + currentUsesPerEncounter + "/" + usesPerEncounter;
+        else ret+= "\nNo limit on uses per encounter.";
+        if(cooldownLength != 0) ret+=" Cooldown: " + turnsSinceUsed + "/" + cooldownLength;
+        else ret+= " No cooldown.";
+        if(hasStatusEffect) ret += "\n" + statusEffectType + " status effect, " +  getStatusEffectRange().get(0) + " - " + getStatusEffectRange().get(1);
+        else ret+= "\nNo status effect.";
+        return ret;
+    }
+
+
+    public static class Builder {
+        //required
+        private List<Integer> range;
+        private MoveType movetype;
+
+        //optional
+        private boolean hasDurability = false; //true means limited use, will break eventually
+        private int currentDurability;
+        private int durability; //number of total uses when hasDurability is true, undefined and unused otherwise
+        //once 0, remove from move list
+
+        private boolean  hasUsesPerEncounter = false; //true means limited use per encounter
+        private int usesPerEncounter; //number of uses per encounter when hasUsesPerEncounter is true, undefined and unused otherwise
+        private int currentUsesPerEncounter;//copy used during an encounter, decrement on each move and reset on exiting
+        //once 0, remove from move list, but re-add on exiting combat
+
+        //could have a boolean to be consistent, but 0 works here
+        private int cooldownLength = 0; //measured in turns, 0 for no cooldown
+        private int turnsSinceUsed; //measure turns since the move was used, once it equals cooldownLength, it can be used again
+
+
+
+        //do I need a name for the status effect
+        private boolean hasStatusEffect = false; //true if this move has a status effect
+        private MoveType statusEffectType; //type of status effect if hasStatusEffect is true, undefined otherwise
+        private List<Integer> statusEffectRange; //range of amount of status effect if hasStatusEffect is true, undefined otherwise
+        private int duration; //number of turns status effect is active for if hasStatusEffect is true, undefined otherwise
+        private int currentDuration;
+
+        //necessary
+        public Builder(List<Integer> r, MoveType t) {
+            this.range = r;
+            this.movetype = t;
+        }
+
+        //remaining 4 are optional
+        public Builder setDurability(int durabilityInTurns) {
+            hasDurability = true;
+            durability = currentDurability = durabilityInTurns;
+            return this;
+        }
+
+        public Builder setUsesPerEncounter(int uses) {
+            hasUsesPerEncounter = true;
+            usesPerEncounter = uses;
+            currentUsesPerEncounter = 0;
+            return this;
+        }
+
+        public Builder setCooldown(int durationInTurns) {
+            cooldownLength = turnsSinceUsed = durationInTurns;
+            return this;
+        }
+
+        public Builder setStatusEffect(MoveType type, List<Integer> range, int durationInTurns) {
+            hasStatusEffect = true;
+            statusEffectType = type;
+            statusEffectRange = range;
+            duration = currentDuration = durationInTurns;
+            return this;
+        }
+
+        public MoveData build() {
+            return new MoveData(this);
+        }
+    }
+
+    private MoveData(Builder builder) {
+        range = builder.range;
+        movetype = builder.movetype;
+        hasDurability = builder.hasDurability;
+        if(hasDurability){
+            durability = currentDurability = builder.durability;
+        }
+        hasUsesPerEncounter = builder.hasUsesPerEncounter;
+        if(hasUsesPerEncounter){
+            usesPerEncounter =  builder.usesPerEncounter;
+            currentUsesPerEncounter = builder.currentUsesPerEncounter;
+        }
+        cooldownLength = builder.cooldownLength;
+        if(cooldownLength !=0){
+            turnsSinceUsed = builder.turnsSinceUsed;
+        }
+        hasStatusEffect = builder.hasStatusEffect;
+        if(hasStatusEffect){
+            statusEffectType = builder.statusEffectType;
+            statusEffectRange = builder.statusEffectRange;
+            duration = currentDuration = builder.duration;
+        }
     }
 
 

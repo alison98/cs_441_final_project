@@ -64,6 +64,7 @@ public class CombatScreen implements Screen {
     //      -add UI elements that use xp
     //          --display level
     //          --display increase in user's xp?
+    //      -use player.getRewards() for drops, levels
     // -BUGS:
     //      -test all the new stuff I added to moves
     //          --need a better solution to duplicates - imagine enemy and player using same move
@@ -141,8 +142,8 @@ public class CombatScreen implements Screen {
     //called for every one of the player's current status effects, then playerTurn() can be called
     //i.e. all status effects will go, then player can do move for current turn
     public void performPlayerStatusEffects(){
-        //System.out.println("enter player status effect");
-        //System.out.println("num of status effects : " + player.getOngoingStatusEffects().size());
+        System.out.println("enter player status effect");
+        System.out.println("num of status effects : " + player.getOngoingStatusEffects().size());
         if(statusEffectsIndex < player.getOngoingStatusEffects().size()){
             String statusEffect = player.getOngoingStatusEffects().get(statusEffectsIndex);
             //System.out.println("performing " + statusEffect);
@@ -169,13 +170,13 @@ public class CombatScreen implements Screen {
     public void playerTurn(MoveData.MoveType type, int amount, String nameOfMove){
         switch (type){ //deal with different types of moves
             case ATTACK:
-                //System.out.println("dealing " + amount + " to enemy");
+                System.out.println("dealing " + amount + " to enemy");
                 enemy.setHealth(enemy.getHealth() - amount);
                 enemyHealthBar.decreaseHealth(amount);
                 currentAttack = new Attack(player, enemy);
                 break;
             case HEALING:
-                //System.out.println("healing " + amount + " to self");
+                System.out.println("healing " + amount + " to self");
                 player.setHealth(player.getHealth() + amount);
                 playerHealthBar.increaseHealth(amount);
                 currentAttack = new Attack(player, player); //don't remove - it doesn't do anything yet, but ensures nothing breaks when healing has no effect (healing at 100% for example)
@@ -384,8 +385,8 @@ public class CombatScreen implements Screen {
         float nextY = 200;
         float nextX = 150;
 
-        for (int i = 0; i < moveOccurrences.size(); i++) {//set up buttons - a max of 2 rows
-            final String currentMove = playerWeapons.get(i); //get the current move
+        int i = 0;
+        for(String currentMove : moveOccurrences.keySet()){ //set up buttons - a max of 2 rows
             Skin s = new Skin(Gdx.files.internal("skin/plain-james-ui.json")); //random skin from my last project just to test, very ugly, replace (can also switch to image buttons)
             TextButton newMoveButton;
             //if(moveButtons.length > i) newMoveButton = moveButtons[i]; //this doesn't work, find another way to reuse/check
@@ -418,6 +419,7 @@ public class CombatScreen implements Screen {
 
             stage.addActor(newMoveButton);
             moveButtons[i] = newMoveButton;
+            i++;
         }
     }
 

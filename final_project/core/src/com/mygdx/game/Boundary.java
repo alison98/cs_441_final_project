@@ -73,7 +73,7 @@ public class Boundary extends Actor {
             boundaries.add(new Rectangle(1232, 400, 16, 504));
             List<Integer> location1 = new ArrayList<>();
             location1.add(48);
-            location1.add(2032);
+            location1.add(880);
             location1.add(40);
             location1.add(224);
             enemyLocations.add(location1);
@@ -93,8 +93,14 @@ public class Boundary extends Actor {
             location4.add(880);
             location4.add(1184);
             location4.add(432);
-            location4.add(752);
+            location4.add(680);
             enemyLocations.add(location4);
+            List<Integer> location5 = new ArrayList<>();
+            location5.add(1184);
+            location5.add(2032);
+            location5.add(40);
+            location5.add(224);
+            enemyLocations.add(location5);
         } else if(filename.equals("cafeteria.png")){
             boundaries.add(new Rectangle(440, 208, 320, 240));
             boundaries.add(new Rectangle(440, 608, 320, 248));
@@ -110,8 +116,8 @@ public class Boundary extends Actor {
             List<Integer> location2 = new ArrayList<>();
             location2.add(800);
             location2.add(1128);
-            location2.add(48);
-            location2.add(856);
+            location2.add(300);
+            location2.add(600);
             enemyLocations.add(location2);
             List<Integer> location3 = new ArrayList<>();
             location3.add(1512);
@@ -121,11 +127,16 @@ public class Boundary extends Actor {
             enemyLocations.add(location3);
             List<Integer> location4 = new ArrayList<>();
             location4.add(48);
-            location4.add(2032);
+            location4.add(800);
             location4.add(48);
             location4.add(184);
             enemyLocations.add(location4);
-
+            List<Integer> location5 = new ArrayList<>();
+            location5.add(1400);
+            location5.add(2032);
+            location5.add(48);
+            location5.add(184);
+            enemyLocations.add(location5);
         } else if(filename.equals("blank-room.png")){
             List<Integer> location1 = new ArrayList<>();
             location1.add(150);

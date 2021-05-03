@@ -98,10 +98,13 @@ public class Move {
         floor2.add("sword");
         List<String> floor3 = new ArrayList<>();
         floor3.add("sword");
+        List<String> floor4 = new ArrayList<>();
+        floor4.add("sword");
         enemyWeapons.add(floor0);
         enemyWeapons.add(floor1);
         enemyWeapons.add(floor2);
         enemyWeapons.add(floor3);
+        enemyWeapons.add(floor4);
     }
 
     public static Move getInstance(){

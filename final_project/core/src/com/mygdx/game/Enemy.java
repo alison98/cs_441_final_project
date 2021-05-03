@@ -22,7 +22,7 @@ public class Enemy extends Actor {
     private Rectangle hitbox;
     private List<String> weapon;
     private List<String> ongoingStatusEffects;
-    private int level, maxHealth, health, experience;
+    private int level, maxHealth, health, experience, money;
     private Move abilities;
     private String name;
     private Random random;
@@ -63,7 +63,7 @@ public class Enemy extends Actor {
 
         level = random.nextInt(10)+floor;
         //maxHealth = health = 10;
-        maxHealth = health = floor*10 + random.nextInt(10);
+        money = maxHealth = health = floor*10 + random.nextInt(10);
         experience = level*2;
     }
 
@@ -221,8 +221,12 @@ public class Enemy extends Actor {
         return health;
     }
 
-    public int getExperience(){
-        return experience;
+    public List<Integer> getRewards(){
+        List<Integer> rewards = new ArrayList<>();
+        rewards.add(experience);
+        rewards.add(money);
+        //rewards.add(drops);
+        return rewards;
     }
 
     public boolean getFight(){
@@ -265,10 +269,10 @@ public class Enemy extends Actor {
     }
 
     public void respawn(){
+        maxHealth = health = floor * 10 + random.nextInt(10);
         if(!boss) {
             //maxHealth = health = 10;
             sprite.setAlpha(1f);
-            maxHealth = health = floor * 10 + random.nextInt(10);
             fight = true;
             sprite = sprites[0];
             scaleSprite(1f);

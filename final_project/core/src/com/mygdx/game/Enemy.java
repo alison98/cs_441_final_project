@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
@@ -20,6 +21,7 @@ public class Enemy extends Actor {
     private boolean fight, key, boss;
     private Rectangle hitbox;
     private List<String> weapon;
+    private List<String> ongoingStatusEffects;
     private int level, maxHealth, health, experience;
     private Move abilities;
     private String name;
@@ -56,6 +58,7 @@ public class Enemy extends Actor {
         floor = floorIn;
         abilities = Move.getInstance();
         weapon = abilities.getEnemyWeapons(floor);
+        ongoingStatusEffects = new ArrayList<>();
 
 
         level = random.nextInt(10)+floor;
@@ -203,6 +206,8 @@ public class Enemy extends Actor {
     public List<String> getWeapon(){
         return weapon;
     }
+
+    public List<String> getOngoingStatusEffects() { return ongoingStatusEffects; }
 
     public int getLevel(){
         return level;

@@ -1,6 +1,8 @@
 package com.mygdx.game;
 
+import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Random;
 
 
 /*
@@ -22,6 +24,12 @@ public class MoveData {
     public MoveData(List<Integer> r, MoveType t){
         range = r;
         movetype = t;
+        if(movetype == MoveType.HEALING){ //make healing items single use for now
+            //like I mention below, this constructor will be expanded once I decide on what I'm doing
+            //so this is just for testing for now
+            hasDurability = true;
+            currentDurability = durability = 1;
+        }
     }
 
     public List<Integer> getRange() { return range; }
@@ -43,7 +51,7 @@ public class MoveData {
     }
 
     private boolean hasDurability; //true means limited use, will break eventually
-    //doesn't need a copy, value persists throughout encounters
+    private int currentDurability;
     private int durability; //number of total uses when hasDurability is true, undefined and unused otherwise
     //once 0, remove from move list
 
@@ -56,33 +64,74 @@ public class MoveData {
     private int cooldownLength; //measured in turns, 0 for no cooldown
     private int turnsSinceUsed; //measure turns since the move was used, once it equals cooldownLength, it can be used again
 
-    //could be very generalized - attack or heal
-    enum  StatusEffect {
-        BURNING,
-        BLEEDING,
-        HEALING
+
+
+    //do I need a name for the status effect
+    private boolean hasStatusEffect; //true if this move has a status effect
+    private MoveType statusEffectType; //type of status effect if hasStatusEffect is true, undefined otherwise
+    private List<Integer> statusEffectRange; //range of amount of status effect if hasStatusEffect is true, undefined otherwise
+    private int duration; //number of turns status effect is active for if hasStatusEffect is true, undefined otherwise
+    private int currentDuration;
+
+    //just for now, will probably go to constructor later
+    public void setStatusEffect(boolean hasStatusEffect, MoveType type, List<Integer> range, int duration){
+        this.hasStatusEffect = hasStatusEffect;
+        this.statusEffectType = type;
+        this.statusEffectRange = range;
+        this.duration = this.currentDuration = duration;
     }
 
+    public boolean getHasStatusEffect() { return hasStatusEffect; }
+
+    public MoveType getStatusEffectType() { return statusEffectType;}
+
+    public List<Integer> getStatusEffectRange() { return statusEffectRange; }
+
+
     //other ideas
-    //status effect (does damage or healing over a number of turns)
     //probability of something happening (critical, more damage, some healing, idk)
     //probability that move will go first (for an idea I have about both sides picking a move at the same time, different advantages to going 1st or 2nd, more strategy-based by being able to see the enemy's move list)
 
 
-    //this is what we'd call instead of just getRange (probably via Move.java)
+    public int randomAmountInRange(List<Integer> range){
+        Random random = new Random();
+        int temp = random.nextInt(range.get(1)-range.get(0));
+        return range.get(0)+temp;
+    }
+
+    //this is what we call to use a move now, rather than just getRange/damage
     //it'll automatically update all values for characteristics
     //i.e. decrement durability, currentUsesPerEncounter, etc. if need be
     //I'll need to pass in the player or move list though to propagate changes
-    public List<Integer> useMove(){
+    public int useMove(String nameOfMove, List<String> moves, List<String> statusEffects){
+        //System.out.println("using " + nameOfMove);
         //update values
         if(cooldownLength != 0) turnsSinceUsed = 0; //if this has cooldown, reset turns since used so we can start counting again
         if(hasUsesPerEncounter) currentUsesPerEncounter++; //if we can only use it a certain amount of times each battle, increment current uses
-        if(hasDurability) durability--; //if it can be broken, decrement the use
-        if(hasDurability && durability == 0) {//then check if it should be removed from player's list (if durability is 0)
-            //once I figure out where/hwo to pass in player move list, remove current move from it here
+        if(hasDurability) currentDurability--; //if it can be broken, decrement the use
+        //System.out.println("before removing : " + moves.size());
+        if(hasDurability && currentDurability == 0) {//then check if it should be removed from player's list (if durability is 0)
+            moves.remove(nameOfMove);//once I figure out where/hwo to pass in player move list, remove current move from it here
+            currentDurability =  durability; //then reset durability in case we have copies? - need to really test
         }
-        //also call preformOtherMove() on all other moves in the list I pass in
-        return getRange();
+        //System.out.println("after removing: " + moves.size());
+        if(hasStatusEffect) { //right now this allows overlaps, can change (use move with status effect twice, get 2 status effects and so on)
+            //System.out.println("adding to status effects");
+            statusEffects.add(nameOfMove); //add to ongoingStatusEffects
+        }
+        return randomAmountInRange(getRange());
+    }
+
+    //called when using
+    public int useStatusEffect(String nameOfMove, List<String> statusEffects){
+        //System.out.println("using status effect : " + duration);
+        currentDuration--;
+        if(currentDuration == 0){
+            currentDuration = duration;
+            //System.out.println("removing");
+            statusEffects.remove(nameOfMove);//remove from list
+        }
+        return randomAmountInRange(getStatusEffectRange());
     }
 
     //this would be needed for stuff like cooldowns

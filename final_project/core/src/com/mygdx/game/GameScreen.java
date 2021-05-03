@@ -76,7 +76,6 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         tick();
-        checkCollisions();
         checkInteractable();
         player.move();
         stage.act(delta);
@@ -84,6 +83,7 @@ public class GameScreen implements Screen {
         spriteBatch.setProjectionMatrix(hud.getStage().getCamera().combined);
         hud.getStage().act(delta);
         hud.getStage().draw();
+        checkCollisions(); //matt's fix to scale issue - have to move down here, otherwise we change screens in the middle of render, and render will call all other functions before closing screen - https://stackoverflow.com/questions/31181752/libgdx-screen-render-and-lifecycle
     }
 
     private void checkCollisions(){
@@ -122,6 +122,7 @@ public class GameScreen implements Screen {
                 hud.setText("Door is locked!");
             }
         }
+        System.out.println(player.getX() + ", " + player.getY());
     }
 
     private void tick(){

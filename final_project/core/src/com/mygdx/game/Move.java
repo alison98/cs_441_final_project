@@ -27,7 +27,9 @@ public class Move {
         //Set up all possible moves in game
         movelist = new HashMap<>();
         movelist.put("sword", new MoveData(setDamage(10, 20), MoveData.MoveType.ATTACK));
+        //movelist.get("sword").setStatusEffect(true, MoveData.MoveType.ATTACK, setDamage(50, 60), 10); //another test case
         movelist.put("coffee", new MoveData(setDamage(10, 20), MoveData.MoveType.HEALING));
+        movelist.get("coffee").setStatusEffect(true, MoveData.MoveType.HEALING, setDamage(50, 60), 2);//test case - 2 turn healing status effect
 
         //Set up weapons/abilities for enemies
         enemyWeapons = new ArrayList<>();
@@ -53,14 +55,6 @@ public class Move {
         return instance;
     }
 
-    //function called from CombatScreen to get a random value in the Move's range
-    public int getDamage(String weapon){
-        List<Integer> range = movelist.get(weapon).getRange();
-        Random random = new Random();
-        int temp = random.nextInt(range.get(1)-range.get(0));
-        return range.get(0)+temp;
-    }
-
     public MoveData.MoveType getMoveType(String weapon){
         return movelist.get(weapon).getMoveType();
     }
@@ -72,11 +66,41 @@ public class Move {
         return damage;
     }
 
-    //other things this class may have/need
-    //  -relation to specific weapons
-    //  -a type (weapon, other abilities we may add later)
-    //  -setters for max and min damage if weapons/moves can be upgraded
-    //  -different damage fields (does X-Y damage against enemy Z, A-B damage against enemy C, etc.)
+    //for printing info about a move in combat screen
+    //will need to add other info (cooldowns, uses per encounter, etc)
+    public String toString(String move){
+        MoveData selectedMove = movelist.get(move);
+        String ret = move + " - " + selectedMove.getMoveType() + "\n" + selectedMove.getRange().get(0) + " - " + selectedMove.getRange().get(1);
+        if(movelist.get(move).getHasStatusEffect()) ret += "\n" + movelist.get(move).getStatusEffectType() + " status effect, " +  movelist.get(move).getStatusEffectRange().get(0) + " - " + movelist.get(move).getStatusEffectRange().get(1);
+        else ret+= "\nno status effect";
+        return ret;
+    }
 
+
+    public MoveData.MoveType getStatusEffectMoveType(String moveContainingStatusEffect) {
+        return movelist.get(moveContainingStatusEffect).getStatusEffectType();
+    }
+
+    public int useMove(String nameOfMove, List<String> moves, List<String> statusEffects){
+        //first, call perform other move on all other moves
+        for(String otherMove : moves){//also call preformOtherMove() on all other moves in the list I pass in
+            if(movelist.get(otherMove) != movelist.get(nameOfMove)){
+                movelist.get(otherMove).performOtherMove();
+            }
+        }
+        return movelist.get(nameOfMove).useMove(nameOfMove, moves, statusEffects); //then use the selected move, and return amount
+    }
+
+    public int useStatusEffect(String nameOfMove, List<String> statusEffects){
+        return movelist.get(nameOfMove).useStatusEffect(nameOfMove, statusEffects);
+    }
+
+    public void resetMoves(List<String> moves){
+        for(String moveName : moves) movelist.get(moveName).resetMove();
+    }
+
+    public boolean isCurrentlyAvailable(String nameOfMove){
+        return movelist.get(nameOfMove).getCurrentlyAvailable();
+    }
 
 }

@@ -7,7 +7,9 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 public class Enemy extends Actor {
@@ -16,44 +18,52 @@ public class Enemy extends Actor {
     private int speed, speedX,speedY, type, floor;
     private float initX, initY;
     private boolean horizontal, direction;
-    private boolean fight, key, boss, human;
+    private boolean fight, key, boss;
     private Rectangle hitbox;
     private List<String> weapon;
+    private List<String> ongoingStatusEffects;
     private int level, maxHealth, health, experience;
     private Move abilities;
     private String name;
     private Random random;
     private List<Integer> movement;
 
-    public Enemy(int x, int y, int speedIn, int typeIn, int floorIn, List<Integer> movementIn){
-        initSprites();
+    public Enemy(int x, int y, int speedIn, String file, int floorIn, List<Integer> movementIn){
+        initSprites(file);
         sprite = sprites[0];
         initX = x;
         initY = y;
         speed = speedIn;
         speedX = speedIn;
         speedY = speedIn;
-        type = typeIn;
+        movement = movementIn;
+        random = new Random();
+        if (movement != null){
+            type = 1;
+            initX = random.nextInt(movement.get(1)-movement.get(0)-(int)sprite.getWidth())+movement.get(0);
+            initY = random.nextInt(movement.get(3)-movement.get(2)-(int)sprite.getHeight())+movement.get(2);
+        }else {
+            type = 0;
+        }
         horizontal = true;
         direction = true;
         fight = true;
         key = false;
         boss = false;
-        human = false;
         setBounds(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
         hitbox = new Rectangle(getX(), getY(), getWidth(), getHeight());
         setPosition(initX, initY);
-        movement = movementIn;
 
         //get the weapons based on level
         floor = floorIn;
         abilities = Move.getInstance();
         weapon = abilities.getEnemyWeapons(floor);
+        ongoingStatusEffects = new ArrayList<>();
 
-        random = new Random();
+
         level = random.nextInt(10)+floor;
-        //maxHealth = health = 1;
-        maxHealth = health = floor*100 + random.nextInt(100);
+        //maxHealth = health = 10;
+        maxHealth = health = floor*10 + random.nextInt(10);
         experience = level*2;
     }
 
@@ -61,11 +71,14 @@ public class Enemy extends Actor {
         return hitbox;
     }
 
-    private void initSprites(){
+    private void initSprites(String file){
         sprites = new Sprite[2];
-        sprites[0] = new Sprite(new Texture("enemy-printer-4x.png"));
+        sprites[0] = new Sprite(new Texture(file));
         sprites[1] = new Sprite(new Texture("player-resized6x.png")); //change to random human character
-        name = "Monster";
+        name = file.substring(0,file.length()-4);
+        name = name.replaceAll("-"," ");
+        name = name.toUpperCase();
+
     }
 
     public void scaleSprite(float scale){
@@ -194,6 +207,8 @@ public class Enemy extends Actor {
         return weapon;
     }
 
+    public List<String> getOngoingStatusEffects() { return ongoingStatusEffects; }
+
     public int getLevel(){
         return level;
     }
@@ -224,36 +239,36 @@ public class Enemy extends Actor {
 
     public void setBoss(){
         boss = true;
-        sprite = new Sprite(new Texture("enemy-printer-12x.png"));
-        positionChanged();
-    }
-
-    public void setHuman(){
-        human = true;
-        setHealth(0);
+        //sprite = new Sprite(new Texture("enemy-printer-12x.png"));
+        //positionChanged();
     }
 
     public void setHealth(int healthIn){
         health = healthIn;
         if(health > maxHealth) health = maxHealth; //for healing (don't go past max)
-        if(health<=0) {
-            fight = false;
+    }
+
+    public void defeated(){
+        fight = false;
+        sprite.setAlpha(0);
+        if(key){
+            Layout.getInstance().setKey(floor);
+            System.out.println("Obtained Key");
+            key = false;
+        }
+        if(boss){
             sprite = sprites[1];
-            positionChanged();
-            if(key){
-                Layout.getInstance().setKey(floor);
-                System.out.println("Obtained Key");
-            }
-            if(boss){
-                Layout.getInstance().setBoss(floor);
-                System.out.println("Defeated Boss");
-            }
+            sprite.setAlpha(1f);
+            Layout.getInstance().setBoss(floor);
+            System.out.println("Defeated Boss");
         }
     }
 
     public void respawn(){
-        if(!boss && !human) {
-            maxHealth = health = floor * 100 + random.nextInt(100);
+        if(!boss) {
+            //maxHealth = health = 10;
+            sprite.setAlpha(1f);
+            maxHealth = health = floor * 10 + random.nextInt(10);
             fight = true;
             sprite = sprites[0];
             scaleSprite(1f);

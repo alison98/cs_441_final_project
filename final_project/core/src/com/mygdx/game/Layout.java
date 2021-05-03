@@ -24,7 +24,7 @@ public class Layout {
     private List<Boolean> keys, bosses;
     private Random random;
     private Texture stairUpImg;
-    private List<String> roomNames;
+    private List<String> roomNames, enemyNames, bossNames;
 
 
     //Singleton class
@@ -52,6 +52,8 @@ public class Layout {
         column = random.nextInt(maxCol-1)+1;
 
         addRoomNames();
+        addEnemyNames();
+        addBossNames();
         generateMap();
 
         stairUpImg = new Texture("stairs-up.png");
@@ -77,6 +79,9 @@ public class Layout {
         }
         return instance;
     }
+
+    //matt needed for putting back at stairs
+    public Texture getStairUpImg(){return stairUpImg;}
 
     public Sprite getRoom(){
         return rooms.get(floor).get(row).get(column);
@@ -106,9 +111,23 @@ public class Layout {
 
     private void addRoomNames(){
         roomNames = new ArrayList<>();
-        roomNames.add("blank-room.png");
+        //roomNames.add("blank-room.png");
         roomNames.add("server-closet.png");
         roomNames.add("conference-room.png");
+        roomNames.add("cafeteria.png");
+    }
+    private void addEnemyNames(){
+        enemyNames = new ArrayList<>();
+        enemyNames.add("enemy-printer-4x.png");
+        enemyNames.add("fax.png");
+        enemyNames.add("box.png");
+    }
+    private void addBossNames(){
+        bossNames = new ArrayList<>();
+        bossNames.add("enemy-printer-12x.png");
+        bossNames.add("fax-boss.png");
+        bossNames.add("box-boss.png");
+        bossNames.add("enemy-printer-12x.png");
     }
 
     public boolean getDoorTouched(Player player){
@@ -249,12 +268,12 @@ public class Layout {
         int originalCol =column;
 
         //tutorial floor
-        addRoom(0, row, column, "office-space-no-printer.png", 0, 0);
+        addRoom(0, row, column, "office-space-no-printer.png", 0);
         connections.get(0).get(row).get(column).add(0);
         column -=1;
 
         int firstRoom = random.nextInt(roomNames.size());
-        addRoom(0, row, column, roomNames.get(firstRoom), 0, 0);
+        addRoom(0, row, column, roomNames.get(firstRoom), 0);
         connections.get(0).get(row).get(column).add(1);
         List<Integer[]> stairUp = new ArrayList<>();
         Integer[] stairs = new Integer[3];
@@ -266,7 +285,7 @@ public class Layout {
 
         List<String> available = new ArrayList<>(roomNames);
         available.remove(firstRoom);
-        addRoom(1, row, column, available.get(random.nextInt(available.size())), 0, 0);
+        addRoom(1, row, column, available.get(random.nextInt(available.size())), 0);
         List<Integer[]> stairDown = new ArrayList<>();
         Integer[] stairs2 = new Integer[3];
         stairs2[0] = row;
@@ -321,7 +340,7 @@ public class Layout {
                         connections.get(j).get(currRow).get(currCol).add(2);
                     }
                     if (rooms.get(j).get(currRow).get(currCol) == null) {
-                        addRoom(j, currRow, currCol, roomNames.get(random.nextInt(roomNames.size())), random.nextInt(2) + 1, 0);
+                        addRoom(j, currRow, currCol, roomNames.get(random.nextInt(roomNames.size())), random.nextInt(2) + 1);
 
                     }
                 }
@@ -337,7 +356,7 @@ public class Layout {
         column = originalCol;
     }
 
-    private void addRoom(int floorIn, int rowIn, int columnIn, String sprite, int enemy, int human){
+    private void addRoom(int floorIn, int rowIn, int columnIn, String sprite, int enemy){
         if(floorIn ==0){ //tutorial floor
             rooms.get(floorIn).get(rowIn).set(columnIn, new Sprite(new Texture(sprite)));
             if(rooms.get(floorIn).get(rowIn).get(columnIn).getTexture().toString().equals("office-space-no-printer.png")){
@@ -356,18 +375,10 @@ public class Layout {
         for(int i=0; i<enemy; i++){
             List<Integer> range = spawnLocation.get(random.nextInt(spawnLocation.size()));
             enemies.get(floorIn).get(rowIn).get(columnIn).add(
-                    new Enemy(random.nextInt(range.get(1)-range.get(0)-50)+range.get(0),random.nextInt(range.get(3)-range.get(2)-100)+range.get(2),2,1,floorIn,range));
+                    new Enemy(0,0,2,enemyNames.get(random.nextInt(enemyNames.size())),floorIn,range));
             if(spawnLocation.size() > 1){
                 spawnLocation.remove(range);
             }
-        }
-
-
-        for(int i=0; i<human; i++){
-            List<Integer> range = spawnLocation.get(random.nextInt(spawnLocation.size()));
-            Enemy npc = new Enemy(random.nextInt(1000)+100,random.nextInt(700)+100,2,0,floorIn, range);
-            npc.setHuman();
-            enemies.get(floorIn).get(rowIn).get(columnIn).add(npc);
         }
     }
 
@@ -395,7 +406,7 @@ public class Layout {
         String prevFloor = rooms.get(floorIn).get(stairs[0]).get(stairs[1]).getTexture().toString();
         List<String> available = new ArrayList<>(roomNames);
         available.remove(prevFloor);
-        addRoom(floorIn+1,possibleRooms.get(nextRoom).get(0),possibleRooms.get(nextRoom).get(1), available.get(random.nextInt(available.size())),0,0);
+        addRoom(floorIn+1,possibleRooms.get(nextRoom).get(0),possibleRooms.get(nextRoom).get(1), available.get(random.nextInt(available.size())),0);
         List<Integer[]> stairDown = new ArrayList<>();
         Integer[] stairs2 = new Integer[3];
         stairs2[0] = possibleRooms.get(nextRoom).get(0);
@@ -476,7 +487,7 @@ public class Layout {
         bossRooms.add(bossRoom);
 
         rooms.get(floorIn).get(newRow).set(newCol, new Sprite(new Texture(sprite)));
-        enemies.get(floorIn).get(newRow).get(newCol).add(new Enemy(1000,300,2,0,floorIn, null));
+        enemies.get(floorIn).get(newRow).get(newCol).add(new Enemy(1000,400,2,bossNames.get(floorIn),floorIn, null));
         enemies.get(floorIn).get(newRow).get(newCol).get(0).setBoss();
 
         connections.get(floorIn).get(newRow).get(newCol).add(direction);

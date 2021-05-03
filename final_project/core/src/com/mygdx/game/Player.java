@@ -23,6 +23,7 @@ public class Player extends Actor {
     private int level, health, maxHealth, experience;
     private Move abilities;
     private GameScreen gameScreen;
+    private List<String> ongoingStatusEffects;
 
 
     public Player(GameScreen gameScreenIn){
@@ -49,10 +50,13 @@ public class Player extends Actor {
         weapon.add("sword");
         weapon.add("coffee");
         weapon.add("coffee");
+        ongoingStatusEffects = new ArrayList<>();
         level = 1;
         maxHealth = health = 100;
         experience = 0;
     }
+
+    public List<String> getOngoingStatusEffects() { return ongoingStatusEffects; }
 
     public List<String> getWeapon(){
         return weapon;

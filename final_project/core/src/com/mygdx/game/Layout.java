@@ -413,8 +413,8 @@ public class Layout {
         if(floorIn ==0){ //tutorial floor
             rooms.get(floorIn).get(rowIn).set(columnIn, new Sprite(new Texture(sprite)));
             if(rooms.get(floorIn).get(rowIn).get(columnIn).getTexture().toString().equals("office-space-no-printer.png")){
-                interactables.get(floorIn).get(rowIn).get(columnIn).add(new TutorialPrinter("printer-shadow.png", floorIn, rowIn, columnIn, 0));
-                interactables.get(floorIn).get(rowIn).get(columnIn).get(0).setPosition(1528, 200);
+                interactables.get(floorIn).get(rowIn).get(columnIn).add(new TutorialPrinter("printer-shadow.png", floorIn, rowIn, columnIn, 0, 1528, 200));
+                //interactables.get(floorIn).get(rowIn).get(columnIn).get(0).setPosition(1528, 200);
                 Integer[] tutorial = new Integer[2];
                 tutorial[0] = rowIn;
                 tutorial[1] = columnIn;
@@ -545,8 +545,10 @@ public class Layout {
         bossRooms.add(bossRoom);
 
         rooms.get(floorIn).get(newRow).set(newCol, new Sprite(new Texture(sprite)));
-        enemies.get(floorIn).get(newRow).get(newCol).add(new Enemy(1000,400,2,bossNames.get(floorIn),floorIn, null));
-        enemies.get(floorIn).get(newRow).get(newCol).get(0).setBoss();
+        interactables.get(floorIn).get(newRow).get(newCol).add(new Boss(bossNames.get(floorIn), floorIn, newRow, newCol, 0, 1000, 400));
+
+        //enemies.get(floorIn).get(newRow).get(newCol).add(new Enemy(1000,400,2,bossNames.get(floorIn),floorIn, null));
+        //enemies.get(floorIn).get(newRow).get(newCol).get(0).setBoss();
 
         connections.get(floorIn).get(newRow).get(newCol).add(direction);
         if (direction == 0) {
@@ -603,8 +605,10 @@ public class Layout {
         stairRooms.add(stairDown);
 
         rooms.get(maxFloor).get(0).set(0, new Sprite(new Texture("blank-room.png")));
-        enemies.get(maxFloor).get(0).get(0).add(new Enemy(1000,400,2,bossNames.get(maxFloor),maxFloor, null));
-        enemies.get(maxFloor).get(0).get(0).get(0).setBoss();
+        interactables.get(maxFloor).get(0).get(0).add(new Boss(bossNames.get(maxFloor), maxFloor, 0, 0, 0, 1000, 400));
+
+        //enemies.get(maxFloor).get(0).get(0).add(new Enemy(1000,400,2,bossNames.get(maxFloor),maxFloor, null));
+        //enemies.get(maxFloor).get(0).get(0).get(0).setBoss("PUT A MESSAGE FOR THE FINAL BOSS TO SAY AFTER DYING HERE");
 
         connections.get(maxFloor).get(0).get(0).add(3);
         connections.get(maxFloor).get(1).get(0).add(2);

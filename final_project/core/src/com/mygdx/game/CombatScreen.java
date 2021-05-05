@@ -248,6 +248,13 @@ public class CombatScreen implements Screen {
     private void combatOver(boolean playerWon) {
         if(playerWon){//the player won
             player.setPosition(playerX, playerY);//put back in original spot
+            if(enemy.isBoss()){
+                enemy.setHuman();
+                String bossMessage = enemy.getBossMessage();
+                if(bossMessage != ""){
+                    gameScreen.getHud().setText(bossMessage);
+                }
+            }
             if(enemy.hasKey()){
                 gameScreen.getHud().setText("The enemy dropped a key!");
             }

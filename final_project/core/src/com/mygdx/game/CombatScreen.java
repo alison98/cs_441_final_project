@@ -46,6 +46,7 @@ public class CombatScreen implements Screen {
     private Attack currentAttack;
     private float playerX, playerY, enemyX, enemyY;
     private Label textBox; //to display move info
+    private Label currentMoveLabel; //to display name of current move
     private boolean touchDown; //to only display move info when mousing over (not on actually using)
     private boolean statusEffectsInProgress;
     private int statusEffectsIndex;
@@ -53,28 +54,27 @@ public class CombatScreen implements Screen {
 
     //TODO
     // -FEATURES:
-    //      -name of attack/UI indication of what's happening
-    //          --with multiple status effects, it can become very confusing quickly
-    //          --probably just show name of move and if it was a status effect or not
     //      -other things to add based on how Moves work:
     //          --Do weapons have durability?
     //          --Cool-down or certain number of uses of a move per encounter?
     //          --I've taken care of the 2 points above already (although I haven't tested)
     //          --Can AI heal? if so make their choices smarter
-    //      -add UI elements that use xp
-    //          --display level
-    //          --display increase in user's xp?
     //      -use player.getRewards() for drops, levels
     // -BUGS:
+    //      -fix so player cannot consume move that does nothing
+    //          --i.e. healing at 100% won't do anything, but it will use their move - pick one or the other
     //      -test all the new stuff I added to moves
     //          --need a better solution to duplicates - imagine enemy and player using same move
     //          --duplicates and multiple simultaneous effects will probably break
+    //      -I had an enemy spawn with 0 health and break everything
     //      -fix bug of going back into combat
     //          --I haven't been able to replicate yet
     //      -fix bug where printer disappears when player loses
     //          --this is because the interactable is removed before combat ends
     //          --decide what happens when player dies first - we might want predefined save points or something to go back to
     // -OTHER:
+    //      -different font
+    //      -different background
     //      -update comments
     //      -less hard-coded numbers (placing UI elements)
     //      -clean the button code
@@ -148,7 +148,7 @@ public class CombatScreen implements Screen {
             String statusEffect = player.getOngoingStatusEffects().get(statusEffectsIndex);
             //System.out.println("performing " + statusEffect);
             int amount = Move.getInstance().useStatusEffect(statusEffect, player.getOngoingStatusEffects());//change to status effect range
-            playerTurn(Move.getInstance().getStatusEffectMoveType(statusEffect), amount, statusEffect);
+            playerTurn(Move.getInstance().getStatusEffectMoveType(statusEffect), amount, statusEffect, true);
             statusEffectsIndex++;
             //System.out.println("next index : " + statusEffectsIndex + " size of list " + player.getOngoingStatusEffects().size());
         }else{
@@ -163,11 +163,13 @@ public class CombatScreen implements Screen {
         //System.out.println(player.getWeapon().size());
         int amount = Move.getInstance().useMove(selectedWeapon, player.getWeapon(), player.getOngoingStatusEffects());
         //System.out.println(player.getWeapon().size());
-        playerTurn(Move.getInstance().getMoveType(selectedWeapon), amount, selectedWeapon);
+        playerTurn(Move.getInstance().getMoveType(selectedWeapon), amount, selectedWeapon, false);
         isPlayerTurn = false;//it is now the enemy's turn, they can go once animations finish
     }
 
-    public void playerTurn(MoveData.MoveType type, int amount, String nameOfMove){
+    public void playerTurn(MoveData.MoveType type, int amount, String nameOfMove, boolean StatusEffect){
+        if(StatusEffect) currentMoveLabel.setText("Bill Gates" + " used " + nameOfMove + " status effect");
+        else currentMoveLabel.setText("Bill Gates" + " used " + nameOfMove);
         switch (type){ //deal with different types of moves
             case ATTACK:
                 System.out.println("dealing " + amount + " to enemy");
@@ -199,7 +201,7 @@ public class CombatScreen implements Screen {
             String statusEffect = enemy.getOngoingStatusEffects().get(statusEffectsIndex);
             //System.out.println("performing " + statusEffect);
             int amount = Move.getInstance().useStatusEffect(statusEffect, enemy.getOngoingStatusEffects());//change to status effect range
-            enemyTurn(Move.getInstance().getStatusEffectMoveType(statusEffect), amount, statusEffect);
+            enemyTurn(Move.getInstance().getStatusEffectMoveType(statusEffect), amount, statusEffect, false);
             statusEffectsIndex++;
         }else{
             statusEffectsInProgress = false;
@@ -219,13 +221,15 @@ public class CombatScreen implements Screen {
         //I'll probably want to make a smarter choice - only heal when low
         String selectedWeapon = enemyWeapons.get(rand.nextInt(enemyWeapons.size()));//get random weapon
         int amount = Move.getInstance().useMove(selectedWeapon, enemy.getWeapon(), enemy.getOngoingStatusEffects());
-        enemyTurn(Move.getInstance().getMoveType(selectedWeapon), amount, selectedWeapon);
+        enemyTurn(Move.getInstance().getMoveType(selectedWeapon), amount, selectedWeapon, false);
         isPlayerTurn = true;//it is now the player's turn, they can go once animations finish
     }
 
     //common functionality for a turn and a status effect
     //look at type, use amount, modify health bars, etc.
-    public void enemyTurn(MoveData.MoveType type, int amount, String nameOfMove) {
+    public void enemyTurn(MoveData.MoveType type, int amount, String nameOfMove, boolean StatusEffect) {
+        if(StatusEffect) currentMoveLabel.setText(enemy.getName() + " used " + nameOfMove + " status effect");
+        else currentMoveLabel.setText(enemy.getName() + " used " + nameOfMove);
         switch (type) { //deal with different types of moves
             case ATTACK:
                 //System.out.println("dealing " + amount + " to player");
@@ -258,6 +262,8 @@ public class CombatScreen implements Screen {
             if(enemy.hasKey()){
                 gameScreen.getHud().setText("The enemy dropped a key!");
             }
+            List<Integer> rewards = enemy.getRewards(); //0 is xp, 1 is money, 2 will be drops
+            //then we just call player.setRewards
             enemy.defeated();
         }else{//player lost
             //place player back at this floor's stairs
@@ -311,16 +317,23 @@ public class CombatScreen implements Screen {
         //these 2 labels display the change in health per turn
         Label playerHealthChange = new Label("", labelStyle);
         playerHealthChange.setSize(250, 200);
-        playerHealthChange.setPosition(((float) width / 4) + player.getWidth()/2, height - (float) (height / 2.5));
+        playerHealthChange.setPosition(((float) width / 4) + player.getWidth()/2, height - (height / 2.25f));
         playerHealthChange.setAlignment(Align.center);
         stage.addActor(playerHealthChange);
 
         Label enemyHealthChange = new Label("", labelStyle);
         enemyHealthChange.setSize(250, 200);
-        enemyHealthChange.setPosition((width - (width / 5f) + enemy.getWidth()/2) + enemy.getWidth()/2, height - (float) (height / 2.5));
+        enemyHealthChange.setPosition((width - (width / 5f) + enemy.getWidth()/2) + enemy.getWidth()/2, height -  (height / 2.25f));
         enemyHealthChange.setAlignment(Align.center);
         stage.addActor(enemyHealthChange);
 
+        //global label for displaying the current move's name
+        currentMoveLabel = new Label("", labelStyle);
+        currentMoveLabel.setSize(500, 200);
+        currentMoveLabel.setPosition(width/2f - 250, height - height/1.3f);
+        currentMoveLabel.setFontScale(.6f);//looks better smaller (and I am running out of room)
+        currentMoveLabel.setAlignment(Align.center);
+        stage.addActor(currentMoveLabel);
 
         //I'm trying to replace some of the hard-coded numbers with constants
         final int LABEL_AND_HEALTHBAR_LENGTH = 750;
@@ -330,13 +343,13 @@ public class CombatScreen implements Screen {
         //2 labels for name and current/total health
         //these look the best when they are directly above the health bars and the same length, so they reuse the constants
         //will probably need to define these numbers differently/less hard-coding and make sure it looks good at different scales(?)
-        Label playerNameLabel = new Label("Bill Gates", labelStyle);
+        Label playerNameLabel = new Label("Level " + player.getLevel() + "\nBill Gates", labelStyle);
         playerNameLabel.setSize(LABEL_AND_HEALTHBAR_LENGTH + LABEL_AND_HEALTHBAR_OFFSET, 200);
         playerNameLabel.setPosition(100, height - (height / 5.5f));
         playerNameLabel.setAlignment(Align.center);
         stage.addActor(playerNameLabel);
 
-        Label enemyNameLabel = new Label(enemy.getName(), labelStyle);
+        Label enemyNameLabel = new Label("Level " + enemy.getLevel() + "\n" + enemy.getName(), labelStyle);
         enemyNameLabel.setSize(LABEL_AND_HEALTHBAR_LENGTH + LABEL_AND_HEALTHBAR_OFFSET, 200);
         enemyNameLabel.setPosition(width - 850, height -(height / 5.5f));
         enemyNameLabel.setAlignment(Align.center);
@@ -344,10 +357,10 @@ public class CombatScreen implements Screen {
 
         //HealthBar class with a basic decrementing animation
         //I also put the labels with the health bar as well to keep organized (and modify them as part of the animation, which makes sense)
-        playerHealthBar = new HealthBar(player.getHealth(), player.getMaxHealth(), 100, height - (height / 4f), playerHealthChange, playerNameLabel, LABEL_AND_HEALTHBAR_LENGTH, LABEL_AND_HEALTHBAR_HEIGHT,LABEL_AND_HEALTHBAR_OFFSET);//will also modify X, Y to be based on sprite size, health
+        playerHealthBar = new HealthBar(player.getHealth(), player.getMaxHealth(), 100, height - (height / 3.5f), playerHealthChange, playerNameLabel, LABEL_AND_HEALTHBAR_LENGTH, LABEL_AND_HEALTHBAR_HEIGHT,LABEL_AND_HEALTHBAR_OFFSET);//will also modify X, Y to be based on sprite size, health
         stage.addActor(playerHealthBar);
 
-        enemyHealthBar = new HealthBar(enemy.getHealth(), enemy.getMaxHealth() ,width - 850, height -  (height / 4f),enemyHealthChange, enemyNameLabel, LABEL_AND_HEALTHBAR_LENGTH, LABEL_AND_HEALTHBAR_HEIGHT,LABEL_AND_HEALTHBAR_OFFSET);//will also modify X, Y to be based on sprite size, health
+        enemyHealthBar = new HealthBar(enemy.getHealth(), enemy.getMaxHealth() ,width - 850, height -  (height / 3.5f),enemyHealthChange, enemyNameLabel, LABEL_AND_HEALTHBAR_LENGTH, LABEL_AND_HEALTHBAR_HEIGHT,LABEL_AND_HEALTHBAR_OFFSET);//will also modify X, Y to be based on sprite size, health
         stage.addActor(enemyHealthBar);
 
         //Label to display info about a move
@@ -874,6 +887,7 @@ public class CombatScreen implements Screen {
             if(currentActiveAnimations == 0){
                 //System.out.println("done with all animations");
                 animationActive = false;
+                currentMoveLabel.setText("");
                 //can call an event to trigger next function
                 //playerTurn is never explicitly called, its done via buttons
                 //so we just check if animations are active and its the player's turn

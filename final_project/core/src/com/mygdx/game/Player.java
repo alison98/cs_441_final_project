@@ -174,6 +174,12 @@ public class Player extends Actor {
                 this.speedX = 0;
             }
         }
+        for(Interactable interactable : Layout.getInstance().getInteractables()){
+            if(newBounds.overlaps(interactable.getBounds())){
+                this.speedX = 0;
+                this.speedY = 0;
+            }
+        }
         if(frameCounter < 4){
             frameCounter++;
         } else{

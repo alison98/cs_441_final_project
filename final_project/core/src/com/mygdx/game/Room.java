@@ -113,7 +113,7 @@ public class Room extends Actor {
 
     public Interactable getInteractablesTouched(Player player) {
         for(Interactable interactable : interactables){
-            if(interactable.getBounds().overlaps(player.getBounds())){
+            if(interactable.getInteractionBounds().overlaps(player.getBounds())){
                 return interactable;
             }
         }

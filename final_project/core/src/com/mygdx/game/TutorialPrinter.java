@@ -3,10 +3,12 @@ package com.mygdx.game;
 import com.badlogic.gdx.Game;
 
 public class TutorialPrinter extends Interactable{
-    private int floor, row, column, index;
+    private int floor, row, column, index, x, y;
 
-    public TutorialPrinter(String image, int floorIn, int rowIn, int columnIn, int indexIn) {
-        super(image, floorIn, rowIn, columnIn, indexIn);
+    public TutorialPrinter(String image, int floorIn, int rowIn, int columnIn, int indexIn, int xIn, int yIn) {
+        super(image, floorIn, rowIn, columnIn, indexIn, xIn, yIn);
+        x = xIn;
+        y = yIn;
         floor = floorIn;
         row = rowIn;
         column = columnIn;
@@ -19,9 +21,9 @@ public class TutorialPrinter extends Interactable{
     }
 
     public void fight(GameScreen game){
-        Enemy tutorialPrinter = new Enemy(1528,200,2,"enemy-printer-12x.png", 0, null);
-        tutorialPrinter.setKey();
-        tutorialPrinter.setBoss();
+        Enemy tutorialPrinter = new Enemy(x,y,2,"enemy-printer-12x.png", floor, null);
+        //tutorialPrinter.setKey();
+        tutorialPrinter.setBoss("You managed to fight off the printer,\nbut what's going on upstairs?");
         game.getPlayer().setCombat();
         Layout.getInstance().removeInteractable(floor, row, column, index);
         game.getRoom().setUpInteractables();

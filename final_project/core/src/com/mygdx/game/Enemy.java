@@ -22,11 +22,13 @@ public class Enemy extends Actor {
     private Rectangle hitbox;
     private List<String> weapon;
     private List<String> ongoingStatusEffects;
-    private int level, maxHealth, health, experience;
+    private int level, maxHealth, health, experience, money;
     private Move abilities;
     private String name;
     private Random random;
     private List<Integer> movement;
+    private String bossMessage;
+    private boolean isHuman;
 
     public Enemy(int x, int y, int speedIn, String file, int floorIn, List<Integer> movementIn){
         initSprites(file);
@@ -63,18 +65,22 @@ public class Enemy extends Actor {
 
         level = random.nextInt(10)+floor;
         //maxHealth = health = 10;
-        maxHealth = health = floor*10 + random.nextInt(10);
+        money = maxHealth = health = floor*10 + random.nextInt(10);
         experience = level*2;
+        bossMessage = "";
+        isHuman = false;
     }
 
     public Rectangle getHitbox(){
         return hitbox;
     }
 
+    public Sprite getHumanSprite(){return sprites[1];}
+
     private void initSprites(String file){
         sprites = new Sprite[2];
         sprites[0] = new Sprite(new Texture(file));
-        sprites[1] = new Sprite(new Texture("player-resized6x.png")); //change to random human character
+        sprites[1] = new Sprite(new Texture("human2-6x.png")); //change to random human character
         name = file.substring(0,file.length()-4);
         name = name.replaceAll("-"," ");
         name = name.toUpperCase();
@@ -221,8 +227,12 @@ public class Enemy extends Actor {
         return health;
     }
 
-    public int getExperience(){
-        return experience;
+    public List<Integer> getRewards(){
+        List<Integer> rewards = new ArrayList<>();
+        rewards.add(experience);
+        rewards.add(money);
+        //rewards.add(drops);
+        return rewards;
     }
 
     public boolean getFight(){
@@ -237,10 +247,25 @@ public class Enemy extends Actor {
 
     public boolean hasKey(){ return key; }
 
-    public void setBoss(){
+    public boolean isBoss(){ return boss; }
+
+    public void setBoss(String bossMessageIn){
         boss = true;
+        bossMessage = bossMessageIn;
         //sprite = new Sprite(new Texture("enemy-printer-12x.png"));
         //positionChanged();
+    }
+
+    public boolean isHuman(){return isHuman;}
+
+    public void setHuman(){
+        isHuman = true;
+        sprite = sprites[1];
+        positionChanged();
+    }
+
+    public String getBossMessage(){
+        return bossMessage;
     }
 
     public void setHealth(int healthIn){
@@ -265,10 +290,10 @@ public class Enemy extends Actor {
     }
 
     public void respawn(){
+        maxHealth = health = floor * 10 + random.nextInt(10);
         if(!boss) {
             //maxHealth = health = 10;
             sprite.setAlpha(1f);
-            maxHealth = health = floor * 10 + random.nextInt(10);
             fight = true;
             sprite = sprites[0];
             scaleSprite(1f);

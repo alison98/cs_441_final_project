@@ -66,6 +66,10 @@ public class Hud {
                         if(interactable != null){
                             if(interactable instanceof TutorialPrinter){
                                 ((TutorialPrinter)interactable).fight(gameScreen);
+                            } else if(interactable instanceof Boss){
+                                if(!((Boss)interactable).isHuman()){
+                                    ((Boss)interactable).fight(gameScreen);
+                                }
                             }
                         }
                         upButton.setTouchable(Touchable.enabled);
@@ -85,6 +89,8 @@ public class Hud {
                 if(interactable != null){
                     if(interactable instanceof TutorialPrinter){
                         ((TutorialPrinter)interactable).interact(gameScreen);
+                    } else if(interactable instanceof Boss){
+                        ((Boss)interactable).interact(gameScreen);
                     }
                 }
             }

@@ -15,6 +15,7 @@ public class Move {
     private static Move instance;
 
     private Map<String, MoveData> movelist;//Map where key is the names of weapons and value is a MoveData object (with range and move type)
+    private Map<String, List<MoveData>> randomMovelist; //this is what I'll use when we need a random move, still need to figure out how to use elsewhere now
     private List<List<String>> enemyWeapons;
 
 
@@ -26,11 +27,11 @@ public class Move {
     private Move(){
         //Set up all possible moves in game
         movelist = new HashMap<>();
+        randomMovelist = new HashMap<>();//likely to change in some capacity
         //I switched to a builder
 
         //starting to set up some more moves (I need more and will keep thinking, especially for different enemy sprites)
         //player and enemy cannot use the same moves right now, so I've separated here and may take further precautions (or fix the limitation)
-        //I'd also like to randomize some stats, but I'd need to change a bit to do so (same limitation as point above)
         //I also need to think about balance and making things interesting
 
         //test case I didn't feel like removing yet
@@ -86,6 +87,248 @@ public class Move {
 
 
 
+        //here's how random moves work for now
+        //its unbalanced, but I've added the ability for us to test and balance easily
+        //  -we set up moves and their ranges above, then make random variations for each
+        //  -we always keep the type of move, and can never do less damage than the min or more than the max
+        //  -all other possible features/stats are randomized, as seen below
+        //  -these will be added to a Map<String, List<MoveData>>
+        //  -when we give the player or enemy a new move, we can go fully random, or provide a parameter based on the move's ranking (1-5 for now, also needs tweaking)
+        //  -same thing with shop, can make a price based on stats of weapon
+        //  -I can also mark MoveData objects that are in use - prevent issues above and keeps "duplicates" different
+
+        //here's the current stats on randomization and ranking, which need a lot of adjustments
+        //also the ranking system is far from perfect, and should be more representative of the %'s I've listed below
+        //  -range: worth 35% of ranking
+        //      -we use the original range to determine which slice to use in this variation's range
+        //      -10% chance of range = minimum to minimum
+        //      -20% chance of range = minimum to 25% of max
+        //      -30% chance of range = 25% of max to 50% of max
+        //      -20% chance of range = 50% of max to 75% of max
+        //      -10% chance of range = maximum to maximum
+        //  -durability: worth 10% of ranking (I might go higher)
+        //      -1% chance of infinite/no durability (might adjust)
+        //      -10% chance of 1, 10% chance of 2, ... 10 % chance of 9 (should adjust)
+        //      -9% chance of 10 (should adjust)
+        //  -uses per turn: worth 10% of ranking (I might go lower)
+        //      -1% chance of no limit (might adjust)
+        //      -20% chance of 1, 20% chance of 2, ... 20 % chance of 4 (should adjust)
+        //      -19% chance of 5 (should adjust)
+        //  -cooldown: worth 10% of ranking (I might go lower)
+        //      -1% chance of no cooldown (might adjust)
+        //      -33.33% chance of 1 (should adjust)
+        //      -32.33% chance of 2 (should adjust)
+        //      -33.33% chance of 3 (should adjust)
+        //  -status effect: worth 35% of ranking
+        //      -33.33% chance of having a status effect (which is worth 20% out of the 35%)
+        //      -50% chance of being healing, 50% chance of being attack
+        //      -33% chance of duration being 1, 33% chance of duration being 2, 33% chance of duration being 3 (adjust)
+        //      -then the range stuff:
+        //          -25% chance of having a higher maximum range than the original (adjust and fix ranking amount here)
+        //          -then the same percentages as the range above, again based on the original range (unless max was adjusted in step before)
+
+        //further balance issues:
+        //  -running out of moves (weapon breaks, have no more and cannot get any more)
+        //  -overpowered (infinite healing items)
+        //  -underpowered
+
+
+        //used for stats
+        double hasStatusEffect=0, highDurability=0, highUsesPerTurn=0, lowCooldown=0, weak=0, strong = 0, one=0, two=0, three=0, four=0, five=0;
+
+        Random rand = new Random();
+        for(String move : movelist.keySet()){//go through all moves created above
+            List<MoveData> currentMovelist = new ArrayList<>();//make a new list to store all random variations for this move
+            MoveData originalMove = movelist.get(move); //get the original move
+            for(int i =0 ; i< 100; i++){ //make 100 random variations
+                //variables we'll set through randomization
+                //I do things this way so I can use the builder at the end for clarity
+                List<Integer> range, statusEffectRange = new ArrayList<>();
+                int durability = 0;
+                int usesPerTurn = 0;
+                int cooldown = 0;
+                boolean statusEffect = false;
+                MoveData.MoveType statusType = null;
+                int duration = 0;
+                int ranking = 0;
+
+                //1st up is damage/amount range - based this on the starting one, won't go higher or lower, but will modify range
+                int damageRandomAssignment = rand.nextInt(10) + 1; //roll 1-10
+                //get min and max from the original move's min and max
+                int min = originalMove.getRange().get(0);
+                int max = originalMove.getRange().get(1);
+                int halfway = ((max-min)/2) + min; //50% of max
+                int minToHalf = ((halfway-min) / 2) + min; //25% of max
+                int halfToMax = ((max-halfway) / 2) + halfway; //75% of max
+                if(damageRandomAssignment == 1){//1 - do min damage every time
+                    range = setDamage(min, min);
+                    ranking+=0;
+                }else if(damageRandomAssignment < 4){//2, 3 - do min to a little above min
+                    range = setDamage(min, minToHalf);
+                    ranking+=5;
+                }else if(damageRandomAssignment < 7) { //4,5,6 - do more than min to half
+                    range = setDamage(minToHalf, halfway);
+                    ranking+=10;
+                }else if(damageRandomAssignment <9){//7,8 - do half to max
+                    range = setDamage(halfway, halfToMax);
+                    ranking+=20;
+                }else if(damageRandomAssignment < 10){ //75 - 100%
+                    range = setDamage(halfToMax, max);
+                    ranking+=30;
+                }
+                else { //10 - do max
+                    range = setDamage(max, max);
+                    ranking+=35;
+                }
+
+                //next is durability
+                //1-100 - num % 10 is durability, 100 is infinite use
+                //remember to tweak healing items here
+                int durabilityRandomAssignment = rand.nextInt(100) + 1; //roll 1-100
+                if(durabilityRandomAssignment != 100){
+                    durability = (durabilityRandomAssignment % 10) + 1; //1 - 10
+                    ranking+= (durability-1);
+                }else{
+                    ranking+=10;
+                }
+
+                //next is uses per turn
+                //1-100 - num % 5 is uses per turn, 100 is no limit
+                int usesPerTurnRandomAssignment = rand.nextInt(100) + 1; //roll 1-100
+                if(usesPerTurnRandomAssignment != 100){
+                    usesPerTurn = (usesPerTurnRandomAssignment % 5) + 1; //1-5
+                    if(usesPerTurn == 1) ranking+=0;
+                    if(usesPerTurn == 2) ranking+=3;
+                    if(usesPerTurn == 3) ranking+=6;
+                    if(usesPerTurn == 4) ranking+=8;
+                    if(usesPerTurn == 5) ranking+=9;
+                }else{
+                    ranking+=10;
+                }
+
+                //next is cooldown
+                //1-100 - num % 3 is cooldown, 100 is no cooldown
+                int cooldownRandomAssignment = rand.nextInt(100) + 1; //roll 1-100
+                if(cooldownRandomAssignment != 100){
+                    cooldown = (cooldownRandomAssignment % 3) + 1; //1-3
+                    if(cooldown == 1) ranking+=9;
+                    if(cooldown == 2) ranking+=5;
+                    if(cooldown == 3) ranking+=0;
+                }else{
+                    ranking+=10;
+                }
+
+                //then status effect
+                int statusEffectRandomAssignment = rand.nextInt(3) + 1; //roll 1-3
+                if(statusEffectRandomAssignment == 3){//1/3 chance for now
+                    statusEffect = true;
+                    ranking+=20;
+                    int typeRandomAssignment = rand.nextInt(1) + 1; //50% chance of either
+                    if(typeRandomAssignment == 1){
+                        statusType = MoveData.MoveType.ATTACK;
+                    }else{
+                        statusType = MoveData.MoveType.HEALING;
+                    }
+                    duration = rand.nextInt(3) + 1; //roll 1-3, determines duration right from that
+                    ranking+=duration;
+                    int statusEffectRangeRandomAssignment = rand.nextInt(4) + 1;
+                    int maxRange, minRange;
+                    if(statusEffectRangeRandomAssignment == 4) { //25% chance of higher range than original
+                        maxRange = rand.nextInt(max) + max;//up to double
+                        minRange = min;
+                        //really need a ranking adjustment here
+                    }
+                    else{
+                        maxRange = max;
+                        minRange = min;
+                    }
+                    //same as the original damage stuff, can make a function
+                    damageRandomAssignment = rand.nextInt(10) + 1; //roll 1-10
+                    halfway = ((maxRange-minRange)/2) + minRange; //50%
+                    minToHalf = ((halfway-minRange) / 2) + minRange; //25%
+                    halfToMax = ((maxRange-halfway) / 2) + halfway;//75%
+                    if(damageRandomAssignment == 1){//1 - do min damage every time
+                        statusEffectRange = setDamage(minRange, minRange);
+                        ranking+=0;
+                    }else if(damageRandomAssignment < 4){//2, 3 - do min to a little above min
+                        statusEffectRange = setDamage(minRange, minToHalf);
+                        ranking+=2;
+                    }else if(damageRandomAssignment < 7) { //4,5,6 - do more than min to half
+                        statusEffectRange = setDamage(minToHalf, halfway);
+                        ranking+=5;
+                    }else if(damageRandomAssignment <9){//7,8 - do half to half to max
+                        statusEffectRange = setDamage(halfway, halfToMax);
+                        ranking+=8;
+                    } else if(damageRandomAssignment <10){ // 9 - do half to max to max
+                        statusEffectRange = setDamage(halfToMax, maxRange);
+                        ranking+=10;
+                    }else { //10 - do max
+                        statusEffectRange = setDamage(maxRange, maxRange);
+                        ranking+=12;
+                    }
+                }
+
+                //finally, start building the move
+                MoveData.Builder builder = new MoveData.Builder(range, originalMove.getMoveType());
+
+                if(durability != 0){
+                    builder.setDurability(durability);
+                }
+                if(cooldown != 0){
+                    builder.setCooldown(cooldown);
+                }
+                if(usesPerTurn != 0){
+                    builder.setUsesPerEncounter(usesPerTurn);
+                }
+                if(statusEffect){
+                    builder.setStatusEffect(statusType, statusEffectRange, duration);
+                }
+
+                MoveData currentMove = builder.build();//actually build the MoveData object
+                currentMove.setRanking(ranking);//set its ranking, which we've been building up here
+                currentMovelist.add(currentMove);//add to current arraylist
+
+                //stuff for testing:
+                //System.out.println(move + " " + i + ": "+ currentMove.toString() + "\n\n"); //print move variation number and info
+
+                //collect stats on percentage of moves with certain criteria
+                if(currentMove.getHasStatusEffect()) hasStatusEffect++;
+                if(durability == 0 ) highDurability++;
+                if(usesPerTurn == 0 ) highUsesPerTurn++;
+                if(cooldown == 0 ) lowCooldown++;
+                //if(durability == 0 || durability > 8) highDurability++;
+                //if(usesPerTurn == 0 || usesPerTurn > 4) highUsesPerTurn++;
+                //if(cooldown == 0 || cooldown <2) lowCooldown++;
+
+                if(currentMove.getHasStatusEffect() && durability ==0 && usesPerTurn == 0 && cooldown ==0) strong++;
+                if(!currentMove.getHasStatusEffect() && durability<2 && usesPerTurn < 2 && cooldown>2) weak++;
+
+                int r = currentMove.getRanking();
+                if(r == 1) one++;
+                if(r==2) two++;
+                if(r==3) three++;
+                if(r==4) four++;
+                if(r==5) five++;
+
+            }
+            randomMovelist.put(move, currentMovelist); //add all the variations to the random list
+        }
+
+        //stats to print out to help with balance and testing
+        double maxMoves = 100 * movelist.keySet().size();
+        System.out.println((hasStatusEffect/maxMoves) * 100 + "% have status effects");
+        System.out.println( (highDurability/maxMoves) * 100 + "% have high durability");
+        System.out.println((highUsesPerTurn/maxMoves) * 100 + "% have high uses per turn");
+        System.out.println((lowCooldown/maxMoves) * 100 + "% have low cooldown");
+        System.out.println((strong/maxMoves) * 100 + "% are overpowered");
+        System.out.println((weak/maxMoves) * 100 + "% are weak");
+        System.out.println((one/maxMoves) * 100 + "% are ranked 1");
+        System.out.println((two/maxMoves) * 100 + "% are ranked 2");
+        System.out.println((three/maxMoves) * 100 + "% are ranked 3");
+        System.out.println((four/maxMoves) * 100 + "% are ranked 4");
+        System.out.println((five/maxMoves) * 100 + "% are ranked 5");
+
+
 
         //Set up weapons/abilities for enemies
         enemyWeapons = new ArrayList<>();
@@ -113,6 +356,10 @@ public class Move {
         }
         return instance;
     }
+
+    //I'll need a new function somewhere to get a random move
+    //for example, when we give an enemy a move, we want to pull a random one, or use the ranking to pick one
+    //then this is the enemy's move, and we need to track the specific variation (store the index with the move name? I still need to figure this one out)
 
     public MoveData.MoveType getMoveType(String weapon){
         return movelist.get(weapon).getMoveType();

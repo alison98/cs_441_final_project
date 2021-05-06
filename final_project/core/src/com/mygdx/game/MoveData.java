@@ -17,6 +17,29 @@ public class MoveData {
         HEALING//heal self
     }
 
+    //related to figuring out how to let player and enemy use a specific random instance
+    //we'll need to make sure a variation is not currently in use
+    private int inUse;
+
+    //moves now have a ranking, which can help with setting enemy moves based on level, as well as drops and prices in the shop (if we get there)
+    //right now its 0-100, but we return 1-5 based on this
+    private int ranking;
+
+    //called when making the random variation (we sum up the value from 0-100 there)
+    public void setRanking(int r){
+        ranking = r;
+    }
+
+    //returns 1 - 5 based on the 0-100 value assigned when creating the move
+    //needs some work still
+    public int getRanking(){
+        if(ranking < 21) return 1;
+        if(ranking < 41) return 2;
+        if(ranking < 61) return 3;
+        if(ranking < 81) return 4;
+        return 5;
+    }
+
     //we need a range and a type - name is held in singleton map
     private List<Integer> range;
     private MoveType movetype;
@@ -131,7 +154,7 @@ public class MoveData {
         else ret+= "\nNo limit on uses per encounter.";
         if(cooldownLength != 0) ret+=" Cooldown: " + turnsSinceUsed + "/" + cooldownLength;
         else ret+= " No cooldown.";
-        if(hasStatusEffect) ret += "\n" + statusEffectType + " status effect, " +  getStatusEffectRange().get(0) + " - " + getStatusEffectRange().get(1);
+        if(hasStatusEffect) ret += "\n" + statusEffectType + " status effect, " +  getStatusEffectRange().get(0) + " - " + getStatusEffectRange().get(1) + ", " + duration + " turns";
         else ret+= "\nNo status effect.";
         return ret;
     }

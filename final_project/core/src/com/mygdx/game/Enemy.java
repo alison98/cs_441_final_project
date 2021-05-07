@@ -254,7 +254,7 @@ public class Enemy extends Actor {
         isBoss = true;
         bossMessage = bossMessageIn;
         boss = bossIn;
-        maxHealth = health = 100;
+        //maxHealth = health = 100;
         //sprite = new Sprite(new Texture("enemy-printer-12x.png"));
         //positionChanged();
     }

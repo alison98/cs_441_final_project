@@ -339,6 +339,7 @@ public class Layout {
         stairRooms.add(stairDown);
         keys.add(false);
         bosses.add(false);
+        addShop(1,row,column);
 
         //Create middle floors
         int nextRow = row;
@@ -433,6 +434,12 @@ public class Layout {
                 spawnLocation.remove(range);
             }
         }
+        int possibility = random.nextInt(5);
+        if(possibility ==0) {
+            List<List<Integer>> itemLocations = Boundary.getInstance().getItemLocations();
+            List<Integer> itemL = itemLocations.get(random.nextInt(itemLocations.size()));
+            interactables.get(floorIn).get(rowIn).get(columnIn).add(new Item("badlogic.jpg", floorIn, rowIn, columnIn, 0, itemL.get(0), itemL.get(1)));
+        }
     }
 
     private List<Integer> addStairs(int floorIn){
@@ -466,12 +473,12 @@ public class Layout {
         stairs2[2] = 0;
         stairDown.add(stairs2);
         stairRooms.add(stairDown);
+        addShop(floorIn+1,stairs2[0],stairs2[1]);
         return possibleRooms.get(nextRoom);
     }
 
     private void addKey(int floorIn){
         List<Enemy> possibleEnemy = new ArrayList<>();
-        //List<Integer[]> possibleRooms = new ArrayList<>();
 
         for(int i=0; i<rooms.get(floorIn).size(); i++){
             for(int j=0; j<rooms.get(floorIn).get(i).size(); j++){
@@ -479,10 +486,6 @@ public class Layout {
                     for(int k=0; k<enemies.get(floorIn).get(i).get(j).size(); k++){
                         if(enemies.get(floorIn).get(i).get(j).get(k).getHealth()>0){
                             possibleEnemy.add(enemies.get(floorIn).get(i).get(j).get(k));
-                            /*Integer[] location = new Integer[2];
-                            location[0] = i;
-                            location[1] = j;
-                            possibleRooms.add(location);*/
                         }
                     }
                 }
@@ -491,7 +494,6 @@ public class Layout {
 
         int keyEnemy = random.nextInt(possibleEnemy.size());
         possibleEnemy.get(keyEnemy).setKey();
-        //keyRooms.add(possibleRooms.get(keyEnemy));
     }
 
     private void addBoss(int floorIn, String sprite){
@@ -603,6 +605,7 @@ public class Layout {
         stairs2[2] = 0;
         stairDown.add(stairs2);
         stairRooms.add(stairDown);
+        addShop(maxFloor,stairs2[0],stairs2[1]);
 
         rooms.get(maxFloor).get(0).set(0, new Sprite(new Texture("blank-room.png")));
         interactables.get(maxFloor).get(0).get(0).add(new Boss(bossNames.get(maxFloor), maxFloor, 0, 0, 0, 1000, 400));
@@ -619,6 +622,12 @@ public class Layout {
         bossRooms.add(bossRoom);
     }
 
+    private void addShop(int floorIn, int rowIn, int columnIn){
+        Boundary.getInstance().setBoundaries(rooms.get(floorIn).get(rowIn).get(columnIn).getTexture().toString());
+        List<Integer> spawnLocation = Boundary.getInstance().getShopLocation();
+        interactables.get(floorIn).get(rowIn).get(columnIn).add(new Shop("human2-6x.png",floorIn,rowIn,columnIn,1,spawnLocation.get(0),spawnLocation.get(1)));
+    }
+
     private void respawn(){
         for(int i=0; i<enemies.get(floor).size(); i++){
             for(int j=0; j<enemies.get(floor).get(i).size(); j++){
@@ -626,6 +635,10 @@ public class Layout {
                     enemies.get(floor).get(i).get(j).get(k).respawn();
                 }
             }
+        }
+        if(floor >0) {
+            Integer[] boss = bossRooms.get(floor);
+            ((Boss) interactables.get(floor).get(boss[0]).get(boss[1]).get(0)).respawn();
         }
     }
 
@@ -638,7 +651,6 @@ public class Layout {
             if(stairRooms.get(floor).get(i)[2] == 0){
                 row = stairRooms.get(floor).get(i)[0];
                 column = stairRooms.get(floor).get(i)[1];
-                //Player position may also need to change
                 respawn();
             }
         }

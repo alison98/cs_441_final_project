@@ -67,6 +67,10 @@ public class Player extends Actor {
         weapon.remove(weaponToRemove);
     }
 
+    public void addWeapon(String weaponIn){
+        weapon.add(weaponIn);
+    }
+
     public int getLevel(){
         return level;
     }

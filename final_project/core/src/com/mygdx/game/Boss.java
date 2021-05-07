@@ -27,7 +27,7 @@ public class Boss extends Interactable{
         } else{
             bossMessage = "PUT A POST-COMBAT MESSAGE\nFOR THE FINAL BOSS HERE";
         }
-        boss.setBoss(bossMessage);
+        boss.setBoss(bossMessage, this);
     }
 
     public boolean isHuman(){return boss.isHuman();}
@@ -51,8 +51,12 @@ public class Boss extends Interactable{
 
     public void fight(GameScreen game){
         game.getPlayer().setCombat();
-        super.setSprite(boss.getHumanSprite());
-        super.positionChanged();
+        //super.setSprite(boss.getHumanSprite());
+        //super.positionChanged();
         game.getGame().setScreen(new CombatScreen(game.getGame(), boss, game.getPlayer(), game));
+    }
+
+    public void respawn(){
+        boss.respawn();
     }
 }

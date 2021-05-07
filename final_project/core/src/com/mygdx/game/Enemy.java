@@ -18,7 +18,7 @@ public class Enemy extends Actor {
     private int speed, speedX,speedY, type, floor;
     private float initX, initY;
     private boolean horizontal, direction;
-    private boolean fight, key, boss;
+    private boolean fight, key, isBoss;
     private Rectangle hitbox;
     private List<String> weapon;
     private List<String> ongoingStatusEffects;
@@ -29,6 +29,7 @@ public class Enemy extends Actor {
     private List<Integer> movement;
     private String bossMessage;
     private boolean isHuman;
+    private Interactable boss;
 
     public Enemy(int x, int y, int speedIn, String file, int floorIn, List<Integer> movementIn){
         initSprites(file);
@@ -51,7 +52,7 @@ public class Enemy extends Actor {
         direction = true;
         fight = true;
         key = false;
-        boss = false;
+        isBoss = false;
         setBounds(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
         hitbox = new Rectangle(getX(), getY(), getWidth(), getHeight());
         setPosition(initX, initY);
@@ -65,7 +66,7 @@ public class Enemy extends Actor {
 
         level = random.nextInt(10)+floor;
         //maxHealth = health = 10;
-        money = maxHealth = health = floor*10 + random.nextInt(10);
+        money = maxHealth = health = floor*10 + random.nextInt(10)+1;
         experience = level*2;
         bossMessage = "";
         isHuman = false;
@@ -247,11 +248,13 @@ public class Enemy extends Actor {
 
     public boolean hasKey(){ return key; }
 
-    public boolean isBoss(){ return boss; }
+    public boolean isBoss(){ return isBoss; }
 
-    public void setBoss(String bossMessageIn){
-        boss = true;
+    public void setBoss(String bossMessageIn, Interactable bossIn){
+        isBoss = true;
         bossMessage = bossMessageIn;
+        boss = bossIn;
+        maxHealth = health = 100;
         //sprite = new Sprite(new Texture("enemy-printer-12x.png"));
         //positionChanged();
     }
@@ -281,8 +284,9 @@ public class Enemy extends Actor {
             System.out.println("Obtained Key");
             key = false;
         }
-        if(boss){
-            sprite = sprites[1];
+        if(isBoss){
+            setHuman();
+            boss.setSprite(sprites[1]);
             sprite.setAlpha(1f);
             Layout.getInstance().setBoss(floor);
             System.out.println("Defeated Boss");
@@ -291,7 +295,7 @@ public class Enemy extends Actor {
 
     public void respawn(){
         maxHealth = health = floor * 10 + random.nextInt(10);
-        if(!boss) {
+        if(!isBoss) {
             //maxHealth = health = 10;
             sprite.setAlpha(1f);
             fight = true;

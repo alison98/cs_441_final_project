@@ -14,11 +14,15 @@ public class Boundary extends Actor {
 
     private List<Rectangle> boundaries;
     private List<List<Integer>> enemyLocations;
+    private List<List<Integer>> itemLocations;
+    private List<Integer> shopLocation;
     private static Boundary instance;
 
     private Boundary(){
         this.boundaries = new ArrayList<Rectangle>();
         this.enemyLocations = new ArrayList<>();
+        this.itemLocations = new ArrayList<>();
+        this.shopLocation = new ArrayList<>();
     }
 
     public static Boundary getInstance(){
@@ -31,6 +35,8 @@ public class Boundary extends Actor {
     public void setBoundaries(String filename){
         boundaries.clear();
         enemyLocations.clear();
+        itemLocations.clear();
+        shopLocation.clear();
         if(filename.equals("office-space-no-printer.png")){
             boundaries.add(new Rectangle(208, 432, 440, 409));
             boundaries.add(new Rectangle(848, 432, 440, 409));
@@ -51,10 +57,10 @@ public class Boundary extends Actor {
             boundaries.add(new Rectangle(1528, 296, 128, 112));
             boundaries.add(new Rectangle(1656, 296, 80, 64));
             List<Integer> location1 = new ArrayList<>();
-            location1.add(450);
-            location1.add(776);
-            location1.add(50);
-            location1.add(752);
+            location1.add(450);//X start
+            location1.add(776);//X end
+            location1.add(50);//Y start
+            location1.add(752);//Y end
             enemyLocations.add(location1);
             List<Integer> location2 = new ArrayList<>();
             location2.add(1150);
@@ -62,6 +68,16 @@ public class Boundary extends Actor {
             location2.add(450);
             location2.add(900);
             enemyLocations.add(location2);
+            List<Integer> itemL1 = new ArrayList<>();
+            itemL1.add(50);//X
+            itemL1.add(50);//Y
+            itemLocations.add(itemL1);
+            List<Integer> itemL2 = new ArrayList<>();
+            itemL2.add(300);
+            itemL2.add(750);
+            itemLocations.add(itemL2);
+            shopLocation.add(1750);
+            shopLocation.add(800);
         } else if(filename.equals("conference-room.png")){
             boundaries.add(new Rectangle(240, 584, 360, 320));
             boundaries.add(new Rectangle(1480, 584, 360, 320));
@@ -101,6 +117,16 @@ public class Boundary extends Actor {
             location5.add(40);
             location5.add(224);
             enemyLocations.add(location5);
+            List<Integer> itemL1 = new ArrayList<>();
+            itemL1.add(1300);
+            itemL1.add(700);
+            itemLocations.add(itemL1);
+            List<Integer> itemL2 = new ArrayList<>();
+            itemL2.add(600);
+            itemL2.add(700);
+            itemLocations.add(itemL2);
+            shopLocation.add(1900);
+            shopLocation.add(50);
         } else if(filename.equals("cafeteria.png")){
             boundaries.add(new Rectangle(488, 208, 320, 240));
             boundaries.add(new Rectangle(488, 608, 320, 248));
@@ -137,6 +163,16 @@ public class Boundary extends Actor {
             location5.add(48);
             location5.add(184);
             enemyLocations.add(location5);
+            List<Integer> itemL1 = new ArrayList<>();
+            itemL1.add(600);
+            itemL1.add(450);
+            itemLocations.add(itemL1);
+            List<Integer> itemL2 = new ArrayList<>();
+            itemL2.add(1200);
+            itemL2.add(450);
+            itemLocations.add(itemL2);
+            shopLocation.add(1500);
+            shopLocation.add(800);
         } else if(filename.equals("blank-room.png")){
             List<Integer> location1 = new ArrayList<>();
             location1.add(150);
@@ -153,6 +189,14 @@ public class Boundary extends Actor {
 
     public List<List<Integer>> getEnemyLocations(){
         return enemyLocations;
+    }
+
+    public List<List<Integer>> getItemLocations(){
+        return itemLocations;
+    }
+
+    public List<Integer> getShopLocation(){
+        return shopLocation;
     }
 
 }

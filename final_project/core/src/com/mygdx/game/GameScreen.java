@@ -115,9 +115,9 @@ public class GameScreen implements Screen {
             }else if(location == 1){
                 player.setPosition(70,player.getY());
             }else if(location == 2){
-                player.setPosition(player.getX(),70);
+                player.setPosition(Gdx.graphics.getWidth()/2 - player.getWidth()/2,70);
             }else if(location == 3){
-                player.setPosition(player.getX(),Gdx.graphics.getHeight() - player.getHeight()-180);
+                player.setPosition(Gdx.graphics.getWidth()/2 - player.getWidth()/2,Gdx.graphics.getHeight() - player.getHeight()-180);
             }else if(location == -1){
                 hud.setText("Door is locked!");
             }

@@ -79,6 +79,8 @@ public class MoveData {
 
     public List<Integer> getStatusEffectRange() { return statusEffectRange; }
 
+    public int getStatusEffectDuration() { return duration; }
+
 
     //other ideas
     //probability of something happening (critical, more damage, some healing, idk)

@@ -86,7 +86,88 @@ public class Move {
                 .build());
 
 
+        //Set up weapons/abilities for enemies
+        enemyWeapons = new ArrayList<>();
+        List<String> floor0 = new ArrayList<>();
+        floor0.add("sword");
+        //floor0.add("coffee"); //testing enemy healing itself
+        List<String> floor1 = new ArrayList<>();
+        floor1.add("sword");
+        List<String> floor2 = new ArrayList<>();
+        floor2.add("sword");
+        List<String> floor3 = new ArrayList<>();
+        floor3.add("sword");
+        List<String> floor4 = new ArrayList<>();
+        floor4.add("sword");
+        enemyWeapons.add(floor0);
+        enemyWeapons.add(floor1);
+        enemyWeapons.add(floor2);
+        enemyWeapons.add(floor3);
+        enemyWeapons.add(floor4);
+    }
 
+    public static Move getInstance(){
+        if(instance == null){
+            instance = new Move();
+        }
+        return instance;
+    }
+
+
+    public MoveData.MoveType getMoveType(String weapon){
+        return movelist.get(weapon).getMoveType();
+    }
+
+    public List<Integer> setDamage(int min, int max){
+        List<Integer> damage = new ArrayList<>();
+        damage.add(min);
+        damage.add(max);
+        return damage;
+    }
+
+    //for printing info about a move in combat screen
+    //will need to add other info (cooldowns, uses per encounter, etc)
+    public String toString(String move){
+        return movelist.get(move).toString();
+    }
+
+
+    public MoveData.MoveType getStatusEffectMoveType(String moveContainingStatusEffect) {
+        return movelist.get(moveContainingStatusEffect).getStatusEffectType();
+    }
+
+    public boolean getHasStatusEffect(String moveContainingStatusEffect){
+        return movelist.get(moveContainingStatusEffect).getHasStatusEffect();
+    }
+
+    public int getStatusEffectDuration(String moveContainingStatusEffect){
+        return movelist.get(moveContainingStatusEffect).getStatusEffectDuration();
+    }
+
+    public int useMove(String nameOfMove, List<String> moves, List<String> statusEffects){
+        //first, call perform other move on all other moves
+        for(String otherMove : moves){//also call preformOtherMove() on all other moves in the list I pass in
+            if(movelist.get(otherMove) != movelist.get(nameOfMove)){
+                movelist.get(otherMove).performOtherMove();
+            }
+        }
+        return movelist.get(nameOfMove).useMove(nameOfMove, moves, statusEffects); //then use the selected move, and return amount
+    }
+
+    public int useStatusEffect(String nameOfMove, List<String> statusEffects){
+        return movelist.get(nameOfMove).useStatusEffect(nameOfMove, statusEffects);
+    }
+
+    public void resetMoves(List<String> moves){
+        for(String moveName : moves) movelist.get(moveName).resetMove();
+    }
+
+    public boolean isCurrentlyAvailable(String nameOfMove){
+        return movelist.get(nameOfMove).getCurrentlyAvailable();
+    }
+
+    //I'll come back to this later if we end up using it
+    public void setupRandomMoves(){
         //here's how random moves work for now
         //its unbalanced, but I've added the ability for us to test and balance easily
         //  -we set up moves and their ranges above, then make random variations for each
@@ -327,82 +408,6 @@ public class Move {
         System.out.println((three/maxMoves) * 100 + "% are ranked 3");
         System.out.println((four/maxMoves) * 100 + "% are ranked 4");
         System.out.println((five/maxMoves) * 100 + "% are ranked 5");
-
-
-
-        //Set up weapons/abilities for enemies
-        enemyWeapons = new ArrayList<>();
-        List<String> floor0 = new ArrayList<>();
-        floor0.add("sword");
-        //floor0.add("coffee"); //testing enemy healing itself
-        List<String> floor1 = new ArrayList<>();
-        floor1.add("sword");
-        List<String> floor2 = new ArrayList<>();
-        floor2.add("sword");
-        List<String> floor3 = new ArrayList<>();
-        floor3.add("sword");
-        List<String> floor4 = new ArrayList<>();
-        floor4.add("sword");
-        enemyWeapons.add(floor0);
-        enemyWeapons.add(floor1);
-        enemyWeapons.add(floor2);
-        enemyWeapons.add(floor3);
-        enemyWeapons.add(floor4);
-    }
-
-    public static Move getInstance(){
-        if(instance == null){
-            instance = new Move();
-        }
-        return instance;
-    }
-
-    //I'll need a new function somewhere to get a random move
-    //for example, when we give an enemy a move, we want to pull a random one, or use the ranking to pick one
-    //then this is the enemy's move, and we need to track the specific variation (store the index with the move name? I still need to figure this one out)
-
-    public MoveData.MoveType getMoveType(String weapon){
-        return movelist.get(weapon).getMoveType();
-    }
-
-    public List<Integer> setDamage(int min, int max){
-        List<Integer> damage = new ArrayList<>();
-        damage.add(min);
-        damage.add(max);
-        return damage;
-    }
-
-    //for printing info about a move in combat screen
-    //will need to add other info (cooldowns, uses per encounter, etc)
-    public String toString(String move){
-        return movelist.get(move).toString();
-    }
-
-
-    public MoveData.MoveType getStatusEffectMoveType(String moveContainingStatusEffect) {
-        return movelist.get(moveContainingStatusEffect).getStatusEffectType();
-    }
-
-    public int useMove(String nameOfMove, List<String> moves, List<String> statusEffects){
-        //first, call perform other move on all other moves
-        for(String otherMove : moves){//also call preformOtherMove() on all other moves in the list I pass in
-            if(movelist.get(otherMove) != movelist.get(nameOfMove)){
-                movelist.get(otherMove).performOtherMove();
-            }
-        }
-        return movelist.get(nameOfMove).useMove(nameOfMove, moves, statusEffects); //then use the selected move, and return amount
-    }
-
-    public int useStatusEffect(String nameOfMove, List<String> statusEffects){
-        return movelist.get(nameOfMove).useStatusEffect(nameOfMove, statusEffects);
-    }
-
-    public void resetMoves(List<String> moves){
-        for(String moveName : moves) movelist.get(moveName).resetMove();
-    }
-
-    public boolean isCurrentlyAvailable(String nameOfMove){
-        return movelist.get(nameOfMove).getCurrentlyAvailable();
     }
 
 }

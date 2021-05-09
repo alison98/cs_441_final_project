@@ -687,7 +687,7 @@ public class Layout {
         stairRooms.add(stairDown);
         addShop(maxFloor,stairs2[0],stairs2[1]);
 
-        rooms.get(maxFloor).get(0).set(0, new Sprite(new Texture("blank-room.png")));
+        rooms.get(maxFloor).get(0).set(0, new Sprite(new Texture("boss-room.png")));
         interactables.get(maxFloor).get(0).get(0).add(new Boss(bossNames.get(maxFloor), maxFloor, 0, 0, 0, 1000, 400));
 
         //enemies.get(maxFloor).get(0).get(0).add(new Enemy(1000,400,2,bossNames.get(maxFloor),maxFloor, null));

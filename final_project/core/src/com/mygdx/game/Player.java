@@ -20,7 +20,7 @@ public class Player extends Actor {
     private int walkFrame;
     private int frameCounter;
     private List<String> weapon;
-    private int level, health, maxHealth, experience;
+    private int level, health, maxHealth, experience, money;
     private Move abilities;
     private GameScreen gameScreen;
     private List<String> ongoingStatusEffects;
@@ -54,6 +54,7 @@ public class Player extends Actor {
         level = 1;
         maxHealth = health = 100;
         experience = 0;
+        money = 0;
     }
 
     public List<String> getOngoingStatusEffects() { return ongoingStatusEffects; }
@@ -96,6 +97,14 @@ public class Player extends Actor {
             level +=1;
             experience -=100;
         }
+    }
+
+    public int getMoney(){
+        return money;
+    }
+
+    public void setMoney(int amount){
+        money = amount;
     }
 
     public void setSpeedX(int speedXIn){

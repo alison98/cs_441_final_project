@@ -74,7 +74,7 @@ public class Hud {
                             } else if(interactable instanceof Item){
                                 ((Item)interactable).pickUp(gameScreen,gameScreen.getPlayer());
                             }else if(interactable instanceof Shop){
-                                ((Shop)interactable).openShop(gameScreen);
+                                ((Shop)interactable).openShop(spriteBatch, gameScreen);
                             }
                         }
                         upButton.setTouchable(Touchable.enabled);

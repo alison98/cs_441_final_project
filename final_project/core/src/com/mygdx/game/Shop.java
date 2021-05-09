@@ -1,5 +1,7 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
@@ -21,7 +23,9 @@ public class Shop extends Interactable{
         game.getHud().setText("Welcome to the shop!");
     }
 
-    public void openShop(GameScreen game){
-        game.getRoom().setUpInteractables();
+    public void openShop(final SpriteBatch spriteBatch, final GameScreen gameScreen){
+        gameScreen.getRoom().setUpInteractables();
+        gameScreen.getGame().setScreen(new ShopScreen(gameScreen.getGame(), spriteBatch,gameScreen,floor));
     }
+
 }

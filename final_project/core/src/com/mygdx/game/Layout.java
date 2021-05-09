@@ -25,6 +25,7 @@ public class Layout {
     private Random random;
     private Texture stairUpImg;
     private List<String> roomNames, enemyNames, bossNames;
+    private List<List<List<String>>> shopItems;
 
 
     //Singleton class
@@ -38,6 +39,7 @@ public class Layout {
         //keyRooms = new ArrayList<>();
         keys = new ArrayList<>();
         bosses = new ArrayList<>();
+        shopItems = new ArrayList<>();
 
         random = new Random();
         //Map size
@@ -56,6 +58,8 @@ public class Layout {
         addEnemyNames();
         addBossNames();
         generateMap();
+
+        setupShop();
 
         stairUpImg = new Texture("stairs-up.png");
 
@@ -110,6 +114,10 @@ public class Layout {
         bosses.set(floorIn, true);
     }
 
+    public List<List<String>> getShopItems(int floorIn){
+        return shopItems.get(floorIn-1);
+    }
+
     private void addRoomNames(){
         //Add room names here to be randomly chosen
         roomNames = new ArrayList<>();
@@ -134,6 +142,78 @@ public class Layout {
         bossNames.add("box-boss.png");
         bossNames.add("enemy-printer-12x.png");
         bossNames.add("enemy-printer-12x.png");
+    }
+
+    private void setupShop(){
+        //max 13 items including close
+        List<List<String>> floor1 = new ArrayList<>();
+        floor1.add(addItem("coffee","1", "multi"));
+        floor1.add(addItem("coffee","1", "multi"));
+        floor1.add(addItem("coffee","1", "multi"));
+        floor1.add(addItem("coffee","1", "multi"));
+        floor1.add(addItem("coffee","1", "multi"));
+        floor1.add(addItem("coffee","1", "multi"));
+        floor1.add(addItem("coffee","1", "multi"));
+        floor1.add(addItem("coffee","1", "multi"));
+        floor1.add(addItem("Tea","0", "single"));
+        floor1.add(addItem("Tea","0", "multi"));
+        floor1.add(addItem("coffee","0", "single"));
+        floor1.add(addItem("coffee","0", "multi"));
+        floor1.add(addItem("close","0", "multi"));
+        shopItems.add(floor1);
+        List<List<String>> floor2 = new ArrayList<>();
+        floor2.add(addItem("coffee","1", "multi"));
+        floor2.add(addItem("coffee","1", "multi"));
+        floor2.add(addItem("coffee","1", "multi"));
+        floor2.add(addItem("coffee","1", "multi"));
+        floor2.add(addItem("coffee","1", "multi"));
+        floor2.add(addItem("coffee","1", "multi"));
+        floor2.add(addItem("coffee","1", "multi"));
+        floor2.add(addItem("coffee","1", "multi"));
+        floor2.add(addItem("coffee","1", "multi"));
+        floor2.add(addItem("coffee","1", "multi"));
+        floor2.add(addItem("coffee","1", "multi"));
+        floor2.add(addItem("coffee","0", "multi"));
+        floor2.add(addItem("close","0", "multi"));
+        shopItems.add(floor2);
+        List<List<String>> floor3 = new ArrayList<>();
+        floor3.add(addItem("coffee","1", "multi"));
+        floor3.add(addItem("coffee","1", "multi"));
+        floor3.add(addItem("coffee","1", "multi"));
+        floor3.add(addItem("coffee","1", "multi"));
+        floor3.add(addItem("coffee","1", "multi"));
+        floor3.add(addItem("coffee","1", "multi"));
+        floor3.add(addItem("coffee","1", "multi"));
+        floor3.add(addItem("coffee","1", "multi"));
+        floor3.add(addItem("coffee","1", "multi"));
+        floor3.add(addItem("coffee","1", "multi"));
+        floor3.add(addItem("coffee","1", "multi"));
+        floor3.add(addItem("coffee","0", "multi"));
+        floor3.add(addItem("close","0", "multi"));
+        shopItems.add(floor3);
+        List<List<String>> floor4 = new ArrayList<>();
+        floor4.add(addItem("coffee","1", "multi"));
+        floor4.add(addItem("coffee","1", "multi"));
+        floor4.add(addItem("coffee","1", "multi"));
+        floor4.add(addItem("coffee","1", "multi"));
+        floor4.add(addItem("coffee","1", "multi"));
+        floor4.add(addItem("coffee","1", "multi"));
+        floor4.add(addItem("coffee","1", "multi"));
+        floor4.add(addItem("coffee","1", "multi"));
+        floor4.add(addItem("coffee","1", "multi"));
+        floor4.add(addItem("coffee","1", "multi"));
+        floor4.add(addItem("coffee","1", "multi"));
+        floor4.add(addItem("coffee","0", "multi"));
+        floor4.add(addItem("close","0", "multi"));
+        shopItems.add(floor4);
+    }
+
+    private List<String> addItem(String item, String price, String type){
+        List<String> newItem = new ArrayList<>();
+        newItem.add(item);
+        newItem.add(price);
+        newItem.add(type);
+        return newItem;
     }
 
     public boolean getDoorTouched(Player player){

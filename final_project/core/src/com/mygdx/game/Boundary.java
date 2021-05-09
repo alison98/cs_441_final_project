@@ -128,11 +128,11 @@ public class Boundary extends Actor {
             shopLocation.add(1900);
             shopLocation.add(50);
         } else if(filename.equals("cafeteria.png")){
-            boundaries.add(new Rectangle(488, 208, 320, 240));
-            boundaries.add(new Rectangle(488, 608, 320, 248));
-            boundaries.add(new Rectangle(1128, 208, 320, 248));
-            boundaries.add(new Rectangle(1128, 608, 320, 240));
-            boundaries.add(new Rectangle(1728, 328, 160, 576));
+            boundaries.add(new Rectangle(488, 208, 320, 240)); //Bottom Left Table
+            boundaries.add(new Rectangle(488, 608, 320, 248)); //Top Left Table
+            boundaries.add(new Rectangle(1128, 208, 320, 248)); //Bottom Right Table
+            boundaries.add(new Rectangle(1128, 608, 320, 240)); //Top Right Table
+            boundaries.add(new Rectangle(1728, 328, 160, 576)); //Food Bar
             List<Integer> location1 = new ArrayList<>();
             location1.add(200);
             location1.add(440);
@@ -180,7 +180,16 @@ public class Boundary extends Actor {
             location1.add(150);
             location1.add(800);
             enemyLocations.add(location1);
+        } else if(filename.equals("blank-room.png")){
+            boundaries.add(new Rectangle(24, 48, 168, 368)); //Left Tree
+            boundaries.add(new Rectangle(1888, 48, 168, 368)); //Right Tree
+            boundaries.add(new Rectangle(256, 112, 152, 544)); //Left Table
+            boundaries.add(new Rectangle(1580, 112, 152, 544)); //Right Table
+            boundaries.add(new Rectangle(704, 216, 184, 240)); //Left Chair
+            boundaries.add(new Rectangle(1200, 216, 184, 240)); //Right Chair
+            boundaries.add(new Rectangle(832, 528, 424, 312)); //Desk REMOVE THIS ONCE FINAL BOSS INTERACTABLE IS CREATED
         }
+
     }
 
     public List<Rectangle> getBoundaries(){

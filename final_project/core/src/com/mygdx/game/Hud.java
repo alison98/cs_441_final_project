@@ -36,6 +36,7 @@ public class Hud {
     private ImageButton downButton;
     private ImageButton leftButton;
     private ImageButton rightButton;
+    private ImageButton inventoryButton;
     private Queue<String> textQueue;
 
 
@@ -167,6 +168,22 @@ public class Hud {
             }
         });
 
+        inventoryButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("right-button.png"))));
+        inventoryButton.setTouchable(Touchable.enabled);
+        inventoryButton.setPosition(100, 1000);
+        inventoryButton.addListener(new InputListener(){
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button){
+                gameScreen.getGame().setScreen(new Inventory());
+            }
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button){
+                return true;
+            }
+        });
+
+
         table.add(upButton);
         table.row();
         table.add(leftButton);
@@ -177,6 +194,7 @@ public class Hud {
         stage.addActor(table);
         stage.addActor(selectButton);
         stage.addActor(textBox);
+        stage.addActor(inventoryButton);
     }
 
     public void setInteractable(){

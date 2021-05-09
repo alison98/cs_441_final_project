@@ -35,7 +35,11 @@ public class Boss extends Interactable{
     @Override
     public void interact(GameScreen game){
         if(boss.isHuman()){
-            game.getHud().setText("PUT A POST-COMBAT MESSAGE\nFOR THE HUMANS HERE");
+            if(floor == 4){
+                game.getHud().setText("PUT A POST-COMBAT MESSAGE\nFOR THE FINAL BOSS'S DESK HERE");
+            } else{
+                game.getHud().setText("PUT A POST-COMBAT MESSAGE\nFOR THE HUMANS HERE");
+            }
         } else {
             if(floor == 1){
                 game.getHud().setText("PUT A PRE-COMBAT MESSAGE\nFOR THE FLOOR 1 BOSS HERE");

@@ -38,23 +38,67 @@ public class Move {
         movelist.put("sword", new MoveData.Builder(setDamage(10, 20), MoveData.MoveType.ATTACK).build()); //bare minimum  - name, range, type
 
         //some player attacks
+        //note that we can control what moves are sold on each floor
         movelist.put("Stapler", new MoveData.Builder(setDamage(15, 25), MoveData.MoveType.ATTACK)
                 .setCooldown(2)
+                .setDurability(4)
                 .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2) //bleeding
                 .build()); //bare minimum  - name, range, type
         movelist.put("Paper Clip", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK)
-                .setDurability(3)
-                .build());
-        movelist.put("Keyboard", new MoveData.Builder(setDamage(10, 20), MoveData.MoveType.ATTACK)
                 .setDurability(2)
                 .build());
-        movelist.put("Mug", new MoveData.Builder(setDamage(10, 20), MoveData.MoveType.ATTACK)
-                .setCooldown(1)
+        movelist.put("Keyboard", new MoveData.Builder(setDamage(25, 35), MoveData.MoveType.ATTACK)
+                .setDurability(2)
+                .build());
+        movelist.put("Mug", new MoveData.Builder(setDamage(10,15), MoveData.MoveType.ATTACK)
+                .setDurability(1)
                 .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(10, 20), 1) //burning
                 .build());
-        movelist.put("Tie", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK).build());
+        movelist.put("Tie", new MoveData.Builder(setDamage(0,5), MoveData.MoveType.ATTACK).build()); //no durability, but weak, prevents player from having no moves
+        movelist.put("Water Bottle", new MoveData.Builder(setDamage(10, 15), MoveData.MoveType.ATTACK)
+                .setCooldown(3)
+                .setUsesPerEncounter(1)
+                .setDurability(3)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(10, 20), 2)
+                .build());
+        movelist.put("Chair", new MoveData.Builder(setDamage(20,30), MoveData.MoveType.ATTACK)
+                .setDurability(1)
+                .build());
+        movelist.put("Telephone", new MoveData.Builder(setDamage(20, 35), MoveData.MoveType.ATTACK)
+                .setDurability(2)
+                .setCooldown(2)
+                .build());
+        movelist.put("Ruler", new MoveData.Builder(setDamage(10, 15), MoveData.MoveType.ATTACK)
+                .setDurability(2)
+                .build());
+        movelist.put("Glue", new MoveData.Builder(setDamage(10, 15), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .setDurability(3)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(10, 20), 1)
+                .build());
+        movelist.put("Tape", new MoveData.Builder(setDamage(15, 20), MoveData.MoveType.ATTACK)
+                .setDurability(1)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(10, 20), 1)
+                .build());
+        movelist.put("Scissors", new MoveData.Builder(setDamage(25,30), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .setDurability(2)
+                .build());
+        movelist.put("Wired Mouse", new MoveData.Builder(setDamage(25,35), MoveData.MoveType.ATTACK)
+                .setDurability(1)
+                .build());
+        movelist.put("Desk Lamp", new MoveData.Builder(setDamage(20,40), MoveData.MoveType.ATTACK)
+                .setCooldown(3)
+                .setDurability(2)
+                .build());
+        movelist.put("Laptop", new MoveData.Builder(setDamage(15,25), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .setDurability(3)
+                .build());
+
 
         //some player healing moves
+        //I'm going to make all healing items single use for now, which means no cooldown or uses per turn limit
         movelist.put("coffee", new MoveData.Builder(setDamage(20, 40), MoveData.MoveType.HEALING)
                 .setDurability(1) //single use
                 .setStatusEffect(MoveData.MoveType.HEALING, setDamage(10, 20), 2) //adding a status effect to this one
@@ -64,20 +108,97 @@ public class Move {
                 .setStatusEffect(MoveData.MoveType.HEALING, setDamage(10, 20), 2)
                 .build());
         movelist.put("Donut", new MoveData.Builder(setDamage(10, 15), MoveData.MoveType.HEALING)
-                .setDurability(2) //can use twice
+                .setDurability(1) //can use twice
                 .build());
         movelist.put("Sandwich", new MoveData.Builder(setDamage(10, 20), MoveData.MoveType.HEALING)
                 .setDurability(1) //single use
+                .setStatusEffect(MoveData.MoveType.HEALING, setDamage(5, 20), 2)
+                .build());
+        movelist.put("Bagel", new MoveData.Builder(setDamage(15, 20), MoveData.MoveType.HEALING)
+                .setDurability(1)
+                .build());
+        movelist.put("Pizza", new MoveData.Builder(setDamage(5,10), MoveData.MoveType.HEALING)
+                .setDurability(1)
+                .setStatusEffect(MoveData.MoveType.HEALING, setDamage(0, 10), 2)
+                .build());
+        movelist.put("Salad", new MoveData.Builder(setDamage(20,30), MoveData.MoveType.HEALING)
+                .setDurability(1)
+                .build());
+        movelist.put("Soda", new MoveData.Builder(setDamage(5,10), MoveData.MoveType.HEALING)
+                .setDurability(1)
+                .build());
+        movelist.put("Soup", new MoveData.Builder(setDamage(15,30), MoveData.MoveType.HEALING)
+                .setDurability(1)
+                .build());
+        movelist.put("Chips", new MoveData.Builder(setDamage(5,10), MoveData.MoveType.HEALING)
+                .setDurability(1)
+                .build());
+        movelist.put("Candy Bar", new MoveData.Builder(setDamage(10, 15), MoveData.MoveType.HEALING)
+                .setDurability(1)
+                .build());
+        movelist.put("Burrito", new MoveData.Builder(setDamage(20,25), MoveData.MoveType.HEALING)
+                .setDurability(1)
+                .build());
+        movelist.put("Protein Shake", new MoveData.Builder(setDamage(25,40), MoveData.MoveType.HEALING)
+                .setDurability(1)
+                .build());
+        movelist.put("Ice Cream", new MoveData.Builder(setDamage(10, 15), MoveData.MoveType.HEALING)
+                .setDurability(1)
+                .build());
+        movelist.put("Energy Bar", new MoveData.Builder(setDamage(20,30), MoveData.MoveType.HEALING)
+                .setDurability(1)
+                .setStatusEffect(MoveData.MoveType.HEALING, setDamage(15, 30), 1)
                 .build());
 
         //some enemy attacks
+        //probably won't use durability, but cooldown and uses per turn could be helpful (but I need to test)
+        //it also creates variety, which is why I used it a lot below
         movelist.put("Paper Cut", new MoveData.Builder(setDamage(10, 20), MoveData.MoveType.ATTACK)
                 .setCooldown(2)
                 .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2)
                 .build());
-        movelist.put("Slam Lid", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK)
+        movelist.put("Slam Tray", new MoveData.Builder(setDamage(0,5), MoveData.MoveType.ATTACK) //make sure the enemy doesn't get stuck - a move with no cooldown, no uses limit, but weak - I might make it so the enemy only picks when nothing else is available
                 .build());
-
+        movelist.put("Toner Leak", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK)
+                .setCooldown(1)
+                .build());
+        movelist.put("Short Circuit", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK)
+                .setCooldown(2)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 15), 1)
+                .build());
+        movelist.put("Electrical Fire", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .setCooldown(2)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 15), 2)
+                .build());
+        movelist.put("Power Surge", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK)
+                .setCooldown(2)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2)
+                .build());
+        movelist.put("Shoot Ink", new MoveData.Builder(setDamage(15, 25), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .build());
+        movelist.put("Shoot Paper", new MoveData.Builder(setDamage(15, 20), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .build());
+        movelist.put("Paper Jam", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK)
+                .setCooldown(1)
+                .build());
+        movelist.put("Dial-up Noise", new MoveData.Builder(setDamage(15, 25), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .build());
+        movelist.put("Overheating", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .setCooldown(2)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2)
+                .build());
+        movelist.put("Fan Blades", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK)
+                .setCooldown(2)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2)
+                .build());
+        movelist.put("Dust Cloud", new MoveData.Builder(setDamage(5, 15), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .build());
 
         //enemy healing?
         //I haven't decided if these should exist
@@ -86,7 +207,92 @@ public class Move {
                 .build());
 
 
+        //Set up weapons/abilities for enemies
+        //easiest way is to make higher floors have better moves
+        //I'll add more when I start testing and balancing
+        enemyWeapons = new ArrayList<>();
+        List<String> floor0 = new ArrayList<>();
+        floor0.add("Paper Cut");
+        floor0.add("Slam Tray");
+        //floor0.add("sword");
+        //floor0.add("coffee"); //testing enemy healing itself
+        List<String> floor1 = new ArrayList<>();
+        floor1.add("sword");
+        List<String> floor2 = new ArrayList<>();
+        floor2.add("sword");
+        List<String> floor3 = new ArrayList<>();
+        floor3.add("sword");
+        List<String> floor4 = new ArrayList<>();
+        floor4.add("sword");
+        enemyWeapons.add(floor0);
+        enemyWeapons.add(floor1);
+        enemyWeapons.add(floor2);
+        enemyWeapons.add(floor3);
+        enemyWeapons.add(floor4);
+    }
 
+    public static Move getInstance(){
+        if(instance == null){
+            instance = new Move();
+        }
+        return instance;
+    }
+
+
+    public MoveData.MoveType getMoveType(String weapon){
+        return movelist.get(weapon).getMoveType();
+    }
+
+    public List<Integer> setDamage(int min, int max){
+        List<Integer> damage = new ArrayList<>();
+        damage.add(min);
+        damage.add(max);
+        return damage;
+    }
+
+    //for printing info about a move in combat screen
+    //will need to add other info (cooldowns, uses per encounter, etc)
+    public String toString(String move){
+        return movelist.get(move).toString();
+    }
+
+
+    public MoveData.MoveType getStatusEffectMoveType(String moveContainingStatusEffect) {
+        return movelist.get(moveContainingStatusEffect).getStatusEffectType();
+    }
+
+    public boolean getHasStatusEffect(String moveContainingStatusEffect){
+        return movelist.get(moveContainingStatusEffect).getHasStatusEffect();
+    }
+
+    public int getStatusEffectDuration(String moveContainingStatusEffect){
+        return movelist.get(moveContainingStatusEffect).getStatusEffectDuration();
+    }
+
+    public int useMove(String nameOfMove, List<String> moves, List<String> statusEffects){
+        //first, call perform other move on all other moves
+        for(String otherMove : moves){//also call preformOtherMove() on all other moves in the list I pass in
+            if(movelist.get(otherMove) != movelist.get(nameOfMove)){
+                movelist.get(otherMove).performOtherMove();
+            }
+        }
+        return movelist.get(nameOfMove).useMove(nameOfMove, moves, statusEffects); //then use the selected move, and return amount
+    }
+
+    public int useStatusEffect(String nameOfMove, List<String> statusEffects){
+        return movelist.get(nameOfMove).useStatusEffect(nameOfMove, statusEffects);
+    }
+
+    public void resetMoves(List<String> moves){
+        for(String moveName : moves) movelist.get(moveName).resetMove();
+    }
+
+    public boolean isCurrentlyAvailable(String nameOfMove){
+        return movelist.get(nameOfMove).getCurrentlyAvailable();
+    }
+
+    //I'll come back to this later if we end up using it
+    public void setupRandomMoves(){
         //here's how random moves work for now
         //its unbalanced, but I've added the ability for us to test and balance easily
         //  -we set up moves and their ranges above, then make random variations for each
@@ -327,82 +533,6 @@ public class Move {
         System.out.println((three/maxMoves) * 100 + "% are ranked 3");
         System.out.println((four/maxMoves) * 100 + "% are ranked 4");
         System.out.println((five/maxMoves) * 100 + "% are ranked 5");
-
-
-
-        //Set up weapons/abilities for enemies
-        enemyWeapons = new ArrayList<>();
-        List<String> floor0 = new ArrayList<>();
-        floor0.add("sword");
-        //floor0.add("coffee"); //testing enemy healing itself
-        List<String> floor1 = new ArrayList<>();
-        floor1.add("sword");
-        List<String> floor2 = new ArrayList<>();
-        floor2.add("sword");
-        List<String> floor3 = new ArrayList<>();
-        floor3.add("sword");
-        List<String> floor4 = new ArrayList<>();
-        floor4.add("sword");
-        enemyWeapons.add(floor0);
-        enemyWeapons.add(floor1);
-        enemyWeapons.add(floor2);
-        enemyWeapons.add(floor3);
-        enemyWeapons.add(floor4);
-    }
-
-    public static Move getInstance(){
-        if(instance == null){
-            instance = new Move();
-        }
-        return instance;
-    }
-
-    //I'll need a new function somewhere to get a random move
-    //for example, when we give an enemy a move, we want to pull a random one, or use the ranking to pick one
-    //then this is the enemy's move, and we need to track the specific variation (store the index with the move name? I still need to figure this one out)
-
-    public MoveData.MoveType getMoveType(String weapon){
-        return movelist.get(weapon).getMoveType();
-    }
-
-    public List<Integer> setDamage(int min, int max){
-        List<Integer> damage = new ArrayList<>();
-        damage.add(min);
-        damage.add(max);
-        return damage;
-    }
-
-    //for printing info about a move in combat screen
-    //will need to add other info (cooldowns, uses per encounter, etc)
-    public String toString(String move){
-        return movelist.get(move).toString();
-    }
-
-
-    public MoveData.MoveType getStatusEffectMoveType(String moveContainingStatusEffect) {
-        return movelist.get(moveContainingStatusEffect).getStatusEffectType();
-    }
-
-    public int useMove(String nameOfMove, List<String> moves, List<String> statusEffects){
-        //first, call perform other move on all other moves
-        for(String otherMove : moves){//also call preformOtherMove() on all other moves in the list I pass in
-            if(movelist.get(otherMove) != movelist.get(nameOfMove)){
-                movelist.get(otherMove).performOtherMove();
-            }
-        }
-        return movelist.get(nameOfMove).useMove(nameOfMove, moves, statusEffects); //then use the selected move, and return amount
-    }
-
-    public int useStatusEffect(String nameOfMove, List<String> statusEffects){
-        return movelist.get(nameOfMove).useStatusEffect(nameOfMove, statusEffects);
-    }
-
-    public void resetMoves(List<String> moves){
-        for(String moveName : moves) movelist.get(moveName).resetMove();
-    }
-
-    public boolean isCurrentlyAvailable(String nameOfMove){
-        return movelist.get(nameOfMove).getCurrentlyAvailable();
     }
 
 }

@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -20,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -50,31 +52,29 @@ public class CombatScreen implements Screen {
     private boolean touchDown; //to only display move info when mousing over (not on actually using)
     private boolean statusEffectsInProgress;
     private int statusEffectsIndex;
+    private Label playerHealthStatusEffect, playerAttackStatusEffect, enemyHealthStatusEffect, enemyAttackStatusEffect;
+    private int playerHealthStatusDuration, playerAttackStatusDuration, enemyHealthStatusDuration, enemyAttackStatusDuration;
 
 
     //TODO
     // -FEATURES:
     //      -other things to add based on how Moves work:
-    //          --Do weapons have durability?
-    //          --Cool-down or certain number of uses of a move per encounter?
-    //          --I've taken care of the 2 points above already (although I haven't tested)
     //          --Can AI heal? if so make their choices smarter
-    //      -use player.getRewards() for drops, levels
+    //      -use player.getRewards() for drops
     // -BUGS:
+    //      -when status effect is brief, name flashes too quick
     //      -fix so player cannot consume move that does nothing
     //          --i.e. healing at 100% won't do anything, but it will use their move - pick one or the other
     //      -test all the new stuff I added to moves
-    //          --need a better solution to duplicates - imagine enemy and player using same move
-    //          --duplicates and multiple simultaneous effects will probably break
-    //      -I had an enemy spawn with 0 health and break everything
+    //          --multiple simultaneous effects might break
     //      -fix bug of going back into combat
     //          --I haven't been able to replicate yet
     //      -fix bug where printer disappears when player loses
     //          --this is because the interactable is removed before combat ends
     //          --decide what happens when player dies first - we might want predefined save points or something to go back to
     // -OTHER:
-    //      -different font
     //      -different background
+    //      -different skin for buttons
     //      -update comments
     //      -less hard-coded numbers (placing UI elements)
     //      -clean the button code
@@ -176,6 +176,13 @@ public class CombatScreen implements Screen {
                 enemy.setHealth(enemy.getHealth() - amount);
                 enemyHealthBar.decreaseHealth(amount);
                 currentAttack = new Attack(player, enemy);
+                if(StatusEffect){
+                    enemyAttackStatusDuration--;
+                    if(enemyAttackStatusDuration == 0) enemyAttackStatusEffect.setVisible(false);
+                }else if(Move.getInstance().getHasStatusEffect(nameOfMove)){
+                    enemyAttackStatusDuration += Move.getInstance().getStatusEffectDuration(nameOfMove);
+                    enemyAttackStatusEffect.setVisible(true);
+                }
                 break;
             case HEALING:
                 System.out.println("healing " + amount + " to self");
@@ -183,6 +190,14 @@ public class CombatScreen implements Screen {
                 playerHealthBar.increaseHealth(amount);
                 currentAttack = new Attack(player, player); //don't remove - it doesn't do anything yet, but ensures nothing breaks when healing has no effect (healing at 100% for example)
                 //once I decide what I want for healing, I'll replace the attack with that
+                if(StatusEffect){
+                    playerHealthStatusDuration--;
+                    if(playerHealthStatusDuration == 0) playerHealthStatusEffect.setVisible(false);
+                }else if(Move.getInstance().getHasStatusEffect(nameOfMove)){
+                    System.out.println("before "  + playerHealthStatusDuration);
+                    playerHealthStatusDuration += Move.getInstance().getStatusEffectDuration(nameOfMove);
+                    playerHealthStatusEffect.setVisible(true);
+                }
         }
     }
 
@@ -219,7 +234,12 @@ public class CombatScreen implements Screen {
         List<String> enemyWeapons = enemy.getWeapon(); //get list of moves
         Random rand = new Random(); //pick one (random for now)
         //I'll probably want to make a smarter choice - only heal when low
-        String selectedWeapon = enemyWeapons.get(rand.nextInt(enemyWeapons.size()));//get random weapon
+        List<String> availableEnemyWeapons = new ArrayList<>();
+        for (String currentWeapon : enemyWeapons) //only deal with moves that aren't in cooldown, haven't hit use limit
+            if(Move.getInstance().isCurrentlyAvailable(currentWeapon) ) availableEnemyWeapons.add(currentWeapon);
+        String selectedWeapon;
+        selectedWeapon = availableEnemyWeapons.get(rand.nextInt(availableEnemyWeapons.size()));//get random weapon
+        System.out.println("selected " + selectedWeapon);
         int amount = Move.getInstance().useMove(selectedWeapon, enemy.getWeapon(), enemy.getOngoingStatusEffects());
         enemyTurn(Move.getInstance().getMoveType(selectedWeapon), amount, selectedWeapon, false);
         isPlayerTurn = true;//it is now the player's turn, they can go once animations finish
@@ -236,6 +256,13 @@ public class CombatScreen implements Screen {
                 player.setHealth(player.getHealth() - amount);
                 playerHealthBar.decreaseHealth(amount);//start animation
                 currentAttack = new Attack(enemy, player);
+                if(StatusEffect){
+                    playerAttackStatusDuration--;
+                    if(playerAttackStatusDuration == 0) playerAttackStatusEffect.setVisible(false);
+                }else if(Move.getInstance().getHasStatusEffect(nameOfMove)){
+                    playerAttackStatusDuration += Move.getInstance().getStatusEffectDuration(nameOfMove);
+                    playerAttackStatusEffect.setVisible(true);
+                }
                 break;
             case HEALING:
                 //System.out.println("healing " + amount + " to enemy");
@@ -243,6 +270,13 @@ public class CombatScreen implements Screen {
                 enemyHealthBar.increaseHealth(amount);
                 currentAttack = new Attack(enemy, enemy); //don't remove - it doesn't do anything yet, but ensures nothing breaks when healing has no effect (healing at 100% for example)
                 //once I decide what I want for healing, I'll replace the attack with that
+                if(StatusEffect){
+                    enemyHealthStatusDuration--;
+                    if(enemyHealthStatusDuration == 0) enemyHealthStatusEffect.setVisible(false);
+                }else if(Move.getInstance().getHasStatusEffect(nameOfMove)){
+                    enemyHealthStatusDuration += Move.getInstance().getStatusEffectDuration(nameOfMove);
+                    enemyHealthStatusEffect.setVisible(true);
+                }
         }
     }
 
@@ -263,7 +297,9 @@ public class CombatScreen implements Screen {
                 gameScreen.getHud().setText("The enemy dropped a key!");
             }
             List<Integer> rewards = enemy.getRewards(); //0 is xp, 1 is money, 2 will be drops
-            //then we just call player.setRewards
+            player.increaseExperience(rewards.get(0));
+            player.setMoney(player.getMoney() + rewards.get(1));
+            //player.addWeapons(rewards.get(2));//something like this
             enemy.defeated();
         }else{//player lost
             //place player back at this floor's stairs
@@ -319,20 +355,68 @@ public class CombatScreen implements Screen {
         playerHealthChange.setSize(250, 200);
         playerHealthChange.setPosition(((float) width / 4) + player.getWidth()/2, height - (height / 2.25f));
         playerHealthChange.setAlignment(Align.center);
+        playerHealthChange.setFontScale(1.25f);
+        playerHealthChange.setColor(Color.BLACK);
         stage.addActor(playerHealthChange);
 
         Label enemyHealthChange = new Label("", labelStyle);
         enemyHealthChange.setSize(250, 200);
-        enemyHealthChange.setPosition((width - (width / 5f) + enemy.getWidth()/2) + enemy.getWidth()/2, height -  (height / 2.25f));
+        enemyHealthChange.setPosition((width - (width / 2.5f)), height -  (height / 2.25f));
         enemyHealthChange.setAlignment(Align.center);
+        enemyHealthChange.setFontScale(1.25f);
+        enemyHealthChange.setColor(Color.BLACK);
         stage.addActor(enemyHealthChange);
+
+        playerHealthStatusEffect = new Label("", labelStyle);
+        playerHealthStatusEffect.setSize(250, 200);
+        playerHealthStatusEffect.setPosition(125, height -  (height / 2.25f));
+        playerHealthStatusEffect.setAlignment(Align.center);
+        playerHealthStatusEffect.setFontScale(1.25f);
+        playerHealthStatusEffect.setColor(Color.BLUE);
+        playerHealthStatusEffect.setText("+");
+        playerHealthStatusEffect.setVisible(false);
+        stage.addActor(playerHealthStatusEffect);
+
+        playerAttackStatusEffect = new Label("", labelStyle);
+        playerAttackStatusEffect.setSize(250, 200);
+        playerAttackStatusEffect.setPosition(125, height -  (height / 2.25f) - 50);
+        playerAttackStatusEffect.setAlignment(Align.center);
+        playerAttackStatusEffect.setFontScale(1.25f);
+        playerAttackStatusEffect.setColor(Color.RED);
+        playerAttackStatusEffect.setText("-");
+        playerAttackStatusEffect.setVisible(false);
+        stage.addActor(playerAttackStatusEffect);
+
+
+        enemyHealthStatusEffect = new Label("", labelStyle);
+        enemyHealthStatusEffect.setSize(250, 200);
+        enemyHealthStatusEffect.setPosition((width - (width / 5f) + enemy.getWidth()/2) + enemy.getWidth()/2, height -  (height / 2.25f));
+        enemyHealthStatusEffect.setAlignment(Align.center);
+        enemyHealthStatusEffect.setFontScale(1.25f);
+        enemyHealthStatusEffect.setColor(Color.BLUE);
+        enemyHealthStatusEffect.setText("+");
+        enemyHealthStatusEffect.setVisible(false);
+        stage.addActor(enemyHealthStatusEffect);
+
+
+        enemyAttackStatusEffect = new Label("", labelStyle);
+        enemyAttackStatusEffect.setSize(250, 200);
+        enemyAttackStatusEffect.setPosition((width - (width / 5f) + enemy.getWidth()/2) + enemy.getWidth()/2, height -  (height / 2.25f) - 50);
+        enemyAttackStatusEffect.setAlignment(Align.center);
+        enemyAttackStatusEffect.setFontScale(1.25f);
+        enemyAttackStatusEffect.setColor(Color.RED);
+        enemyAttackStatusEffect.setText("-");
+        enemyAttackStatusEffect.setVisible(false);
+        stage.addActor(enemyAttackStatusEffect);
+
 
         //global label for displaying the current move's name
         currentMoveLabel = new Label("", labelStyle);
         currentMoveLabel.setSize(500, 200);
         currentMoveLabel.setPosition(width/2f - 250, height - height/1.3f);
-        currentMoveLabel.setFontScale(.6f);//looks better smaller (and I am running out of room)
+        currentMoveLabel.setFontScale(1f);//looks better smaller (and I am running out of room)
         currentMoveLabel.setAlignment(Align.center);
+        currentMoveLabel.setColor(Color.BLACK);
         stage.addActor(currentMoveLabel);
 
         //I'm trying to replace some of the hard-coded numbers with constants
@@ -347,12 +431,16 @@ public class CombatScreen implements Screen {
         playerNameLabel.setSize(LABEL_AND_HEALTHBAR_LENGTH + LABEL_AND_HEALTHBAR_OFFSET, 200);
         playerNameLabel.setPosition(100, height - (height / 5.5f));
         playerNameLabel.setAlignment(Align.center);
+        playerNameLabel.setFontScale(1.25f);
+        playerNameLabel.setColor(Color.BLACK);
         stage.addActor(playerNameLabel);
 
         Label enemyNameLabel = new Label("Level " + enemy.getLevel() + "\n" + enemy.getName(), labelStyle);
         enemyNameLabel.setSize(LABEL_AND_HEALTHBAR_LENGTH + LABEL_AND_HEALTHBAR_OFFSET, 200);
         enemyNameLabel.setPosition(width - 850, height -(height / 5.5f));
         enemyNameLabel.setAlignment(Align.center);
+        enemyNameLabel.setFontScale(1.25f);
+        enemyNameLabel.setColor(Color.BLACK);
         stage.addActor(enemyNameLabel);
 
         //HealthBar class with a basic decrementing animation
@@ -405,8 +493,11 @@ public class CombatScreen implements Screen {
         float nextY = 200;
         float nextX = 150;
 
+        List<String> alphabeticalList = new ArrayList<>(moveOccurrences.keySet());
+        Collections.sort(alphabeticalList);
+
         int i = 0;
-        for(String currentMove : moveOccurrences.keySet()){ //set up buttons - a max of 2 rows
+        for(String currentMove : alphabeticalList){ //set up buttons - a max of 2 rows
             Skin s = new Skin(Gdx.files.internal("skin/plain-james-ui.json")); //random skin from my last project just to test, very ugly, replace (can also switch to image buttons)
             TextButton newMoveButton;
             //if(moveButtons.length > i) newMoveButton = moveButtons[i]; //this doesn't work, find another way to reuse/check

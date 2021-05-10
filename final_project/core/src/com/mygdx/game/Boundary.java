@@ -180,7 +180,7 @@ public class Boundary extends Actor {
             location1.add(150);
             location1.add(800);
             enemyLocations.add(location1);
-        } else if(filename.equals("blank-room.png")){
+        } else if(filename.equals("boss-room.png")){
             boundaries.add(new Rectangle(24, 48, 168, 368)); //Left Tree
             boundaries.add(new Rectangle(1888, 48, 168, 368)); //Right Tree
             boundaries.add(new Rectangle(256, 112, 152, 544)); //Left Table

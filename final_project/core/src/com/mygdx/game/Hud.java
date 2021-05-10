@@ -174,7 +174,7 @@ public class Hud {
         inventoryButton.addListener(new InputListener(){
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button){
-                gameScreen.getGame().setScreen(new Inventory());
+                gameScreen.getGame().setScreen(new Inventory(gameScreen.getGame(), gameScreen.getPlayer(), gameScreen));
             }
 
             @Override

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -12,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -35,13 +37,14 @@ public class MainMenu implements Screen {
         Skin skin = new Skin();
         skin.add("buttonTexture", buttonTexture);
         ImageTextButton.ImageTextButtonStyle playButtonStyle = new ImageTextButton.ImageTextButtonStyle();
-        playButtonStyle.font = new BitmapFont();
+        playButtonStyle.font = new BitmapFont(Gdx.files.internal("font/font.fnt"));
+        playButtonStyle.fontColor = Color.BLACK;
         playButtonStyle.up = new TextureRegionDrawable(buttonTexture);
         playButtonStyle.down = new TextureRegionDrawable(buttonTexture);
         ImageTextButton playButton = new ImageTextButton("New Game", playButtonStyle);
         playButton.setWidth(400f);
         playButton.setHeight(100f);
-        playButton.getLabel().setFontScale(2f);
+        playButton.getLabel().setFontScale(1f);
         playButton.setPosition(Gdx.graphics.getWidth()/2 - playButton.getWidth()/2, Gdx.graphics.getHeight()/2 - playButton.getHeight() * 2);
         playButton.addListener(new InputListener(){
             @Override

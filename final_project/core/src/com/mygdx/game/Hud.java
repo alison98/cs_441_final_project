@@ -45,10 +45,13 @@ public class Hud {
         stage = new Stage(stageViewport, spriteBatch);
         textQueue = new Queue<String>();
 
-        textBox = new Label("Hello", new Skin(Gdx.files.internal("skin/plain-james-ui.json"), new TextureAtlas(Gdx.files.internal("skin/plain-james-ui.atlas"))));
+        Label.LabelStyle labelStyle = new Label.LabelStyle();
+        labelStyle.font = new BitmapFont(Gdx.files.internal("font/font.fnt"));
+        labelStyle.fontColor = Color.BLACK;
+        textBox = new Label("Hello", labelStyle);
         textBox.setWidth(1200);
         textBox.setHeight(200);
-        textBox.setFontScale(2f);
+        textBox.setFontScale(1f);
         textBox.setAlignment(Align.center);
         textBox.setPosition(Gdx.graphics.getWidth()/2 - textBox.getWidth()/2, 100);
         textBox.getStyle().background = new Image(new Texture(Gdx.files.internal("textbox.png"))).getDrawable();

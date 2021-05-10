@@ -3,8 +3,10 @@ package com.mygdx.game;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -29,22 +31,33 @@ public class Inventory implements Screen {
         this.stage = new Stage(new ScreenViewport());
         gameScreen = gameScreenIn;
 
-        Table table = new Table();
-        Label health = new Label(Integer.toString(player.getHealth()), new Skin(Gdx.files.internal("skin/plain-james-ui.json"), new TextureAtlas(Gdx.files.internal("skin/plain-james-ui.atlas"))));
+        Label.LabelStyle labelStyle = new Label.LabelStyle();
+        labelStyle.font = new BitmapFont(Gdx.files.internal("font/font.fnt"));
+        labelStyle.fontColor = Color.BLACK;
 
-        Label level = new Label(Integer.toString(player.getLevel()), new Skin(Gdx.files.internal("skin/plain-james-ui.json"), new TextureAtlas(Gdx.files.internal("skin/plain-james-ui.atlas"))));
-        Label experience = new Label(Integer.toString(player.getExperience()), new Skin(Gdx.files.internal("skin/plain-james-ui.json"), new TextureAtlas(Gdx.files.internal("skin/plain-james-ui.atlas"))));
+        Table table = new Table();
+        Label health = new Label("Health: " + Integer.toString(player.getHealth()) + "/" + Integer.toString(player.getMaxHealth()), labelStyle);
+        health.setFontScale(1.25f);
+        Label level = new Label("Level: " + Integer.toString(player.getLevel()), labelStyle);
+        level.setFontScale(1.25f);
+        Label experience = new Label("Experience: " + Integer.toString(player.getExperience()) + "/100", labelStyle);
+        experience.setFontScale(1.25f);
         table.add(health);
         table.row();
         table.add(level);
         table.row();
         table.add(experience);
-        table.row();
+        table.setPosition(Gdx.graphics.getWidth()/3 - table.getWidth(), 500);
+
+        Table weaponTable = new Table();
         for(String item : player.getWeapon()){
-            table.add(new Label(item, new Skin(Gdx.files.internal("skin/plain-james-ui.json"), new TextureAtlas(Gdx.files.internal("skin/plain-james-ui.atlas")))));
-            table.row();
+            Label weapon = new Label(item, labelStyle);
+            weapon.setFontScale(1.25f);
+            weapon.setColor(Color.BLACK);
+            weaponTable.add(weapon);
+            weaponTable.row();
         }
-        table.setPosition(500, 500);
+        weaponTable.setPosition(Gdx.graphics.getWidth() * 2 / 3, 500);
 
         ImageButton backButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("right-button.png"))));
         backButton.setTouchable(Touchable.enabled);
@@ -63,6 +76,7 @@ public class Inventory implements Screen {
         });
 
         stage.addActor(table);
+        stage.addActor(weaponTable);
         stage.addActor(backButton);
     }
 

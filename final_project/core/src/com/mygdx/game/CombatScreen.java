@@ -59,17 +59,14 @@ public class CombatScreen implements Screen {
     //TODO
     // -FEATURES:
     //      -other things to add based on how Moves work:
-    //          --Do weapons have durability?
-    //          --Cool-down or certain number of uses of a move per encounter?
-    //          --I've taken care of the 2 points above already (although I haven't tested)
     //          --Can AI heal? if so make their choices smarter
     //      -use player.getRewards() for drops
     // -BUGS:
+    //      -when status effect is brief, name flashes too quick
     //      -fix so player cannot consume move that does nothing
     //          --i.e. healing at 100% won't do anything, but it will use their move - pick one or the other
     //      -test all the new stuff I added to moves
-    //          --need a better solution to duplicates - imagine enemy and player using same move
-    //          --duplicates and multiple simultaneous effects will probably break
+    //          --multiple simultaneous effects might break
     //      -fix bug of going back into combat
     //          --I haven't been able to replicate yet
     //      -fix bug where printer disappears when player loses
@@ -237,7 +234,12 @@ public class CombatScreen implements Screen {
         List<String> enemyWeapons = enemy.getWeapon(); //get list of moves
         Random rand = new Random(); //pick one (random for now)
         //I'll probably want to make a smarter choice - only heal when low
-        String selectedWeapon = enemyWeapons.get(rand.nextInt(enemyWeapons.size()));//get random weapon
+        List<String> availableEnemyWeapons = new ArrayList<>();
+        for (String currentWeapon : enemyWeapons) //only deal with moves that aren't in cooldown, haven't hit use limit
+            if(Move.getInstance().isCurrentlyAvailable(currentWeapon) ) availableEnemyWeapons.add(currentWeapon);
+        String selectedWeapon;
+        selectedWeapon = availableEnemyWeapons.get(rand.nextInt(availableEnemyWeapons.size()));//get random weapon
+        System.out.println("selected " + selectedWeapon);
         int amount = Move.getInstance().useMove(selectedWeapon, enemy.getWeapon(), enemy.getOngoingStatusEffects());
         enemyTurn(Move.getInstance().getMoveType(selectedWeapon), amount, selectedWeapon, false);
         isPlayerTurn = true;//it is now the player's turn, they can go once animations finish
@@ -414,6 +416,7 @@ public class CombatScreen implements Screen {
         currentMoveLabel.setPosition(width/2f - 250, height - height/1.3f);
         currentMoveLabel.setFontScale(1f);//looks better smaller (and I am running out of room)
         currentMoveLabel.setAlignment(Align.center);
+        currentMoveLabel.setColor(Color.BLACK);
         stage.addActor(currentMoveLabel);
 
         //I'm trying to replace some of the hard-coded numbers with constants

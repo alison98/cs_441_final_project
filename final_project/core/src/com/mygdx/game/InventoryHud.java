@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -27,6 +28,7 @@ public class InventoryHud {
     private GameScreen gameScreen;
     private int floor;
     private Label health;
+    private ScrollPane scroller;
 
     public InventoryHud(final Player playerIn, final SpriteBatch spriteBatch, final GameScreen gameScreenIn, final int floorIn){
         player = playerIn;
@@ -85,20 +87,17 @@ public class InventoryHud {
                 final ImageTextButton weapon = new ImageTextButton(item, imageTextButtonStyle);
                 weapon.getLabel().setFontScale(1.25f);
                 weapon.getLabel().setAlignment(Align.center);
-                weapon.addListener(new InputListener(){
+                weapon.addListener(new ClickListener() {
                     @Override
-                    public void touchUp(InputEvent event, float x, float y, int pointer, int button){
+                    public void clicked(InputEvent event, float x, float y) {
                         int amount = Move.getInstance().useMove(item, player.getWeapon(), player.getOngoingStatusEffects());
                         player.setHealth(player.getHealth() + amount);
                         health.setText("Health: " + Integer.toString(player.getHealth()) + "/" + Integer.toString(player.getMaxHealth()));
                         weaponTable.removeActor(weapon);
-                    }
-
-                    @Override
-                    public boolean touchDown(InputEvent event, float x, float y, int pointer, int button){
-                        return true;
+                        super.clicked(event, x, y);
                     }
                 });
+                
                 weaponTable.add(weapon).width(600f).height(150f).pad(10);
                 weaponTable.row();
             } else {
@@ -111,7 +110,7 @@ public class InventoryHud {
         }
         weaponTable.pack();
 
-        ScrollPane scroller = new ScrollPane(weaponTable);
+        scroller = new ScrollPane(weaponTable);
         scroller.setPosition(Gdx.graphics.getWidth() * 2 / 3 - scroller.getWidth(), 0);
         scroller.setWidth(weaponTable.getWidth());
         scroller.setHeight(Gdx.graphics.getHeight());

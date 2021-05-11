@@ -15,9 +15,11 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
@@ -39,7 +41,7 @@ public class CombatScreen implements Screen {
     private Player player;
     private Enemy enemy;
     private boolean isPlayerTurn;
-    private TextButton[] moveButtons;
+    private ImageTextButton[] moveButtons;
     private HealthBar playerHealthBar;
     private HealthBar enemyHealthBar;
     private boolean animationActive; //is there an active animation/movement on screen? if so, we're mid-turn and need to wait
@@ -57,16 +59,8 @@ public class CombatScreen implements Screen {
 
 
     //TODO
-    // -FEATURES:
-    //      -other things to add based on how Moves work:
-    //          --Can AI heal? if so make their choices smarter
-    //      -use player.getRewards() for drops
     // -BUGS:
     //      -when status effect is brief, name flashes too quick
-    //      -fix so player cannot consume move that does nothing
-    //          --i.e. healing at 100% won't do anything, but it will use their move - pick one or the other
-    //      -test all the new stuff I added to moves
-    //          --multiple simultaneous effects might break
     //      -fix bug of going back into combat
     //          --I haven't been able to replicate yet
     //      -fix bug where printer disappears when player loses
@@ -216,7 +210,7 @@ public class CombatScreen implements Screen {
             String statusEffect = enemy.getOngoingStatusEffects().get(statusEffectsIndex);
             //System.out.println("performing " + statusEffect);
             int amount = Move.getInstance().useStatusEffect(statusEffect, enemy.getOngoingStatusEffects());//change to status effect range
-            enemyTurn(Move.getInstance().getStatusEffectMoveType(statusEffect), amount, statusEffect, false);
+            enemyTurn(Move.getInstance().getStatusEffectMoveType(statusEffect), amount, statusEffect, true);
             statusEffectsIndex++;
         }else{
             statusEffectsInProgress = false;
@@ -296,10 +290,9 @@ public class CombatScreen implements Screen {
             if(enemy.hasKey()){
                 gameScreen.getHud().setText("The enemy dropped a key!");
             }
-            List<Integer> rewards = enemy.getRewards(); //0 is xp, 1 is money, 2 will be drops
+            List<Integer> rewards = enemy.getRewards(); //0 is xp, 1 is money
             player.increaseExperience(rewards.get(0));
             player.setMoney(player.getMoney() + rewards.get(1));
-            //player.addWeapons(rewards.get(2));//something like this
             enemy.defeated();
         }else{//player lost
             //place player back at this floor's stairs
@@ -488,7 +481,18 @@ public class CombatScreen implements Screen {
         }
 
         int prevButtonIndex = -1;//index of the button which will be used to go back a "page". Will only be used if we have more moves than we can display at once
-        moveButtons = new TextButton[moveOccurrences.size()];//make a button for each unique move
+
+
+        Texture buttonTexture = new Texture("textbox.png");
+        Skin skin = new Skin();
+        skin.add("buttonTexture", buttonTexture);
+        ImageTextButton.ImageTextButtonStyle playButtonStyle = new ImageTextButton.ImageTextButtonStyle();
+        playButtonStyle.font = new BitmapFont(Gdx.files.internal("font/font.fnt"));
+        playButtonStyle.fontColor = Color.BLACK;
+        playButtonStyle.up = new TextureRegionDrawable(buttonTexture);
+        playButtonStyle.down = new TextureRegionDrawable(buttonTexture);
+
+        moveButtons = new ImageTextButton[moveOccurrences.size()];//make a button for each unique move
         //starting position of 1st button
         float nextY = 200;
         float nextX = 150;
@@ -498,14 +502,12 @@ public class CombatScreen implements Screen {
 
         int i = 0;
         for(String currentMove : alphabeticalList){ //set up buttons - a max of 2 rows
-            Skin s = new Skin(Gdx.files.internal("skin/plain-james-ui.json")); //random skin from my last project just to test, very ugly, replace (can also switch to image buttons)
-            TextButton newMoveButton;
-            //if(moveButtons.length > i) newMoveButton = moveButtons[i]; //this doesn't work, find another way to reuse/check
-            newMoveButton = new TextButton(currentMove, s);//make a new button on screen with move's name
-            newMoveButton.setSize(250, 100); //good size for now
+            ImageTextButton newMoveButton = new ImageTextButton("New Game", playButtonStyle);
+            newMoveButton.setWidth(250f);
+            newMoveButton.setHeight(100f);
             newMoveButton.setPosition(nextX, nextY);
             newMoveButton.setColor(Color.WHITE);
-            newMoveButton.getLabel().setFontScale(2f, 2f);
+            newMoveButton.getLabel().setFontScale(.75f);
             nextX += 300;
             if (nextX + 250 >= width) {//hit side of screen, start new row
                 nextX = 150;
@@ -543,7 +545,7 @@ public class CombatScreen implements Screen {
      * @param button the button to modify
      * @content the string to display on the button and make listener for, represents a move
      */
-    public void setHandler(TextButton button, final String content, int occurrences) {
+    public void setHandler(ImageTextButton button, final String content, int occurrences) {
         if(occurrences > 1) button.setText(content + " x" + occurrences); //used to display how many of a certain move we have
         else button.setText(content);
         button.clearListeners();
@@ -604,7 +606,7 @@ public class CombatScreen implements Screen {
                     //in that case, we need to reset the buttons with the player's newly decreased move list
                     //NOTE - I'd like a slightly better system (some moves won't require a reset, we only need to change at most one button per turn) but this is by far the easiest solution
                     //we could easily add a check here - save the size of the move list before calling player turn, compare here, if its different, need a button reset
-                    for (TextButton currentButton : moveButtons) { //we reset buttons
+                    for (ImageTextButton currentButton : moveButtons) { //we reset buttons
                         currentButton.setText("");
                         currentButton.clearListeners();
                         currentButton.setVisible(false);

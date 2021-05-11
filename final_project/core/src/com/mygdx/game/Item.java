@@ -17,10 +17,10 @@ public class Item extends Interactable{
         index = indexIn;
         random = new Random();
         droppable = new ArrayList<>();
-        droppable.add("coffee");
+        droppable.add("Coffee");
         droppable.add("Tea");
-        droppable.add("Donut");
-        droppable.add("Sandwich");
+        droppable.add("Lemonade");
+        droppable.add("Milk");
     }
 
     @Override

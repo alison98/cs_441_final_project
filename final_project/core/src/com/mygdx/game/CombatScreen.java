@@ -60,6 +60,7 @@ public class CombatScreen implements Screen {
 
     //TODO
     // -BUGS:
+    //      -decide if other status effects carry over
     //      -when status effect is brief, name flashes too quick
     //      -fix bug of going back into combat
     //          --I haven't been able to replicate yet
@@ -95,6 +96,14 @@ public class CombatScreen implements Screen {
         this.gameScreen = gameScreen;
         initUI(); //set up on screen elements
         touchDown = false;
+        //just set up the icon
+        if(player.getOngoingStatusEffects().size() > 0){
+            for(String move : player.getOngoingStatusEffects()){
+                playerHealthStatusDuration += Move.getInstance().getStatusEffectDuration(move);
+            }
+            playerHealthStatusEffect.setVisible(true);
+        }
+        beginPlayerTurn();//edge case where player heals then comes in with status effect
     }
 
     @Override
@@ -127,7 +136,7 @@ public class CombatScreen implements Screen {
     //start chain of events for the player's turn
     //begin their status effects
     private void beginPlayerTurn() {
-        //System.out.println("setup player turn");
+        System.out.println("setup player turn");
         statusEffectsInProgress = true;
         statusEffectsIndex = 0;
         performPlayerStatusEffects();

@@ -35,7 +35,7 @@ public class Move {
         //I also need to think about balance and making things interesting
 
         //test case I didn't feel like removing yet
-        movelist.put("sword", new MoveData.Builder(setDamage(10, 20), MoveData.MoveType.ATTACK).build()); //bare minimum  - name, range, type
+        movelist.put("Sword", new MoveData.Builder(setDamage(10, 20), MoveData.MoveType.ATTACK).build()); //bare minimum  - name, range, type
 
         //some player attacks
         //note that we can control what moves are sold on each floor
@@ -99,7 +99,7 @@ public class Move {
 
         //some player healing moves
         //I'm going to make all healing items single use for now, which means no cooldown or uses per turn limit
-        movelist.put("coffee", new MoveData.Builder(setDamage(20, 40), MoveData.MoveType.HEALING)
+        movelist.put("Coffee", new MoveData.Builder(setDamage(20, 40), MoveData.MoveType.HEALING)
                 .setDurability(1) //single use
                 .setStatusEffect(MoveData.MoveType.HEALING, setDamage(10, 20), 2) //adding a status effect to this one
                 .build());
@@ -213,17 +213,18 @@ public class Move {
         enemyWeapons = new ArrayList<>();
         List<String> floor0 = new ArrayList<>();
         floor0.add("Paper Cut");
+        floor0.add("Paper Cut");
         floor0.add("Slam Tray");
         //floor0.add("sword");
         //floor0.add("coffee"); //testing enemy healing itself
         List<String> floor1 = new ArrayList<>();
-        floor1.add("sword");
+        floor1.add("Slam Tray");
         List<String> floor2 = new ArrayList<>();
-        floor2.add("sword");
+        floor2.add("Slam Tray");;
         List<String> floor3 = new ArrayList<>();
-        floor3.add("sword");
+        floor3.add("Slam Tray");
         List<String> floor4 = new ArrayList<>();
-        floor4.add("sword");
+        floor4.add("Slam Tray");
         enemyWeapons.add(floor0);
         enemyWeapons.add(floor1);
         enemyWeapons.add(floor2);

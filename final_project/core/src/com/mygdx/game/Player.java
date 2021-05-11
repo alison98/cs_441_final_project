@@ -47,9 +47,9 @@ public class Player extends Actor {
         frameCounter = 0;
         gameScreen = gameScreenIn;
         weapon = new ArrayList<>();
-        weapon.add("sword");
-        weapon.add("coffee");
-        weapon.add("coffee");
+        //player starts with a stapler and a coffee
+        weapon.add("Stapler");
+        weapon.add("Coffee");
         ongoingStatusEffects = new ArrayList<>();
         level = 1;
         maxHealth = health = 100;

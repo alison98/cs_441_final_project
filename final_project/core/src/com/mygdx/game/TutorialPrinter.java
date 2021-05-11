@@ -21,7 +21,7 @@ public class TutorialPrinter extends Interactable{
     }
 
     public void fight(GameScreen game){
-        Enemy tutorialPrinter = new Enemy(x,y,2,"enemy-printer-12x.png", floor, null);
+        Enemy tutorialPrinter = new Enemy(x,y,2,"An Angry Printer.png", floor, null);
         //tutorialPrinter.setKey();
         tutorialPrinter.setBoss("You managed to fight off the printer,\nbut what's going on upstairs?", this);
         game.getPlayer().setCombat();

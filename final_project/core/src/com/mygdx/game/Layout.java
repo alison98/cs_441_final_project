@@ -131,19 +131,19 @@ public class Layout {
     private void addEnemyNames(){
         //Add enemy names here to be randomly chosen during room creation
         enemyNames = new ArrayList<>();
-        enemyNames.add("enemy-printer-4x.png");
-        enemyNames.add("fax.png");
-        enemyNames.add("box.png");
+        enemyNames.add("100 Meter Print.png");
+        enemyNames.add("Battlefax.png");
+        enemyNames.add("X-Box 360.png");
     }
     private void addBossNames(){
         //Add Bosses here
         //Size must equal the maxFloor+1
         bossNames = new ArrayList<>();
-        bossNames.add("enemy-printer-12x.png");
-        bossNames.add("fax-boss.png");
-        bossNames.add("box-boss.png");
-        bossNames.add("enemy-printer-12x.png");
-        bossNames.add("enemy-printer-12x.png");
+        bossNames.add("An Angry Printer.png");
+        bossNames.add("Death and Faxes.png");
+        bossNames.add("Box Ness Monster.png");
+        bossNames.add("Printer is Coming.png");
+        bossNames.add("The CEO.png");
     }
 
     private void setupShop(){
@@ -520,7 +520,7 @@ public class Layout {
         if(possibility ==0) {
             List<List<Integer>> itemLocations = Boundary.getInstance().getItemLocations();
             List<Integer> itemL = itemLocations.get(random.nextInt(itemLocations.size()));
-            interactables.get(floorIn).get(rowIn).get(columnIn).add(new Item("ruby.png", floorIn, rowIn, columnIn, 0, itemL.get(0), itemL.get(1)));
+            interactables.get(floorIn).get(rowIn).get(columnIn).add(new Item("coffee.png", floorIn, rowIn, columnIn, 0, itemL.get(0), itemL.get(1)));
         }
     }
 

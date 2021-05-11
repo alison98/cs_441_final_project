@@ -118,6 +118,8 @@ public class Layout {
         return shopItems.get(floorIn-1);
     }
 
+    public int getFloor(){return floor;}
+
     private void addRoomNames(){
         //Add room names here to be randomly chosen
         roomNames = new ArrayList<>();
@@ -518,7 +520,7 @@ public class Layout {
         if(possibility ==0) {
             List<List<Integer>> itemLocations = Boundary.getInstance().getItemLocations();
             List<Integer> itemL = itemLocations.get(random.nextInt(itemLocations.size()));
-            interactables.get(floorIn).get(rowIn).get(columnIn).add(new Item("badlogic.jpg", floorIn, rowIn, columnIn, 0, itemL.get(0), itemL.get(1)));
+            interactables.get(floorIn).get(rowIn).get(columnIn).add(new Item("ruby.png", floorIn, rowIn, columnIn, 0, itemL.get(0), itemL.get(1)));
         }
     }
 

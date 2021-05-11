@@ -107,21 +107,21 @@ public class Move {
                 .setDurability(1) //single use
                 .setStatusEffect(MoveData.MoveType.HEALING, setDamage(10, 20), 2)
                 .build());
-        movelist.put("Donut", new MoveData.Builder(setDamage(10, 15), MoveData.MoveType.HEALING)
+        movelist.put("Hot Chocolate", new MoveData.Builder(setDamage(10, 15), MoveData.MoveType.HEALING)
                 .setDurability(1) //can use twice
                 .build());
-        movelist.put("Sandwich", new MoveData.Builder(setDamage(10, 20), MoveData.MoveType.HEALING)
+        movelist.put("Lemonade", new MoveData.Builder(setDamage(10, 20), MoveData.MoveType.HEALING)
                 .setDurability(1) //single use
                 .setStatusEffect(MoveData.MoveType.HEALING, setDamage(5, 20), 2)
                 .build());
-        movelist.put("Bagel", new MoveData.Builder(setDamage(15, 20), MoveData.MoveType.HEALING)
+        movelist.put("Iced Tea", new MoveData.Builder(setDamage(15, 20), MoveData.MoveType.HEALING)
                 .setDurability(1)
                 .build());
-        movelist.put("Pizza", new MoveData.Builder(setDamage(5,10), MoveData.MoveType.HEALING)
+        movelist.put("Milk", new MoveData.Builder(setDamage(5,10), MoveData.MoveType.HEALING)
                 .setDurability(1)
                 .setStatusEffect(MoveData.MoveType.HEALING, setDamage(0, 10), 2)
                 .build());
-        movelist.put("Salad", new MoveData.Builder(setDamage(20,30), MoveData.MoveType.HEALING)
+        movelist.put("Chocolate Milk", new MoveData.Builder(setDamage(20,30), MoveData.MoveType.HEALING)
                 .setDurability(1)
                 .build());
         movelist.put("Soda", new MoveData.Builder(setDamage(5,10), MoveData.MoveType.HEALING)
@@ -130,22 +130,22 @@ public class Move {
         movelist.put("Soup", new MoveData.Builder(setDamage(15,30), MoveData.MoveType.HEALING)
                 .setDurability(1)
                 .build());
-        movelist.put("Chips", new MoveData.Builder(setDamage(5,10), MoveData.MoveType.HEALING)
+        movelist.put("Sports Drink", new MoveData.Builder(setDamage(5,10), MoveData.MoveType.HEALING)
                 .setDurability(1)
                 .build());
-        movelist.put("Candy Bar", new MoveData.Builder(setDamage(10, 15), MoveData.MoveType.HEALING)
+        movelist.put("Apple Cider", new MoveData.Builder(setDamage(10, 15), MoveData.MoveType.HEALING)
                 .setDurability(1)
                 .build());
-        movelist.put("Burrito", new MoveData.Builder(setDamage(20,25), MoveData.MoveType.HEALING)
+        movelist.put("Water", new MoveData.Builder(setDamage(20,25), MoveData.MoveType.HEALING)
                 .setDurability(1)
                 .build());
         movelist.put("Protein Shake", new MoveData.Builder(setDamage(25,40), MoveData.MoveType.HEALING)
                 .setDurability(1)
                 .build());
-        movelist.put("Ice Cream", new MoveData.Builder(setDamage(10, 15), MoveData.MoveType.HEALING)
+        movelist.put("Orange Juice", new MoveData.Builder(setDamage(10, 15), MoveData.MoveType.HEALING)
                 .setDurability(1)
                 .build());
-        movelist.put("Energy Bar", new MoveData.Builder(setDamage(20,30), MoveData.MoveType.HEALING)
+        movelist.put("Punch", new MoveData.Builder(setDamage(20,30), MoveData.MoveType.HEALING)
                 .setDurability(1)
                 .setStatusEffect(MoveData.MoveType.HEALING, setDamage(15, 30), 1)
                 .build());

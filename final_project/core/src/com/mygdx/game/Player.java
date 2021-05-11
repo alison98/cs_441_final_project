@@ -94,6 +94,8 @@ public class Player extends Actor {
     public void increaseExperience(int amount){
         experience += amount;
         if(experience >= 100){
+            maxHealth = (maxHealth + (25));
+            health = maxHealth;
             level +=1;
             experience -=100;
         }

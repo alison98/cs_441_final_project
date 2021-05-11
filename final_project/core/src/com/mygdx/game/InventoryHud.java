@@ -26,6 +26,7 @@ public class InventoryHud {
     private Player player;
     private GameScreen gameScreen;
     private int floor;
+    private Label health;
 
     public InventoryHud(final Player playerIn, final SpriteBatch spriteBatch, final GameScreen gameScreenIn, final int floorIn){
         player = playerIn;
@@ -39,8 +40,14 @@ public class InventoryHud {
         labelStyle.fontColor = Color.BLACK;
         labelStyle.background = new TextureRegionDrawable(new Texture("textbox.png"));
 
+        ImageTextButton.ImageTextButtonStyle imageTextButtonStyle = new ImageTextButton.ImageTextButtonStyle();
+        imageTextButtonStyle.font = new BitmapFont(Gdx.files.internal("font/font.fnt"));
+        imageTextButtonStyle.fontColor = Color.BLACK;
+        imageTextButtonStyle.up = new TextureRegionDrawable(new Texture("textbox.png"));
+        imageTextButtonStyle.up = new TextureRegionDrawable(new Texture("textbox.png"));
+
         Table table = new Table();
-        Label health = new Label("Health: " + Integer.toString(player.getHealth()) + "/" + Integer.toString(player.getMaxHealth()), labelStyle);
+        health = new Label("Health: " + Integer.toString(player.getHealth()) + "/" + Integer.toString(player.getMaxHealth()), labelStyle);
         health.setFontScale(1.25f);
         health.setAlignment(Align.center);
 
@@ -72,13 +79,35 @@ public class InventoryHud {
 
         table.setPosition(Gdx.graphics.getWidth()/3 - table.getWidth(), Gdx.graphics.getHeight()/2 - table.getHeight());
 
-        Table weaponTable = new Table();
-        for(String item : player.getWeapon()){
-            Label weapon = new Label(item, labelStyle);
-            weapon.setFontScale(1.25f);
-            weapon.setAlignment(Align.center);
-            weaponTable.add(weapon).width(600f).height(150f).pad(10);
-            weaponTable.row();
+        final Table weaponTable = new Table();
+        for(final String item : player.getWeapon()){
+            if(Move.getInstance().getMoveType(item) == MoveData.MoveType.HEALING){
+                final ImageTextButton weapon = new ImageTextButton(item, imageTextButtonStyle);
+                weapon.getLabel().setFontScale(1.25f);
+                weapon.getLabel().setAlignment(Align.center);
+                weapon.addListener(new InputListener(){
+                    @Override
+                    public void touchUp(InputEvent event, float x, float y, int pointer, int button){
+                        int amount = Move.getInstance().useMove(item, player.getWeapon(), player.getOngoingStatusEffects());
+                        player.setHealth(player.getHealth() + amount);
+                        health.setText("Health: " + Integer.toString(player.getHealth()) + "/" + Integer.toString(player.getMaxHealth()));
+                        weaponTable.removeActor(weapon);
+                    }
+
+                    @Override
+                    public boolean touchDown(InputEvent event, float x, float y, int pointer, int button){
+                        return true;
+                    }
+                });
+                weaponTable.add(weapon).width(600f).height(150f).pad(10);
+                weaponTable.row();
+            } else {
+                Label weapon = new Label(item, labelStyle);
+                weapon.setFontScale(1.25f);
+                weapon.setAlignment(Align.center);
+                weaponTable.add(weapon).width(600f).height(150f).pad(10);
+                weaponTable.row();
+            }
         }
         weaponTable.pack();
 
@@ -89,8 +118,6 @@ public class InventoryHud {
         scroller.setTouchable(Touchable.enabled);
 
         Texture buttonTexture = new Texture("textbox.png");
-        Skin skin = new Skin();
-        skin.add("buttonTexture", buttonTexture);
         ImageTextButton.ImageTextButtonStyle backButtonStyle = new ImageTextButton.ImageTextButtonStyle();
         backButtonStyle.font = new BitmapFont(Gdx.files.internal("font/font.fnt"));
         backButtonStyle.fontColor = Color.BLACK;

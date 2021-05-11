@@ -145,13 +145,8 @@ public class Layout {
     }
 
     private void setupShop(){
-        //max 13 items including close
+        //max 8 items including close
         List<List<String>> floor1 = new ArrayList<>();
-        floor1.add(addItem("coffee","1", "multi"));
-        floor1.add(addItem("coffee","1", "multi"));
-        floor1.add(addItem("coffee","1", "multi"));
-        floor1.add(addItem("coffee","1", "multi"));
-        floor1.add(addItem("coffee","1", "multi"));
         floor1.add(addItem("coffee","1", "multi"));
         floor1.add(addItem("coffee","1", "multi"));
         floor1.add(addItem("coffee","1", "multi"));
@@ -168,11 +163,6 @@ public class Layout {
         floor2.add(addItem("coffee","1", "multi"));
         floor2.add(addItem("coffee","1", "multi"));
         floor2.add(addItem("coffee","1", "multi"));
-        floor2.add(addItem("coffee","1", "multi"));
-        floor2.add(addItem("coffee","1", "multi"));
-        floor2.add(addItem("coffee","1", "multi"));
-        floor2.add(addItem("coffee","1", "multi"));
-        floor2.add(addItem("coffee","1", "multi"));
         floor2.add(addItem("coffee","0", "multi"));
         floor2.add(addItem("close","0", "multi"));
         shopItems.add(floor2);
@@ -183,20 +173,10 @@ public class Layout {
         floor3.add(addItem("coffee","1", "multi"));
         floor3.add(addItem("coffee","1", "multi"));
         floor3.add(addItem("coffee","1", "multi"));
-        floor3.add(addItem("coffee","1", "multi"));
-        floor3.add(addItem("coffee","1", "multi"));
-        floor3.add(addItem("coffee","1", "multi"));
-        floor3.add(addItem("coffee","1", "multi"));
-        floor3.add(addItem("coffee","1", "multi"));
         floor3.add(addItem("coffee","0", "multi"));
         floor3.add(addItem("close","0", "multi"));
         shopItems.add(floor3);
         List<List<String>> floor4 = new ArrayList<>();
-        floor4.add(addItem("coffee","1", "multi"));
-        floor4.add(addItem("coffee","1", "multi"));
-        floor4.add(addItem("coffee","1", "multi"));
-        floor4.add(addItem("coffee","1", "multi"));
-        floor4.add(addItem("coffee","1", "multi"));
         floor4.add(addItem("coffee","1", "multi"));
         floor4.add(addItem("coffee","1", "multi"));
         floor4.add(addItem("coffee","1", "multi"));

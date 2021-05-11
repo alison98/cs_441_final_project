@@ -1,8 +1,10 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -26,7 +28,7 @@ public class ShopHud {
     private Stage stage;
     private ScreenViewport stageViewport;
     private ImageButton selectButton;
-    private Label textBox,shopText, priceText;
+    private Label textBox,shopText, priceText,moneyText;
     private ImageButton upButton;
     private ImageButton downButton;
     private ImageButton leftButton;
@@ -45,28 +47,44 @@ public class ShopHud {
 
         player = gameScreen.getPlayer();
 
-        shopText = new Label("Hello", new Skin(Gdx.files.internal("skin/plain-james-ui.json"), new TextureAtlas(Gdx.files.internal("skin/plain-james-ui.atlas"))));
-        shopText.setWidth(1000);
+        Label.LabelStyle labelStyle = new Label.LabelStyle();
+        labelStyle.font = new BitmapFont(Gdx.files.internal("font/font.fnt"));
+        labelStyle.fontColor = Color.BLACK;
+
+        Label.LabelStyle labelStyle2 = new Label.LabelStyle();
+        labelStyle2.font = new BitmapFont(Gdx.files.internal("font/font.fnt"));
+        labelStyle2.fontColor = Color.BLACK;
+
+        shopText = new Label("Hello", labelStyle);
+        shopText.setWidth(800);
         shopText.setHeight(900);
-        shopText.setFontScale(2f);
+        shopText.setFontScale(1f);
         shopText.setAlignment(Align.topLeft);
         shopText.setPosition(Gdx.graphics.getWidth()/2 - shopText.getWidth()/2, 100);
         shopText.getStyle().background = new Image(new Texture(Gdx.files.internal("textbox.png"))).getDrawable();
         shopText.setVisible(false);
 
-        priceText = new Label("Hello", new Skin(Gdx.files.internal("skin/plain-james-ui.json"), new TextureAtlas(Gdx.files.internal("skin/plain-james-ui.atlas"))));
-        priceText.setWidth(400);
+        moneyText = new Label("Hello", labelStyle);
+        moneyText.setWidth(300);
+        moneyText.setHeight(70);
+        moneyText.setFontScale(1f);
+        moneyText.setAlignment(Align.left);
+        moneyText.setPosition(Gdx.graphics.getWidth() - moneyText.getWidth(), Gdx.graphics.getHeight() - moneyText.getHeight());
+        moneyText.setVisible(false);
+
+        priceText = new Label("Hello", labelStyle2);
+        priceText.setWidth(100);
         priceText.setHeight(900);
-        priceText.setFontScale(2f);
+        priceText.setFontScale(1f);
         priceText.setAlignment(Align.topLeft);
-        priceText.setPosition(Gdx.graphics.getWidth()/2, 100);
+        priceText.setPosition(Gdx.graphics.getWidth()/2 + priceText.getWidth(), 100);
         priceText.setVisible(false);
         setText();
 
-        textBox = new Label("Hello", new Skin(Gdx.files.internal("skin/plain-james-ui.json"), new TextureAtlas(Gdx.files.internal("skin/plain-james-ui.atlas"))));
+        textBox = new Label("Hello", labelStyle);
         textBox.setWidth(1200);
         textBox.setHeight(200);
-        textBox.setFontScale(2f);
+        textBox.setFontScale(1f);
         textBox.setAlignment(Align.center);
         textBox.setPosition(Gdx.graphics.getWidth()/2 - textBox.getWidth()/2, 100);
         textBox.getStyle().background = new Image(new Texture(Gdx.files.internal("textbox.png"))).getDrawable();
@@ -76,8 +94,13 @@ public class ShopHud {
 
         selectButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("select-button.png"))));
         selectButton.setPosition(1800, 80);
-        selectButton.setVisible(false);
-        selectButton.setTouchable(Touchable.disabled);
+        if(player.getMoney()>= Integer.valueOf(items.get(position).get(1))){
+            selectButton.setVisible(true);
+            selectButton.setTouchable(Touchable.enabled);
+        }else{
+            selectButton.setVisible(false);
+            selectButton.setTouchable(Touchable.disabled);
+        }
         selectButton.addListener(new InputListener(){
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
@@ -87,19 +110,28 @@ public class ShopHud {
                     leftButton.setTouchable(Touchable.enabled);
                     rightButton.setTouchable(Touchable.enabled);
                     textBox.setVisible(false);
-                }else if(items.get(position).get(0) == "close"){
+                    if (player.getMoney() >= Integer.valueOf(items.get(position).get(1))) {
+                        selectButton.setVisible(true);
+                        selectButton.setTouchable(Touchable.enabled);
+                    } else {
+                        selectButton.setVisible(false);
+                        selectButton.setTouchable(Touchable.disabled);
+                    }
+                }else if (items.get(position).get(0) == "close") {
                     gameScreen.getGame().setScreen(gameScreen);
-                }else if(items.get(position).get(2).equals("single")){
+                } else if (items.get(position).get(2).equals("single")) {
                     player.setMoney(player.getMoney() - Integer.valueOf(items.get(position).get(1)));
                     player.addWeapon(items.get(position).get(0));
                     items.remove(position); //Removes from Layout?
                     setText();
                     purchase("Thank you for your purchase!");
-                }else { //use for multiple purchase
+                } else { //use for multiple purchase
                     player.setMoney(player.getMoney() - Integer.valueOf(items.get(position).get(1)));
                     player.addWeapon(items.get(position).get(0));
+                    setText();
                     purchase("Thank you for your purchase!");
                 }
+
 
             }
             @Override
@@ -116,7 +148,7 @@ public class ShopHud {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 if(position >0) {
-                    arrow.setPosition(arrow.getX(), arrow.getY() + 46);
+                    arrow.setPosition(arrow.getX(), arrow.getY() + 76);
                     position -= 1;
                     if(player.getMoney()>= Integer.valueOf(items.get(position).get(1))) {
                         setInteractable();
@@ -138,7 +170,7 @@ public class ShopHud {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 if(position <items.size()-1) {
-                    arrow.setPosition(arrow.getX(), arrow.getY() - 46);
+                    arrow.setPosition(arrow.getX(), arrow.getY() - 76);
                     position += 1;
                     if(player.getMoney()>= Integer.valueOf(items.get(position).get(1))) {
                         setInteractable();
@@ -189,6 +221,7 @@ public class ShopHud {
         stage.addActor(selectButton);
         stage.addActor(shopText);
         stage.addActor(priceText);
+        stage.addActor(moneyText);
         stage.addActor(arrow);
         stage.addActor(textBox);
     }
@@ -198,7 +231,7 @@ public class ShopHud {
 
         public Arrow(){
             sprite = new Sprite(new Texture("left-button.png"));
-            setPosition(525,800);
+            setPosition(625,800);
         }
 
         @Override
@@ -228,13 +261,13 @@ public class ShopHud {
     }
 
     public void setText(){
-        String allItems = "\n\n\n";
-        String prices = "\n\n\n";
+        String allItems = "\n\n";
+        String prices = "\n\n";
         for(List<String> item : items){
             if(item.get(0).equals("close")){
-                allItems += "\t" + item.get(0);
+                allItems += "          " + item.get(0);
             } else {
-                allItems += "\t" + item.get(0) + "\n";
+                allItems += "          " + item.get(0) + "\n";
                 prices += item.get(1) + "\n";
             }
         }
@@ -242,6 +275,8 @@ public class ShopHud {
         shopText.setVisible(true);
         priceText.setText(prices);
         priceText.setVisible(true);
+        moneyText.setText("  $" + player.getMoney());
+        moneyText.setVisible(true);
     }
 
     public void purchase(String message){

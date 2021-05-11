@@ -93,7 +93,7 @@ public class Player extends Actor {
 
     public void increaseExperience(int amount){
         experience += amount;
-        if(experience <=100){
+        if(experience >= 100){
             level +=1;
             experience -=100;
         }

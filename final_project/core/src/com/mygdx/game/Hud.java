@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -171,13 +172,24 @@ public class Hud {
             }
         });
 
-        inventoryButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("right-button.png"))));
+        Texture buttonTexture = new Texture("textbox.png");
+        Skin skin = new Skin();
+        skin.add("buttonTexture", buttonTexture);
+        ImageTextButton.ImageTextButtonStyle inventoryButtonStyle = new ImageTextButton.ImageTextButtonStyle();
+        inventoryButtonStyle.font = new BitmapFont(Gdx.files.internal("font/font.fnt"));
+        inventoryButtonStyle.fontColor = Color.BLACK;
+        inventoryButtonStyle.up = new TextureRegionDrawable(buttonTexture);
+        inventoryButtonStyle.down = new TextureRegionDrawable(buttonTexture);
+        ImageTextButton inventoryButton = new ImageTextButton("Menu", inventoryButtonStyle);
         inventoryButton.setTouchable(Touchable.enabled);
+        inventoryButton.setWidth(200f);
+        inventoryButton.setHeight(60f);
+        inventoryButton.getLabel().setFontScale(0.6f);
         inventoryButton.setPosition(100, 1000);
         inventoryButton.addListener(new InputListener(){
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button){
-                gameScreen.getGame().setScreen(new Inventory(gameScreen.getGame(), gameScreen.getPlayer(), gameScreen));
+                gameScreen.getGame().setScreen(new Inventory(gameScreen.getGame(), gameScreen.getPlayer(), gameScreen, spriteBatch, Layout.getInstance().getFloor()));
             }
 
             @Override
@@ -185,7 +197,6 @@ public class Hud {
                 return true;
             }
         });
-
 
         table.add(upButton);
         table.row();

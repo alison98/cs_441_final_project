@@ -61,15 +61,17 @@ public class Room extends Actor {
     public void draw(Batch batch, float alpha){
         batch.draw(sprite, getX(),getY(), Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
         doors = layout.possibleRooms();
-        for(int i=0; i<doors.size(); i++){
-            if(doors.get(i)==0){
-                batch.draw(sideDoorImg, 0, Gdx.graphics.getHeight()/2, 50, 150);
-            }else if(doors.get(i)==1){
-                batch.draw(sideDoorImg, Gdx.graphics.getWidth()-50, Gdx.graphics.getHeight()/2, 50, 150);
-            }else if(doors.get(i)==2){
-                batch.draw(doorImg, Gdx.graphics.getWidth()/2-doorImg.getWidth()/2, 888);
-            }else if(doors.get(i)==3){
-                batch.draw(sideDoorImg, Gdx.graphics.getWidth()/2-63, 0, 126, 50);
+        if(sprite.getTexture().toString() != "boss-room.png"){
+            for(int i=0; i<doors.size(); i++){
+                if(doors.get(i)==0){
+                    batch.draw(sideDoorImg, 0, Gdx.graphics.getHeight()/2, 50, 150);
+                }else if(doors.get(i)==1){
+                    batch.draw(sideDoorImg, Gdx.graphics.getWidth()-50, Gdx.graphics.getHeight()/2, 50, 150);
+                }else if(doors.get(i)==2){
+                    batch.draw(doorImg, Gdx.graphics.getWidth()/2-doorImg.getWidth()/2, 888);
+                }else if(doors.get(i)==3){
+                    batch.draw(sideDoorImg, Gdx.graphics.getWidth()/2-63, 0, 126, 50);
+                }
             }
         }
         for(Enemy enemy: enemyList) {

@@ -122,7 +122,7 @@ public class Boundary extends Actor {
             itemL1.add(700);
             itemLocations.add(itemL1);
             List<Integer> itemL2 = new ArrayList<>();
-            itemL2.add(600);
+            itemL2.add(650);
             itemL2.add(700);
             itemLocations.add(itemL2);
             shopLocation.add(1900);

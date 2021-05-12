@@ -73,6 +73,8 @@ public class Room extends Actor {
                     batch.draw(sideDoorImg, Gdx.graphics.getWidth()/2-63, 0, 126, 50);
                 }
             }
+        } else {
+            batch.draw(new Texture("small/blank-image.png"), Gdx.graphics.getWidth()/2-63, 0, 126, 50);
         }
         for(Enemy enemy: enemyList) {
             enemy.draw(batch, alpha);

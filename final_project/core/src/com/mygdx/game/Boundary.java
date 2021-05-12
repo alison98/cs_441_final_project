@@ -184,7 +184,7 @@ public class Boundary extends Actor {
             boundaries.add(new Rectangle(24, 48, 168, 368)); //Left Tree
             boundaries.add(new Rectangle(1888, 48, 168, 368)); //Right Tree
             boundaries.add(new Rectangle(256, 112, 152, 544)); //Left Table
-            boundaries.add(new Rectangle(1580, 112, 152, 544)); //Right Table
+            boundaries.add(new Rectangle(1680, 112, 152, 544)); //Right Table
             boundaries.add(new Rectangle(704, 216, 184, 240)); //Left Chair
             boundaries.add(new Rectangle(1200, 216, 184, 240)); //Right Chair
             boundaries.add(new Rectangle(832, 528, 424, 312)); //Desk REMOVE THIS ONCE FINAL BOSS INTERACTABLE IS CREATED

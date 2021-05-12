@@ -50,7 +50,7 @@ public class Player extends Actor {
         //player starts with a stapler, tie, paper clip, and a coffee
         weapon.add("Stapler");
         weapon.add("Paper Clip");
-        weapon.add("Tie");
+        weapon.add("Sword");
         weapon.add("Coffee");
         ongoingStatusEffects = new ArrayList<>();
         level = 1;

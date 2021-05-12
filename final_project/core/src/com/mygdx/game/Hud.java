@@ -75,7 +75,9 @@ public class Hud {
                                 if(!((Boss)interactable).isHuman()){
                                     ((Boss)interactable).fight(gameScreen);
                                 }
-                            } else if(interactable instanceof Item){
+                            } else if(interactable instanceof FinalBoss){
+                                ((FinalBoss)interactable).fight(gameScreen);
+                            }else if(interactable instanceof Item){
                                 ((Item)interactable).pickUp(gameScreen,gameScreen.getPlayer());
                             }else if(interactable instanceof Shop){
                                 ((Shop)interactable).openShop(spriteBatch, gameScreen);
@@ -100,6 +102,8 @@ public class Hud {
                         ((TutorialPrinter)interactable).interact(gameScreen);
                     } else if(interactable instanceof Boss){
                         ((Boss)interactable).interact(gameScreen);
+                    }else if(interactable instanceof FinalBoss){
+                        ((FinalBoss)interactable).interact(gameScreen);
                     }else if(interactable instanceof Item){
                         ((Item)interactable).interact(gameScreen);
                     }else if(interactable instanceof Shop){

@@ -611,6 +611,7 @@ public class Layout {
         rooms.get(floorIn).get(newRow).set(newCol, new Sprite(new Texture(sprite)));
         interactables.get(floorIn).get(newRow).get(newCol).add(new Boss(bossNames.get(floorIn), floorIn, newRow, newCol, 0, 1000, 400));
 
+
         //enemies.get(floorIn).get(newRow).get(newCol).add(new Enemy(1000,400,2,bossNames.get(floorIn),floorIn, null));
         //enemies.get(floorIn).get(newRow).get(newCol).get(0).setBoss();
 
@@ -670,7 +671,7 @@ public class Layout {
         addShop(maxFloor,stairs2[0],stairs2[1]);
 
         rooms.get(maxFloor).get(0).set(0, new Sprite(new Texture("boss-room.png")));
-        interactables.get(maxFloor).get(0).get(0).add(new Boss(bossNames.get(maxFloor), maxFloor, 0, 0, 0, 1000, 400));
+        interactables.get(maxFloor).get(0).get(0).add(new FinalBoss(bossNames.get(maxFloor), maxFloor, 0, 0, 0, 840, 528));
 
         //enemies.get(maxFloor).get(0).get(0).add(new Enemy(1000,400,2,bossNames.get(maxFloor),maxFloor, null));
         //enemies.get(maxFloor).get(0).get(0).get(0).setBoss("PUT A MESSAGE FOR THE FINAL BOSS TO SAY AFTER DYING HERE");

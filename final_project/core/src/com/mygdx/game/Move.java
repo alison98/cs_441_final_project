@@ -16,11 +16,21 @@ public class Move {
 
     private Map<String, MoveData> movelist;//Map where key is the names of weapons and value is a MoveData object (with range and move type)
     private Map<String, List<MoveData>> randomMovelist; //this is what I'll use when we need a random move, still need to figure out how to use elsewhere now
-    private List<List<String>> enemyWeapons;
+    private Map<String, List<String>> enemyWeapons;
 
 
-    public List<String> getEnemyWeapons(int level) {
-        return enemyWeapons.get(level);
+    //rather than using floor, use sprite image name to get correct move set
+    public List<String> getEnemyWeapons(String file) {
+        String name = file.substring(0,file.length()-4);
+        name = name.replaceAll("-"," ");
+        name = name.toUpperCase();
+        //System.out.println(name);
+        if(name.contains("PRINT")) return enemyWeapons.get("Printer");
+        if(name.contains("FAX")) return enemyWeapons.get("Fax");
+        if(name.contains("BOX")) return enemyWeapons.get("Box");
+        if(name.contains("CEO")) return enemyWeapons.get("CEO");
+        System.out.println("\n\n MATT NEEDS TO ADJUST FOR AN IMAGE NAME \n\n");
+        return enemyWeapons.get("Printer");
     }
 
     //Singleton constructor
@@ -34,9 +44,7 @@ public class Move {
         //player and enemy cannot use the same moves right now, so I've separated here and may take further precautions (or fix the limitation)
         //I also need to think about balance and making things interesting
 
-        //test case I didn't feel like removing yet
         movelist.put("Sword", new MoveData.Builder(setDamage(10, 20), MoveData.MoveType.ATTACK).build()); //bare minimum  - name, range, type
-
         //some player attacks
         //note that we can control what moves are sold on each floor
         movelist.put("Stapler", new MoveData.Builder(setDamage(15, 25), MoveData.MoveType.ATTACK)
@@ -153,6 +161,8 @@ public class Move {
         //some enemy attacks
         //probably won't use durability, but cooldown and uses per turn could be helpful (but I need to test)
         //it also creates variety, which is why I used it a lot below
+
+        //printer moves
         movelist.put("Paper Cut", new MoveData.Builder(setDamage(10, 20), MoveData.MoveType.ATTACK)
                 .setCooldown(2)
                 .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2)
@@ -171,20 +181,20 @@ public class Move {
                 .setCooldown(2)
                 .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 15), 2)
                 .build());
-        movelist.put("Power Surge", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK)
-                .setCooldown(2)
-                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2)
-                .build());
         movelist.put("Shoot Ink", new MoveData.Builder(setDamage(15, 25), MoveData.MoveType.ATTACK)
                 .setUsesPerEncounter(1)
                 .build());
-        movelist.put("Shoot Paper", new MoveData.Builder(setDamage(15, 20), MoveData.MoveType.ATTACK)
+        movelist.put("Fan Blades", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK)
+                .setCooldown(2)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2)
+                .build());
+
+
+        //fax moves
+        movelist.put("Dial-up Noise", new MoveData.Builder(setDamage(15, 25), MoveData.MoveType.ATTACK)
                 .setUsesPerEncounter(1)
                 .build());
-        movelist.put("Paper Jam", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK)
-                .setCooldown(1)
-                .build());
-        movelist.put("Dial-up Noise", new MoveData.Builder(setDamage(15, 25), MoveData.MoveType.ATTACK)
+        movelist.put("Shoot Paper", new MoveData.Builder(setDamage(15, 20), MoveData.MoveType.ATTACK)
                 .setUsesPerEncounter(1)
                 .build());
         movelist.put("Overheating", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK)
@@ -192,13 +202,55 @@ public class Move {
                 .setCooldown(2)
                 .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2)
                 .build());
-        movelist.put("Fan Blades", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK)
+        movelist.put("Paper Jam", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK)
+                .setCooldown(1)
+                .build());
+        movelist.put("Power Surge", new MoveData.Builder(setDamage(5, 10), MoveData.MoveType.ATTACK)
                 .setCooldown(2)
                 .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2)
                 .build());
         movelist.put("Dust Cloud", new MoveData.Builder(setDamage(5, 15), MoveData.MoveType.ATTACK)
                 .setUsesPerEncounter(1)
                 .build());
+
+        //box moves
+        movelist.put("Slam Lid", new MoveData.Builder(setDamage(15, 25), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .build());
+        movelist.put("Heavy Lifting", new MoveData.Builder(setDamage(15, 25), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .build());
+        movelist.put("Unorganized Files", new MoveData.Builder(setDamage(15, 25), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .build());
+        movelist.put("Packing Tape", new MoveData.Builder(setDamage(15, 25), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .build());
+
+
+        //ceo moves
+        movelist.put("Layoffs", new MoveData.Builder(setDamage(15, 25), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .build());
+        movelist.put("Budget Cuts", new MoveData.Builder(setDamage(15, 25), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .build());
+        movelist.put("Audit", new MoveData.Builder(setDamage(15, 25), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .build());
+        movelist.put("Downsizing", new MoveData.Builder(setDamage(15, 25), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .build());
+        movelist.put("Performance Review", new MoveData.Builder(setDamage(15, 25), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .build());
+        movelist.put("Demotion", new MoveData.Builder(setDamage(15, 25), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .build());
+        movelist.put("Wage Cut", new MoveData.Builder(setDamage(15, 25), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .build());
+
 
         //enemy healing?
         //I haven't decided if these should exist
@@ -210,6 +262,9 @@ public class Move {
         //Set up weapons/abilities for enemies
         //easiest way is to make higher floors have better moves
         //I'll add more when I start testing and balancing
+        /*
+        //this is the old way, based on floor
+        //I may still use floor to increase damage of moves, but have prioritized unique moves for different enemy types
         enemyWeapons = new ArrayList<>();
         List<String> floor0 = new ArrayList<>();
         floor0.add("Paper Cut");
@@ -230,6 +285,46 @@ public class Move {
         enemyWeapons.add(floor2);
         enemyWeapons.add(floor3);
         enemyWeapons.add(floor4);
+         */
+
+        //new way - moves are unique to each enemy "type" / sprite
+        //I may still use floors (increase damage based on floor)
+        enemyWeapons = new HashMap<>();
+        List<String> printer = new ArrayList<>();
+        printer.add("Paper Cut");
+        printer.add("Toner Leak");
+        printer.add("Short Circuit");
+        printer.add("Electrical Fire");
+        printer.add("Shoot Ink");
+        printer.add("Fan Blades");
+        printer.add("Slam Tray");
+        List<String> fax = new ArrayList<>();
+        fax.add("Dial-up Noise");
+        fax.add("Shoot Paper");
+        fax.add("Overheating");
+        fax.add("Paper Jam");
+        fax.add("Power Surge");
+        fax.add("Dust Cloud");
+        fax.add("Slam Tray");
+        List<String> box = new ArrayList<>();
+        box.add("Slam Lid");
+        box.add("Dust Cloud");
+        box.add("Paper Cut");
+        box.add("Heavy Lifting");
+        box.add("Unorganized Files");
+        box.add("Packing Tape");
+        List<String> ceo = new ArrayList<>();
+        ceo.add("Layoffs");
+        ceo.add("Budget Cuts");
+        ceo.add("Audit");
+        ceo.add("Downsizing");
+        ceo.add("Performance Review");
+        ceo.add("Demotion");
+        ceo.add("Wage Cut");
+        enemyWeapons.put("Printer", printer);
+        enemyWeapons.put("Fax", fax);
+        enemyWeapons.put("Box", box);
+        enemyWeapons.put("CEO", ceo);
     }
 
     public static Move getInstance(){

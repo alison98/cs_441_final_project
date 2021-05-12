@@ -60,7 +60,7 @@ public class Enemy extends Actor {
         //get the weapons based on level
         floor = floorIn;
         abilities = Move.getInstance();
-        weapon = abilities.getEnemyWeapons(floor);
+        weapon = abilities.getEnemyWeapons(file);
         ongoingStatusEffects = new ArrayList<>();
 
 

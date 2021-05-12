@@ -62,6 +62,7 @@ public class CombatScreen implements Screen {
     // -BUGS:
     //      -decide if other status effects carry over
     //      -when status effect is brief, name flashes too quick
+    //      -sometimes buttons need to be pressed twice
     //      -fix bug of going back into combat
     //          --I haven't been able to replicate yet
     //      -fix bug where printer disappears when player loses
@@ -69,7 +70,6 @@ public class CombatScreen implements Screen {
     //          --decide what happens when player dies first - we might want predefined save points or something to go back to
     // -OTHER:
     //      -different background
-    //      -different skin for buttons
     //      -update comments
     //      -less hard-coded numbers (placing UI elements)
     //      -clean the button code
@@ -151,6 +151,7 @@ public class CombatScreen implements Screen {
             String statusEffect = player.getOngoingStatusEffects().get(statusEffectsIndex);
             //System.out.println("performing " + statusEffect);
             int amount = Move.getInstance().useStatusEffect(statusEffect, player.getOngoingStatusEffects());//change to status effect range
+            //amount = enemy.getHealth();//testing bug Drew found
             playerTurn(Move.getInstance().getStatusEffectMoveType(statusEffect), amount, statusEffect, true);
             statusEffectsIndex++;
             //System.out.println("next index : " + statusEffectsIndex + " size of list " + player.getOngoingStatusEffects().size());
@@ -235,6 +236,10 @@ public class CombatScreen implements Screen {
     public void performSelectedEnemyMove() {
         //System.out.println("enemy's turn");
         List<String> enemyWeapons = enemy.getWeapon(); //get list of moves
+        //System.out.println("\nenemy's moves: ");
+        //for(String m : enemyWeapons){
+        //    System.out.println(m);
+        //}
         Random rand = new Random(); //pick one (random for now)
         //I'll probably want to make a smarter choice - only heal when low
         List<String> availableEnemyWeapons = new ArrayList<>();
@@ -323,7 +328,7 @@ public class CombatScreen implements Screen {
         this.dispose();
         Move.getInstance().resetMoves(enemy.getWeapon());//for any moves that have "per encounter" variables
         Move.getInstance().resetMoves(player.getWeapon());
-        player.getOngoingStatusEffects().clear(); //status effects don't transfer between encounters
+        player.getOngoingStatusEffects().clear(); //status effects don't transfer between encounters, except for healing before combat
         enemy.getOngoingStatusEffects().clear();
         game.setScreen(gameScreen);
 
@@ -482,11 +487,13 @@ public class CombatScreen implements Screen {
         //actually count the occurrences
         for (String currentWeapon : playerWeapons){
             int occurrences =  Collections.frequency(playerWeapons, currentWeapon);//thanks https://stackoverflow.com/questions/505928/how-to-count-the-number-of-occurrences-of-an-element-in-a-list
-            //System.out.println(currentWeapon + " has " + occurrences);
+            System.out.println(currentWeapon + " has " + occurrences);
             if(Move.getInstance().isCurrentlyAvailable(currentWeapon) ){
-                //System.out.println("and isCurrentlyAvailable");
+                System.out.println("and isCurrentlyAvailable");
                 moveOccurrences.put(currentWeapon, occurrences);//probably add a check for if the move is valid (hasn't exceeded uses per turn, cooldown ready)
-            }//else System.out.println("and is not CurrentlyAvailable");
+            }else {
+                System.out.println("and is not CurrentlyAvailable");
+            }
         }
 
         int prevButtonIndex = -1;//index of the button which will be used to go back a "page". Will only be used if we have more moves than we can display at once
@@ -994,10 +1001,10 @@ public class CombatScreen implements Screen {
                 //playerTurn is never explicitly called, its done via buttons
                 //so we just check if animations are active and its the player's turn
                 //but enemy will automatically go without a class like this
-                if(!isPlayerTurn && enemyHealthBar.currentHealth <= 0) combatOver(true); //enemy's health is <=0 and animations are done, player wins
+                if(enemyHealthBar.currentHealth <= 0) combatOver(true); //enemy's health is <=0 and animations are done, player wins
                 else if(!isPlayerTurn && statusEffectsInProgress) performEnemyStatusEffects(); //in the middle of the enemy's turn, performing their status effects
                 else if(!isPlayerTurn && !statusEffectsInProgress) beginEnemyTurn();//enemy is not dead, and its their turn
-                else if(isPlayerTurn && playerHealthBar.currentHealth <= 0) combatOver(false);//player died, animations over enemy wins
+                else if(playerHealthBar.currentHealth <= 0) combatOver(false);//player died, animations over enemy wins
                 else if(isPlayerTurn && statusEffectsInProgress) performPlayerStatusEffects(); //in the middle of the player's turn, performing their status effects
                 else if(isPlayerTurn && !statusEffectsInProgress) beginPlayerTurn(); //player is not dead and its the start of their turn
             }

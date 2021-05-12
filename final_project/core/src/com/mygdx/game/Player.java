@@ -50,11 +50,12 @@ public class Player extends Actor {
         //player starts with a stapler, tie, paper clip, and a coffee
         weapon.add("Stapler");
         weapon.add("Paper Clip");
-        weapon.add("Sword");
+        //weapon.add("Sword");
         weapon.add("Coffee");
+        weapon.add("Fists");
         ongoingStatusEffects = new ArrayList<>();
         level = 1;
-        maxHealth = health = 100;
+        maxHealth = health = 50;
         experience = 0;
         money = 0;
     }

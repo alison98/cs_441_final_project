@@ -497,14 +497,21 @@ public class CombatScreen implements Screen {
         //we remove occurrences when used in playerMove, so when setupButtons is called again, this list is smaller, has the accurate info
 
         //actually count the occurrences
+        boolean shouldAdd;
         for (MoveData currentWeapon : playerWeapons){
-            int occurrences =  Collections.frequency(playerWeapons, currentWeapon.getName());//thanks https://stackoverflow.com/questions/505928/how-to-count-the-number-of-occurrences-of-an-element-in-a-list
+            shouldAdd = true;
+            int occurrences =  Collections.frequency(playerWeapons, currentWeapon);//thanks https://stackoverflow.com/questions/505928/how-to-count-the-number-of-occurrences-of-an-element-in-a-list
             //System.out.println(currentWeapon.getName() + " has " + occurrences);
-            if(currentWeapon.getCurrentlyAvailable() ){
-                //System.out.println("and isCurrentlyAvailable");
-                moveOccurrences.put(currentWeapon, occurrences);//probably add a check for if the move is valid (hasn't exceeded uses per turn, cooldown ready)
-            }else {
-                //System.out.println("and is not CurrentlyAvailable");
+            //for some reason, map.containsKey won't use my equals function, so I'll just check myself
+            for(MoveData key : moveOccurrences.keySet()){
+                if(key.equals(currentWeapon)) {
+                    shouldAdd = false;
+                    break;
+                }
+            }
+            if(currentWeapon.getCurrentlyAvailable() && shouldAdd){//only add if its valid and it hasn't been accounted for yet (two coffee objects aren't == but can be .equals())
+                //System.out.println("adding " + currentWeapon.getName() + ", " + occurrences);
+                moveOccurrences.put(currentWeapon, occurrences);
             }
         }
 

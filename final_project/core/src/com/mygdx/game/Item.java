@@ -60,20 +60,20 @@ public class Item extends Interactable{
                 droppable.add("Paper Clip");
                 droppable.add("Tie");
             }else if(floor == 1){
-                droppable.add("Mug");
-                droppable.add("Ruler");//only obtainable through item drop
-                droppable.add("Paper Clip");
-                droppable.add("Tie");
-            }else if(floor == 2){
-                droppable.add("Laptop");
                 droppable.add("Tape");
                 droppable.add("Water Bottle");
                 droppable.add("Mug");
+                droppable.add("Ruler");//only obtainable through item drop
+            }else if(floor == 2){
+                droppable.add("Stapler"); //only obtainable through item drop
+                droppable.add("Laptop");
+                droppable.add("Tape");
+                droppable.add("Water Bottle");
             }else if(floor == 3){
+                droppable.add("Scissors");//only obtainable through item drop
                 droppable.add("Telephone");
                 droppable.add("Chair");
                 droppable.add("Stapler"); //only obtainable through item drop
-                droppable.add("Laptop");
             }else if(floor == 4){
                 droppable.add("Desk Lamp"); //only obtainable through item drop
                 droppable.add("Wired Mouse");

@@ -30,7 +30,7 @@ public class Move {
         else if(name.contains("FAX")) weaponList = enemyWeapons.get("Fax");
         else if(name.contains("BOX")) weaponList =  enemyWeapons.get("Box");
         else if(name.contains("CEO")) weaponList =  enemyWeapons.get("CEO");
-        else if(name.contains("SERVER")) weaponList =  enemyWeapons.get("Server");
+        else if(name.contains("SERVER") || name.contains("CLOUD")) weaponList =  enemyWeapons.get("Server");
         else if(name.contains("CABINET")) weaponList =  enemyWeapons.get("Cabinet");
         else {
             System.out.println("\n\n MATT NEEDS TO ADJUST FOR AN IMAGE NAME \n\n");

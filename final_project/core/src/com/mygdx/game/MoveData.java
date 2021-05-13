@@ -178,7 +178,7 @@ public class MoveData implements Comparable<MoveData> {
     //this is what we'd call at end of combat
     //reset any temporary changes (like moves per encounter)
     public void resetMove(){
-        if(hasUsesPerEncounter) currentUsesPerEncounter = usesPerEncounter;
+        if(hasUsesPerEncounter) currentUsesPerEncounter = 0;
         if(cooldownLength != 0) turnsSinceUsed = cooldownLength; //this will make sure the cooldown isn't active when starting next turn
     }
 

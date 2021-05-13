@@ -546,7 +546,7 @@ public class CombatScreen implements Screen {
             newMoveButton.setPosition(nextX, nextY);
             if(i==2 || i==3) System.out.println(nextX + "," + nextY);
             newMoveButton.setColor(Color.WHITE);
-            newMoveButton.getLabel().setFontScale(.75f);
+            newMoveButton.getLabel().setFontScale(.7f);
             nextX += 300;
             if (nextX + 250 >= width) {//hit side of screen, start new row
                 nextX = 150;

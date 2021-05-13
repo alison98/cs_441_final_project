@@ -54,6 +54,7 @@ public class Player extends Actor {
         addWeapon("Coffee");
         addWeapon("Coffee");
         addWeapon("Fists");
+        addWeapon("Ruler");
         addWeapon("Sports Drink");
         ongoingStatusEffects = new ArrayList<>();
         level = 1;

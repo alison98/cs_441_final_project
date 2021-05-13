@@ -41,6 +41,7 @@ public class MainMenu implements Screen {
         Label title = new Label("(S)layoff Season", labelStyle);
         title.setAlignment(Align.center);
         title.setFontScale(2.5f);
+        title.setWidth(1100f);
         title.setPosition(Gdx.graphics.getWidth()/2 - title.getWidth()/2, 700);
 
         Texture buttonTexture = new Texture("textbox.png");

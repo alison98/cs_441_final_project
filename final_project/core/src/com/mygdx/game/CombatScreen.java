@@ -56,6 +56,7 @@ public class CombatScreen implements Screen {
     private int statusEffectsIndex;
     private Label playerHealthStatusEffect, playerAttackStatusEffect, enemyHealthStatusEffect, enemyAttackStatusEffect;
     private int playerHealthStatusDuration, playerAttackStatusDuration, enemyHealthStatusDuration, enemyAttackStatusDuration;
+    private List<MoveData> ongoingStatusEffects;
 
 
     //TODO
@@ -98,8 +99,8 @@ public class CombatScreen implements Screen {
         touchDown = false;
         //just set up the icon
         if(player.getOngoingStatusEffects().size() > 0){
-            for(String move : player.getOngoingStatusEffects()){
-                playerHealthStatusDuration += Move.getInstance().getStatusEffectDuration(move);
+            for(MoveData move : player.getOngoingStatusEffects()){
+                playerHealthStatusDuration += move.getStatusEffectDuration();
             }
             playerHealthStatusEffect.setVisible(true);
         }
@@ -139,6 +140,7 @@ public class CombatScreen implements Screen {
         System.out.println("setup player turn");
         statusEffectsInProgress = true;
         statusEffectsIndex = 0;
+        ongoingStatusEffects = new ArrayList<>(player.getOngoingStatusEffects());//need a copy, as we have the possibility of removing while iterating
         performPlayerStatusEffects();
     }
 
@@ -146,13 +148,15 @@ public class CombatScreen implements Screen {
     //i.e. all status effects will go, then player can do move for current turn
     public void performPlayerStatusEffects(){
         System.out.println("enter player status effect");
-        System.out.println("num of status effects : " + player.getOngoingStatusEffects().size());
-        if(statusEffectsIndex < player.getOngoingStatusEffects().size()){
-            String statusEffect = player.getOngoingStatusEffects().get(statusEffectsIndex);
+        System.out.println("num of status effects player has : " + player.getOngoingStatusEffects().size());
+        System.out.println("num of status effects we track : " + ongoingStatusEffects.size());
+        System.out.println("index : " + statusEffectsIndex);
+        if(statusEffectsIndex < ongoingStatusEffects.size()){
+            MoveData statusEffect = ongoingStatusEffects.get(statusEffectsIndex);
             //System.out.println("performing " + statusEffect);
             int amount = Move.getInstance().useStatusEffect(statusEffect, player.getOngoingStatusEffects());//change to status effect range
             //amount = enemy.getHealth();//testing bug Drew found
-            playerTurn(Move.getInstance().getStatusEffectMoveType(statusEffect), amount, statusEffect, true);
+            playerTurn(statusEffect.getStatusEffectType(), amount, statusEffect.getName(), true);
             statusEffectsIndex++;
             //System.out.println("next index : " + statusEffectsIndex + " size of list " + player.getOngoingStatusEffects().size());
         }else{
@@ -162,12 +166,12 @@ public class CombatScreen implements Screen {
     }
 
     //activated on selection/handler, after all status effects are done
-    private void performSelectedPlayerMove(String selectedWeapon) {
+    private void performSelectedPlayerMove(MoveData selectedWeapon) {
         //System.out.println("player's turn");
         //System.out.println(player.getWeapon().size());
         int amount = Move.getInstance().useMove(selectedWeapon, player.getWeapon(), player.getOngoingStatusEffects());
         //System.out.println(player.getWeapon().size());
-        playerTurn(Move.getInstance().getMoveType(selectedWeapon), amount, selectedWeapon, false);
+        playerTurn(selectedWeapon.getMoveType(), amount, selectedWeapon.getName(), false);
         isPlayerTurn = false;//it is now the enemy's turn, they can go once animations finish
     }
 
@@ -210,17 +214,18 @@ public class CombatScreen implements Screen {
         //System.out.println("setup enemy's turn");
         statusEffectsInProgress = true;
         statusEffectsIndex = 0;
+        ongoingStatusEffects = enemy.getOngoingStatusEffects();//need a copy, as we have the possibility of removing while iterating
         performEnemyStatusEffects();
     }
 
 
     public void performEnemyStatusEffects(){
         //System.out.println("enter enemy status effect");
-        if(statusEffectsIndex < enemy.getOngoingStatusEffects().size()){
-            String statusEffect = enemy.getOngoingStatusEffects().get(statusEffectsIndex);
+        if(statusEffectsIndex < ongoingStatusEffects.size()){
+            MoveData statusEffect = ongoingStatusEffects.get(statusEffectsIndex);
             //System.out.println("performing " + statusEffect);
             int amount = Move.getInstance().useStatusEffect(statusEffect, enemy.getOngoingStatusEffects());//change to status effect range
-            enemyTurn(Move.getInstance().getStatusEffectMoveType(statusEffect), amount, statusEffect, true);
+            enemyTurn(statusEffect.getStatusEffectType(), amount, statusEffect.getName(), true);
             statusEffectsIndex++;
         }else{
             statusEffectsInProgress = false;
@@ -235,21 +240,21 @@ public class CombatScreen implements Screen {
     //named "selected" move, but that's for consistency for now (until I make an AI and stop random choices)
     public void performSelectedEnemyMove() {
         //System.out.println("enemy's turn");
-        List<String> enemyWeapons = enemy.getWeapon(); //get list of moves
+        List<MoveData> enemyWeapons = enemy.getWeapon(); //get list of moves
         //System.out.println("\nenemy's moves: ");
         //for(String m : enemyWeapons){
         //    System.out.println(m);
         //}
         Random rand = new Random(); //pick one (random for now)
         //I'll probably want to make a smarter choice - only heal when low
-        List<String> availableEnemyWeapons = new ArrayList<>();
-        for (String currentWeapon : enemyWeapons) //only deal with moves that aren't in cooldown, haven't hit use limit
-            if(Move.getInstance().isCurrentlyAvailable(currentWeapon) ) availableEnemyWeapons.add(currentWeapon);
-        String selectedWeapon;
+        List<MoveData> availableEnemyWeapons = new ArrayList<>();
+        for (MoveData currentWeapon : enemyWeapons) //only deal with moves that aren't in cooldown, haven't hit use limit
+            if(currentWeapon.getCurrentlyAvailable() ) availableEnemyWeapons.add(currentWeapon);
+        MoveData selectedWeapon;
         selectedWeapon = availableEnemyWeapons.get(rand.nextInt(availableEnemyWeapons.size()));//get random weapon
         System.out.println("selected " + selectedWeapon);
         int amount = Move.getInstance().useMove(selectedWeapon, enemy.getWeapon(), enemy.getOngoingStatusEffects());
-        enemyTurn(Move.getInstance().getMoveType(selectedWeapon), amount, selectedWeapon, false);
+        enemyTurn(selectedWeapon.getMoveType(), amount, selectedWeapon.getName(), false);
         isPlayerTurn = true;//it is now the player's turn, they can go once animations finish
     }
 
@@ -257,7 +262,7 @@ public class CombatScreen implements Screen {
     //look at type, use amount, modify health bars, etc.
     public void enemyTurn(MoveData.MoveType type, int amount, String nameOfMove, boolean StatusEffect) {
         if(StatusEffect) currentMoveLabel.setText(enemy.getName() + " used " + nameOfMove + " status effect");
-        else currentMoveLabel.setText(enemy.getName() + " used " + nameOfMove);
+        else currentMoveLabel.setText(enemy.getName() + " used " + nameOfMove );
         switch (type) { //deal with different types of moves
             case ATTACK:
                 //System.out.println("dealing " + amount + " to player");
@@ -478,23 +483,27 @@ public class CombatScreen implements Screen {
     //this is called once in setupUI, then on every turn that changes the moves available to the player
     //for example, player heals, decreases healing item by 1, we need to update buttons to reflect that
     private void setupButtons(){
-        final List<String> playerWeapons = player.getWeapon(); //get list of moves
+        final List<MoveData> playerWeapons = player.getWeapon(); //get list of moves
 
-        final Map<String, Integer> moveOccurrences = new HashMap<>(); //map of (weapon name : number of occurrences of this weapon the player has)
+        //I might not want occurrences anymore, we'll see
+
+
+        final Map<MoveData, Integer> moveOccurrences = new HashMap<>(); //map of (weapon name : number of occurrences of this weapon the player has)
         //we can work this this to prevent making 10 buttons for the same 10 healing items
         //we remove occurrences when used in playerMove, so when setupButtons is called again, this list is smaller, has the accurate info
 
         //actually count the occurrences
-        for (String currentWeapon : playerWeapons){
-            int occurrences =  Collections.frequency(playerWeapons, currentWeapon);//thanks https://stackoverflow.com/questions/505928/how-to-count-the-number-of-occurrences-of-an-element-in-a-list
+        for (MoveData currentWeapon : playerWeapons){
+            int occurrences =  Collections.frequency(playerWeapons, currentWeapon.getName());//thanks https://stackoverflow.com/questions/505928/how-to-count-the-number-of-occurrences-of-an-element-in-a-list
             System.out.println(currentWeapon + " has " + occurrences);
-            if(Move.getInstance().isCurrentlyAvailable(currentWeapon) ){
+            if(currentWeapon.getCurrentlyAvailable() ){
                 System.out.println("and isCurrentlyAvailable");
                 moveOccurrences.put(currentWeapon, occurrences);//probably add a check for if the move is valid (hasn't exceeded uses per turn, cooldown ready)
             }else {
                 System.out.println("and is not CurrentlyAvailable");
             }
         }
+
 
         int prevButtonIndex = -1;//index of the button which will be used to go back a "page". Will only be used if we have more moves than we can display at once
 
@@ -513,11 +522,12 @@ public class CombatScreen implements Screen {
         float nextY = 200;
         float nextX = 150;
 
-        List<String> alphabeticalList = new ArrayList<>(moveOccurrences.keySet());
+        List<MoveData> alphabeticalList = new ArrayList<>(moveOccurrences.keySet());
+
         Collections.sort(alphabeticalList);
 
         int i = 0;
-        for(String currentMove : alphabeticalList){ //set up buttons - a max of 2 rows
+        for(MoveData currentMove : alphabeticalList){ //set up buttons - a max of 2 rows
             ImageTextButton newMoveButton = new ImageTextButton("New Game", playButtonStyle);
             newMoveButton.setWidth(250f);
             newMoveButton.setHeight(100f);
@@ -561,12 +571,12 @@ public class CombatScreen implements Screen {
      * @param button the button to modify
      * @content the string to display on the button and make listener for, represents a move
      */
-    public void setHandler(ImageTextButton button, final String content, int occurrences) {
-        if(occurrences > 1) button.setText(content + " x" + occurrences); //used to display how many of a certain move we have
-        else button.setText(content);
+    public void setHandler(ImageTextButton button, final MoveData move, int occurrences) {
+        if(occurrences > 1) button.setText(move.getName() + " x" + occurrences); //used to display how many of a certain move we have
+        else button.setText(move.getName());
         button.clearListeners();
         button.setVisible(true);
-        switch (Move.getInstance().getMoveType(content)){ //we can set color of button based on move type
+        switch (move.getMoveType()){ //we can set color of button based on move type
             case ATTACK: //red for attack
                 button.getStyle().fontColor = Color.WHITE;
                 button.setColor(Color.RED);
@@ -585,7 +595,7 @@ public class CombatScreen implements Screen {
             @Override
             public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor){
                 if(!touchDown) { //touch down is always fired first, so we know if its a click or enter at this point
-                    textBox.setText(Move.getInstance().toString(content));
+                    textBox.setText(move.toString());
                     textBox.setVisible(true);
                 }
             }
@@ -616,7 +626,7 @@ public class CombatScreen implements Screen {
                 //but only call playerTurn if it is the player's turn (set to true at start and at end of enemyTurn)
                 //and if there's no active animations (dealt with by animationManager)
                 if (isPlayerTurn && !animationActive && !statusEffectsInProgress) {
-                    performSelectedPlayerMove(content); //player does their turn
+                    performSelectedPlayerMove(move); //player does their turn
 
                     //a possibility is that a move can only be used once
                     //in that case, we need to reset the buttons with the player's newly decreased move list
@@ -648,7 +658,7 @@ public class CombatScreen implements Screen {
      * @param nextStartingIndex - index of playerWeapons to start at for this group/page of buttons
      * @param prevStartingIndex - index of the start of the last page, useful for setting up prevPage
      */
-    public void nextPage(final int lastButtonIndex, final int prevButtonIndex, final int nextStartingIndex, final List<String> playerWeapons, final int prevStartingIndex, final Map<String, Integer> moveOccurrences) {
+    public void nextPage(final int lastButtonIndex, final int prevButtonIndex, final int nextStartingIndex, final List<MoveData> playerWeapons, final int prevStartingIndex, final Map<MoveData, Integer> moveOccurrences) {
 
         //System.out.println("next" + nextStartingIndex);
 
@@ -713,7 +723,7 @@ public class CombatScreen implements Screen {
      * @param prevButtonIndex - index of the 1st button on the last row - its text will say "prev button" and allow us to "scroll" between pages
      * @param nextButtonIndex - index of the last button on the last row - its text will say "next button" and allow us to "scroll" between pages
      */
-    public void prevPage(final int lastButtonIndex, final int prevStartingIndex, final int prevButtonIndex, final List<String> playerWeapons, final Map<String, Integer> moveOccurrences) {
+    public void prevPage(final int lastButtonIndex, final int prevStartingIndex, final int prevButtonIndex, final List<MoveData> playerWeapons, final Map<MoveData, Integer> moveOccurrences) {
 
         //System.out.println(prevStartingIndex);
 
@@ -1002,9 +1012,9 @@ public class CombatScreen implements Screen {
                 //so we just check if animations are active and its the player's turn
                 //but enemy will automatically go without a class like this
                 if(enemyHealthBar.currentHealth <= 0) combatOver(true); //enemy's health is <=0 and animations are done, player wins
+                else if(playerHealthBar.currentHealth <= 0) combatOver(false);//player died, animations over enemy wins
                 else if(!isPlayerTurn && statusEffectsInProgress) performEnemyStatusEffects(); //in the middle of the enemy's turn, performing their status effects
                 else if(!isPlayerTurn && !statusEffectsInProgress) beginEnemyTurn();//enemy is not dead, and its their turn
-                else if(playerHealthBar.currentHealth <= 0) combatOver(false);//player died, animations over enemy wins
                 else if(isPlayerTurn && statusEffectsInProgress) performPlayerStatusEffects(); //in the middle of the player's turn, performing their status effects
                 else if(isPlayerTurn && !statusEffectsInProgress) beginPlayerTurn(); //player is not dead and its the start of their turn
             }

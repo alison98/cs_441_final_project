@@ -19,11 +19,12 @@ public class Player extends Actor {
     private ArrayList<Sprite> walkingSprites;
     private int walkFrame;
     private int frameCounter;
-    private List<String> weapon;
+    //private List<String> weapon;
+    private List<MoveData> weaponObjects;
     private int level, health, maxHealth, experience, money;
     private Move abilities;
     private GameScreen gameScreen;
-    private List<String> ongoingStatusEffects;
+    private List<MoveData> ongoingStatusEffects;
 
 
     public Player(GameScreen gameScreenIn){
@@ -46,13 +47,14 @@ public class Player extends Actor {
         speedY = 0;
         frameCounter = 0;
         gameScreen = gameScreenIn;
-        weapon = new ArrayList<>();
-        //player starts with a stapler, tie, paper clip, and a coffee
-        weapon.add("Stapler");
-        weapon.add("Paper Clip");
-        //weapon.add("Sword");
-        weapon.add("Coffee");
-        weapon.add("Fists");
+        //weapon = new ArrayList<>();
+        weaponObjects = new ArrayList<>();
+        addWeapon("Stapler");
+        addWeapon("Paper Clip");
+        addWeapon("Coffee");
+        addWeapon("Coffee");
+        addWeapon("Fists");
+        addWeapon("Sports Drink");
         ongoingStatusEffects = new ArrayList<>();
         level = 1;
         maxHealth = health = 50;
@@ -60,19 +62,16 @@ public class Player extends Actor {
         money = 0;
     }
 
-    public List<String> getOngoingStatusEffects() { return ongoingStatusEffects; }
+    public List<MoveData> getOngoingStatusEffects() { return ongoingStatusEffects; }
 
-    public List<String> getWeapon(){
-        return weapon;
-    }
-
-    //for items that can only be used once (healing for now, we can better define later)
-    public void removeWeapon(String weaponToRemove){
-        weapon.remove(weaponToRemove);
+    public List<MoveData> getWeapon(){
+        return weaponObjects;
     }
 
     public void addWeapon(String weaponIn){
-        weapon.add(weaponIn);
+        //weapon.add(weaponIn);
+        System.out.println("added " + weaponIn);
+        weaponObjects.add(Move.getInstance().getCopy(weaponIn));
     }
 
     public int getLevel(){

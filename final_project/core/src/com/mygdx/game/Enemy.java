@@ -20,8 +20,8 @@ public class Enemy extends Actor {
     private boolean horizontal, direction;
     private boolean fight, key, isBoss;
     private Rectangle hitbox;
-    private List<String> weapon;
-    private List<String> ongoingStatusEffects;
+    private List<MoveData> weapon;
+    private List<MoveData> ongoingStatusEffects;
     private int level, maxHealth, health, experience, money;
     private Move abilities;
     private String name;
@@ -205,16 +205,12 @@ public class Enemy extends Actor {
         return super.remove();
     }
 
-    //for items that can only be used once (healing for now, we can better define later)
-    public void removeWeapon(String weaponToRemove){
-        weapon.remove(weaponToRemove);
-    }
 
-    public List<String> getWeapon(){
+    public List<MoveData> getWeapon(){
         return weapon;
     }
 
-    public List<String> getOngoingStatusEffects() { return ongoingStatusEffects; }
+    public List<MoveData> getOngoingStatusEffects() { return ongoingStatusEffects; }
 
     public int getLevel(){
         return level;

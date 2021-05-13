@@ -82,9 +82,9 @@ public class InventoryHud {
         table.setPosition(Gdx.graphics.getWidth()/3 - table.getWidth(), Gdx.graphics.getHeight()/2 - table.getHeight());
 
         final Table weaponTable = new Table();
-        for(final String item : player.getWeapon()){
-            if(Move.getInstance().getMoveType(item) == MoveData.MoveType.HEALING){
-                final ImageTextButton weapon = new ImageTextButton(item, imageTextButtonStyle);
+        for(final MoveData item : player.getWeapon()){
+            if(item.getMoveType() == MoveData.MoveType.HEALING){
+                final ImageTextButton weapon = new ImageTextButton(item.getName(), imageTextButtonStyle);
                 weapon.getLabel().setFontScale(1.25f);
                 weapon.getLabel().setAlignment(Align.center);
                 weapon.addListener(new ClickListener() {
@@ -101,7 +101,7 @@ public class InventoryHud {
                 weaponTable.add(weapon).width(600f).height(150f).pad(10);
                 weaponTable.row();
             } else {
-                Label weapon = new Label(item, labelStyle);
+                Label weapon = new Label(item.getName(), labelStyle);
                 weapon.setFontScale(1.25f);
                 weapon.setAlignment(Align.center);
                 weaponTable.add(weapon).width(600f).height(150f).pad(10);

@@ -1,6 +1,8 @@
 package com.mygdx.game;
 
 import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -8,7 +10,12 @@ import java.util.Random;
 /*
  * Actual info we store for a "move" done during a turn. Instances stored in the singleton class Move's moveList.
  */
-public class MoveData {
+public class MoveData implements Comparable<MoveData> {
+
+    @Override
+    public int compareTo(MoveData other) {
+        return this.getName().compareTo(other.getName());
+    }
 
     //these are used to determine what the Move does
     //we can add more later if need be
@@ -43,6 +50,9 @@ public class MoveData {
     //we need a range and a type - name is held in singleton map
     private List<Integer> range;
     private MoveType movetype;
+    private String name;
+
+    public String getName() { return name; }
 
     public List<Integer> getRange() { return range; }
 
@@ -96,28 +106,28 @@ public class MoveData {
     //this is what we call to use a move now, rather than just getRange/damage
     //it'll automatically update all values for characteristics
     //i.e. decrement durability, currentUsesPerEncounter, etc. if need be
-    public int useMove(String nameOfMove, List<String> moves, List<String> statusEffects){
+    public int useMove(MoveData moveObject, List<MoveData> moves, List<MoveData> statusEffects){
         //update values
         if(cooldownLength != 0) turnsSinceUsed = 0; //if this has cooldown, reset turns since used so we can start counting again
         if(hasUsesPerEncounter) currentUsesPerEncounter++; //if we can only use it a certain amount of times each battle, increment current uses
         if(hasDurability) currentDurability--; //if it can be broken, decrement the use
         if(hasDurability && currentDurability == 0) {//then check if it should be removed from player's list (if durability is 0)
-            moves.remove(nameOfMove);//once I figure out where/hwo to pass in player move list, remove current move from it here
+            moves.remove(moveObject);//once I figure out where/hwo to pass in player move list, remove current move from it here
             currentDurability =  durability; //then reset durability in case we have copies? - this is what I'm looking into next
         }
         if(hasStatusEffect) { //right now this allows overlaps, can change (use move with status effect twice, get 2 status effects and so on)
-            statusEffects.add(nameOfMove); //add to ongoingStatusEffects
+            statusEffects.add(moveObject); //add to ongoingStatusEffects
         }
         return randomAmountInRange(getRange());
     }
 
     //called when using
-    public int useStatusEffect(String nameOfMove, List<String> statusEffects){
-        //System.out.println("using status effect : " + duration);
+    public int useStatusEffect(MoveData nameOfMove, List<MoveData> statusEffects){
+        System.out.println("using status effect : " + currentDuration +  "/" + duration);
         currentDuration--;
         if(currentDuration == 0){
             currentDuration = duration;
-            //System.out.println("removing");
+            System.out.println("removing " + nameOfMove.getName());
             statusEffects.remove(nameOfMove);//remove from list
         }
         return randomAmountInRange(getStatusEffectRange());
@@ -127,7 +137,9 @@ public class MoveData {
     //we use another move, but want to check for when any moves in cooldown would be ready
     //so we'd need to call this for all moves in the player's move list on every turn
     public void performOtherMove(){
-        if(cooldownLength != 0) turnsSinceUsed++;
+        if(cooldownLength != 0 && turnsSinceUsed!=cooldownLength){
+            turnsSinceUsed++;
+        }
     }
 
     //CombatScreen will call this when setting up moves to display (only valid moves shown)
@@ -166,6 +178,7 @@ public class MoveData {
         //required
         private List<Integer> range;
         private MoveType movetype;
+        private String name;
 
         //optional
         private boolean hasDurability = false; //true means limited use, will break eventually
@@ -192,7 +205,8 @@ public class MoveData {
         private int currentDuration;
 
         //necessary
-        public Builder(List<Integer> r, MoveType t) {
+        public Builder(String n, List<Integer> r, MoveType t) {
+            this.name = n;
             this.range = r;
             this.movetype = t;
         }
@@ -212,7 +226,8 @@ public class MoveData {
         }
 
         public Builder setCooldown(int durationInTurns) {
-            cooldownLength = turnsSinceUsed = durationInTurns;
+            cooldownLength = durationInTurns;
+            turnsSinceUsed = cooldownLength;
             return this;
         }
 
@@ -229,7 +244,8 @@ public class MoveData {
         }
     }
 
-    private MoveData(Builder builder) {
+    public MoveData(Builder builder) {
+        name = builder.name;
         range = builder.range;
         movetype = builder.movetype;
         hasDurability = builder.hasDurability;
@@ -251,6 +267,36 @@ public class MoveData {
             statusEffectRange = builder.statusEffectRange;
             duration = currentDuration = builder.duration;
         }
+        this.builder = builder;
+    }
+
+    private Builder builder;
+
+    MoveData(MoveData other){
+        //System.out.println("copy");
+        name = other.builder.name;
+        range = other.builder.range;
+        movetype = other.builder.movetype;
+        hasDurability = other.builder.hasDurability;
+        if(hasDurability){
+            durability = currentDurability = other.builder.durability;
+        }
+        hasUsesPerEncounter = other.builder.hasUsesPerEncounter;
+        if(hasUsesPerEncounter){
+            usesPerEncounter =  other.builder.usesPerEncounter;
+            currentUsesPerEncounter = other.builder.currentUsesPerEncounter;
+        }
+        cooldownLength = other.builder.cooldownLength;
+        if(cooldownLength !=0){
+            turnsSinceUsed = other.builder.turnsSinceUsed;
+        }
+        hasStatusEffect = other.builder.hasStatusEffect;
+        if(hasStatusEffect){
+            statusEffectType = other.builder.statusEffectType;
+            statusEffectRange = other.builder.statusEffectRange;
+            duration = currentDuration = other.builder.duration;
+        }
+        this.builder = other.builder;
     }
 
 

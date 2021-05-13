@@ -17,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public class MainMenu implements Screen {
@@ -32,6 +33,15 @@ public class MainMenu implements Screen {
         spriteBatch.begin();
         game = GameIn;
         room = new Room();
+
+        Label.LabelStyle labelStyle = new Label.LabelStyle();
+        labelStyle.font = new BitmapFont(Gdx.files.internal("font/font.fnt"));
+        labelStyle.fontColor = Color.BLACK;
+        labelStyle.background = new TextureRegionDrawable(new Texture("textbox.png"));
+        Label title = new Label("(S)layoff Season", labelStyle);
+        title.setAlignment(Align.center);
+        title.setFontScale(2.5f);
+        title.setPosition(Gdx.graphics.getWidth()/2 - title.getWidth()/2, 700);
 
         Texture buttonTexture = new Texture("textbox.png");
         Skin skin = new Skin();
@@ -59,6 +69,7 @@ public class MainMenu implements Screen {
         });
 
         stage.addActor(room);
+        stage.addActor(title);
         stage.addActor(playButton);
     }
 

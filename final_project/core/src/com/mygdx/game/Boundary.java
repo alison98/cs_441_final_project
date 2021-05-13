@@ -97,13 +97,13 @@ public class Boundary extends Actor {
             location2.add(56);
             location2.add(776);
             location2.add(424);
-            location2.add(536);
+            location2.add(568);
             enemyLocations.add(location2);
             List<Integer> location3 = new ArrayList<>();
             location3.add(1280);
             location3.add(2032);
             location3.add(424);
-            location3.add(536);
+            location3.add(568);
             enemyLocations.add(location3);
             List<Integer> location4 = new ArrayList<>();
             location4.add(880);

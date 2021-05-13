@@ -151,44 +151,44 @@ public class Layout {
     private void setupShop(){
         //max 8 items including close
         List<List<String>> floor1 = new ArrayList<>();
-        floor1.add(addItem("Coffee","1", "multi"));
-        floor1.add(addItem("Coffee","1", "multi"));
-        floor1.add(addItem("Coffee","1", "multi"));
-        floor1.add(addItem("Tea","0", "single"));
-        floor1.add(addItem("Tea","0", "multi"));
-        floor1.add(addItem("Coffee","0", "single"));
-        floor1.add(addItem("Coffee","0", "multi"));
-        floor1.add(addItem("close","0", "multi"));
+        floor1.add(addItem("Sports Drink","3", "multi"));
+        floor1.add(addItem("Soda","3", "multi"));
+        floor1.add(addItem("Milk","6", "multi"));
+        floor1.add(addItem("Orange Juice","10", "multi"));
+        floor1.add(addItem("Tie","5", "multi"));
+        floor1.add(addItem("Paper Clip","10", "multi"));
+        floor1.add(addItem("Mug","20", "multi"));
+        floor1.add(addItem("Close","0", "multi"));
         shopItems.add(floor1);
         List<List<String>> floor2 = new ArrayList<>();
-        floor2.add(addItem("Coffee","1", "multi"));
-        floor2.add(addItem("Coffee","1", "multi"));
-        floor2.add(addItem("Coffee","1", "multi"));
-        floor2.add(addItem("Coffee","1", "multi"));
-        floor2.add(addItem("Coffee","1", "multi"));
-        floor2.add(addItem("Coffee","1", "multi"));
-        floor2.add(addItem("Coffee","0", "multi"));
-        floor2.add(addItem("close","0", "multi"));
+        floor2.add(addItem("Orange Juice","10", "multi"));
+        floor2.add(addItem("Apple Cider","10", "multi"));
+        floor2.add(addItem("Hot Chocolate","10", "multi"));
+        floor2.add(addItem("Iced Tea","12", "multi"));
+        floor2.add(addItem("Mug","20", "multi"));
+        floor2.add(addItem("Water Bottle","25", "multi"));
+        floor2.add(addItem("Tape","30", "multi"));
+        floor2.add(addItem("Close","0", "multi"));
         shopItems.add(floor2);
         List<List<String>> floor3 = new ArrayList<>();
-        floor3.add(addItem("Coffee","1", "multi"));
-        floor3.add(addItem("Coffee","1", "multi"));
-        floor3.add(addItem("Coffee","1", "multi"));
-        floor3.add(addItem("Coffee","1", "multi"));
-        floor3.add(addItem("Coffee","1", "multi"));
-        floor3.add(addItem("Coffee","1", "multi"));
-        floor3.add(addItem("Coffee","0", "multi"));
-        floor3.add(addItem("close","0", "multi"));
+        floor3.add(addItem("Iced Tea","12", "multi"));
+        floor3.add(addItem("Soup","20", "multi"));
+        floor3.add(addItem("Water","25", "multi"));
+        floor3.add(addItem("Tape","30", "multi"));
+        floor3.add(addItem("Laptop","50", "multi"));
+        floor3.add(addItem("Chair","65", "multi"));
+        floor3.add(addItem("Telephone","75", "multi"));
+        floor3.add(addItem("Close","0", "multi"));
         shopItems.add(floor3);
         List<List<String>> floor4 = new ArrayList<>();
-        floor4.add(addItem("Coffee","1", "multi"));
-        floor4.add(addItem("Coffee","1", "multi"));
-        floor4.add(addItem("Coffee","1", "multi"));
-        floor4.add(addItem("Coffee","1", "multi"));
-        floor4.add(addItem("Coffee","1", "multi"));
-        floor4.add(addItem("Coffee","1", "multi"));
-        floor4.add(addItem("Coffee","0", "multi"));
-        floor4.add(addItem("close","0", "multi"));
+        floor4.add(addItem("Water","25", "multi"));
+        floor4.add(addItem("Punch","50", "multi"));
+        floor4.add(addItem("Protein Shake","60", "multi"));
+        floor4.add(addItem("Tea","70", "multi"));
+        floor4.add(addItem("Telephone","75", "multi"));
+        floor4.add(addItem("Keyboard","150", "multi"));
+        floor4.add(addItem("Wired Mouse","200", "multi"));
+        floor4.add(addItem("Close","0", "multi"));
         shopItems.add(floor4);
     }
 
@@ -484,6 +484,11 @@ public class Layout {
                 tutorial[0] = rowIn;
                 tutorial[1] = columnIn;
                 bossRooms.add(tutorial);
+            } else {
+                Boundary.getInstance().setBoundaries(sprite);
+                List<List<Integer>> itemLocations = Boundary.getInstance().getItemLocations();
+                List<Integer> itemL = itemLocations.get(random.nextInt(itemLocations.size()));
+                interactables.get(floorIn).get(rowIn).get(columnIn).add(new Item("Sword.png", floorIn, rowIn, columnIn, 0, itemL.get(0), itemL.get(1)));
             }
             return;
         }
@@ -498,11 +503,23 @@ public class Layout {
                 spawnLocation.remove(range);
             }
         }
+
+        //Possibility of item in room
         int possibility = random.nextInt(5);
+        possibility = 0;
         if(possibility ==0) {
+            int choice = random.nextInt(10);
+            String image;
+            if(choice <5){
+                image = "coffee.png";
+            }else if (choice <9){
+                image = "Money.png";
+            }else{
+                image = "Sword.png";
+            }
             List<List<Integer>> itemLocations = Boundary.getInstance().getItemLocations();
             List<Integer> itemL = itemLocations.get(random.nextInt(itemLocations.size()));
-            interactables.get(floorIn).get(rowIn).get(columnIn).add(new Item("coffee.png", floorIn, rowIn, columnIn, 0, itemL.get(0), itemL.get(1)));
+            interactables.get(floorIn).get(rowIn).get(columnIn).add(new Item(image, floorIn, rowIn, columnIn, 0, itemL.get(0), itemL.get(1)));
         }
     }
 

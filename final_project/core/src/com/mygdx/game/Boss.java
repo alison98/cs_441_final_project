@@ -20,10 +20,13 @@ public class Boss extends Interactable{
         String bossMessage;
         if(floor == 1){
             bossMessage = "PUT A POST-COMBAT MESSAGE\nFOR THE FLOOR 1 BOSS HERE";
+            boss.setMaxHealth(50);
         } else if(floor == 2){
             bossMessage = "PUT A POST-COMBAT MESSAGE\nFOR THE FLOOR 2 BOSS HERE";
+            boss.setMaxHealth(75);
         } else{
             bossMessage = "PUT A POST-COMBAT MESSAGE\nFOR THE FLOOR 3 BOSS HERE";
+            boss.setMaxHealth(100);
         }
         boss.setBoss(bossMessage, this);
     }

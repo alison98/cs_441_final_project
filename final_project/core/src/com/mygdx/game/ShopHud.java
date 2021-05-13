@@ -117,7 +117,7 @@ public class ShopHud {
                         selectButton.setVisible(false);
                         selectButton.setTouchable(Touchable.disabled);
                     }
-                }else if (items.get(position).get(0) == "close") {
+                }else if (items.get(position).get(0) == "Close") {
                     gameScreen.getGame().setScreen(gameScreen);
                 } else if (items.get(position).get(2).equals("single")) {
                     player.setMoney(player.getMoney() - Integer.valueOf(items.get(position).get(1)));
@@ -264,7 +264,7 @@ public class ShopHud {
         String allItems = "\n\n";
         String prices = "\n\n";
         for(List<String> item : items){
-            if(item.get(0).equals("close")){
+            if(item.get(0).equals("Close")){
                 allItems += "          " + item.get(0);
             } else {
                 allItems += "          " + item.get(0) + "\n";

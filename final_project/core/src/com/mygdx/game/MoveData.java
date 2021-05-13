@@ -17,6 +17,25 @@ public class MoveData implements Comparable<MoveData> {
         return this.getName().compareTo(other.getName());
     }
 
+    @Override
+    //thanks https://www.geeksforgeeks.org/overriding-equals-method-in-java/, I'm a bit rusty
+    public boolean equals(Object o) {
+        // If the object is compared with itself then return true
+        if (o == this) {
+            return true;
+        }
+        // typecast o to MoveData so that we can compare data members
+        MoveData m = (MoveData) o;
+
+        //so based on how we have things setup, 2 instances of same move will always have same name
+        //then, to be truly equal, they need equal current durability, currentUsesPerEncounter, and turns since used
+        //everything else either doesn't matter or will always be equal by definition
+        return m.getName().equals(name) && m.getCurrentDurability() == currentDurability && m.getCurrentUsesPerEncounter() == currentUsesPerEncounter && m.getTurnsSinceUsed() == turnsSinceUsed;
+        //for example, we have 2 paper clips - to start, they are equal, and will be listed as "Paper Clip x2"
+        //then we use one - now, the durability of one has decreased, and they are now different weapons, and will be listed as different moves
+
+    }
+
     //these are used to determine what the Move does
     //we can add more later if need be
     enum MoveType {
@@ -64,16 +83,20 @@ public class MoveData implements Comparable<MoveData> {
     private int durability; //number of total uses when hasDurability is true, undefined and unused otherwise
     //once 0, remove from move list
 
+    public int getCurrentDurability(){ return currentDurability; }
+
     private boolean  hasUsesPerEncounter; //true means limited use per encounter
     private int usesPerEncounter; //number of uses per encounter when hasUsesPerEncounter is true, undefined and unused otherwise
     private int currentUsesPerEncounter;//copy used during an encounter, decrement on each move and reset on exiting
     //once 0, remove from move list, but re-add on exiting combat
 
+    public int getCurrentUsesPerEncounter() { return currentUsesPerEncounter;}
+
     //could have boolean to be consistent, but 0 works here
     private int cooldownLength; //measured in turns, 0 for no cooldown
     private int turnsSinceUsed; //measure turns since the move was used, once it equals cooldownLength, it can be used again
 
-
+    public int getTurnsSinceUsed() { return turnsSinceUsed; }
 
     //do I need a name for the status effect?
     private boolean hasStatusEffect; //true if this move has a status effect
@@ -155,7 +178,7 @@ public class MoveData implements Comparable<MoveData> {
     //this is what we'd call at end of combat
     //reset any temporary changes (like moves per encounter)
     public void resetMove(){
-        if(hasUsesPerEncounter) currentUsesPerEncounter = usesPerEncounter;
+        if(hasUsesPerEncounter) currentUsesPerEncounter = 0;
         if(cooldownLength != 0) turnsSinceUsed = cooldownLength; //this will make sure the cooldown isn't active when starting next turn
     }
 

@@ -272,6 +272,10 @@ public class Enemy extends Actor {
         if(health > maxHealth) health = maxHealth; //for healing (don't go past max)
     }
 
+    public void setMaxHealth(int maxHealthIn){
+        money = maxHealth = health = maxHealthIn;
+    }
+
     public void defeated(){
         fight = false;
         sprite.setAlpha(0);

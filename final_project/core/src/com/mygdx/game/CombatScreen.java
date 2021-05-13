@@ -19,6 +19,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -57,6 +58,7 @@ public class CombatScreen implements Screen {
     private Label playerHealthStatusEffect, playerAttackStatusEffect, enemyHealthStatusEffect, enemyAttackStatusEffect;
     private int playerHealthStatusDuration, playerAttackStatusDuration, enemyHealthStatusDuration, enemyAttackStatusDuration;
     private List<MoveData> ongoingStatusEffects;
+    private boolean clickedNextOrPrev;
 
 
     //TODO
@@ -64,6 +66,7 @@ public class CombatScreen implements Screen {
     //      -decide if other status effects carry over
     //      -when status effect is brief, name flashes too quick
     //      -sometimes buttons need to be pressed twice
+    //          --think I fixed, keep testing
     //      -fix bug of going back into combat
     //          --I haven't been able to replicate yet
     //      -fix bug where printer disappears when player loses
@@ -96,7 +99,7 @@ public class CombatScreen implements Screen {
         animationManager = new AnimationManager(2);//right now, max animations at one time is 2 - decreasing health bar and sprite moving across screen
         this.gameScreen = gameScreen;
         initUI(); //set up on screen elements
-        touchDown = false;
+        touchDown = clickedNextOrPrev = false;
         //just set up the icon
         if(player.getOngoingStatusEffects().size() > 0){
             for(MoveData move : player.getOngoingStatusEffects()){
@@ -424,8 +427,8 @@ public class CombatScreen implements Screen {
 
         //global label for displaying the current move's name
         currentMoveLabel = new Label("", labelStyle);
-        currentMoveLabel.setSize(500, 200);
-        currentMoveLabel.setPosition(width/2f - 250, height - height/1.3f);
+        currentMoveLabel.setSize(500, 100);
+        currentMoveLabel.setPosition(width/2f - 250, height - height/1.4f);//this was overlapping some buttons, causing the clicking issue
         currentMoveLabel.setFontScale(1f);//looks better smaller (and I am running out of room)
         currentMoveLabel.setAlignment(Align.center);
         currentMoveLabel.setColor(Color.BLACK);
@@ -483,6 +486,7 @@ public class CombatScreen implements Screen {
     //this is called once in setupUI, then on every turn that changes the moves available to the player
     //for example, player heals, decreases healing item by 1, we need to update buttons to reflect that
     private void setupButtons(){
+        //System.out.println("setting up buttons");
         final List<MoveData> playerWeapons = player.getWeapon(); //get list of moves
 
         //I might not want occurrences anymore, we'll see
@@ -493,14 +497,21 @@ public class CombatScreen implements Screen {
         //we remove occurrences when used in playerMove, so when setupButtons is called again, this list is smaller, has the accurate info
 
         //actually count the occurrences
+        boolean shouldAdd;
         for (MoveData currentWeapon : playerWeapons){
-            int occurrences =  Collections.frequency(playerWeapons, currentWeapon.getName());//thanks https://stackoverflow.com/questions/505928/how-to-count-the-number-of-occurrences-of-an-element-in-a-list
-            System.out.println(currentWeapon + " has " + occurrences);
-            if(currentWeapon.getCurrentlyAvailable() ){
-                System.out.println("and isCurrentlyAvailable");
-                moveOccurrences.put(currentWeapon, occurrences);//probably add a check for if the move is valid (hasn't exceeded uses per turn, cooldown ready)
-            }else {
-                System.out.println("and is not CurrentlyAvailable");
+            shouldAdd = true;
+            int occurrences =  Collections.frequency(playerWeapons, currentWeapon);//thanks https://stackoverflow.com/questions/505928/how-to-count-the-number-of-occurrences-of-an-element-in-a-list
+            //System.out.println(currentWeapon.getName() + " has " + occurrences);
+            //for some reason, map.containsKey won't use my equals function, so I'll just check myself
+            for(MoveData key : moveOccurrences.keySet()){
+                if(key.equals(currentWeapon)) {
+                    shouldAdd = false;
+                    break;
+                }
+            }
+            if(currentWeapon.getCurrentlyAvailable() && shouldAdd){//only add if its valid and it hasn't been accounted for yet (two coffee objects aren't == but can be .equals())
+                //System.out.println("adding " + currentWeapon.getName() + ", " + occurrences);
+                moveOccurrences.put(currentWeapon, occurrences);
             }
         }
 
@@ -522,18 +533,20 @@ public class CombatScreen implements Screen {
         float nextY = 200;
         float nextX = 150;
 
-        List<MoveData> alphabeticalList = new ArrayList<>(moveOccurrences.keySet());
+        final List<MoveData> alphabeticalList = new ArrayList<>(moveOccurrences.keySet());
 
         Collections.sort(alphabeticalList);
 
         int i = 0;
         for(MoveData currentMove : alphabeticalList){ //set up buttons - a max of 2 rows
+            //System.out.println(currentMove.getName());
             ImageTextButton newMoveButton = new ImageTextButton("New Game", playButtonStyle);
             newMoveButton.setWidth(250f);
             newMoveButton.setHeight(100f);
             newMoveButton.setPosition(nextX, nextY);
+            if(i==2 || i==3) System.out.println(nextX + "," + nextY);
             newMoveButton.setColor(Color.WHITE);
-            newMoveButton.getLabel().setFontScale(.75f);
+            newMoveButton.getLabel().setFontScale(.7f);
             nextX += 300;
             if (nextX + 250 >= width) {//hit side of screen, start new row
                 nextX = 150;
@@ -542,13 +555,14 @@ public class CombatScreen implements Screen {
                     prevButtonIndex = i + 1; //used to track index of which button will be used to "scroll" between pages
             }
             if (nextY <= 0) {//bottom of screen, make next page button
-                newMoveButton.setText("next page");
+                //System.out.println("next page for " + currentMove.getName());
+                newMoveButton.setText("Next Page");
                 final int finalPrevButtonIndex = prevButtonIndex;
                 final int finalI = i;
                 newMoveButton.addListener(new InputListener() {
                     @Override
                     public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                        nextPage(finalI, finalPrevButtonIndex, finalI, playerWeapons, 0, moveOccurrences);
+                        nextPage(finalI, finalPrevButtonIndex, finalI, alphabeticalList, 0, moveOccurrences);
                         return true;
                     }
                 });
@@ -594,16 +608,17 @@ public class CombatScreen implements Screen {
             //click then drag over button to display its info
             @Override
             public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor){
-                if(!touchDown) { //touch down is always fired first, so we know if its a click or enter at this point
+                if(!touchDown && !clickedNextOrPrev) { //touch down is always fired first, so we know if its a click or enter at this point
                     textBox.setText(move.toString());
                     textBox.setVisible(true);
+                }else{
+                    clickedNextOrPrev = false; //little check to make sure we didn't just click next or prev - if we did, don't display info
                 }
             }
 
             //release click/drag to stop showing info
             @Override
             public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor){
-                textBox.setText("sword\nattack\nx-y dmg");
                 textBox.setVisible(false);
             }
 
@@ -612,6 +627,7 @@ public class CombatScreen implements Screen {
             //i.e. don't display info if we just clicked and are using move
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                clickedNextOrPrev = false;
                 touchDown = true;
                 return true;
             }
@@ -620,6 +636,7 @@ public class CombatScreen implements Screen {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button){
                 touchDown = false;
+                clickedNextOrPrev = false;
                 //when the user clicks a button for a move, call playerTurn with said move
                 //don't just send with damage as parameter, as that would be same damage for same move
                 //this setup will call getDamage (to get a random damage in range) every time
@@ -642,6 +659,8 @@ public class CombatScreen implements Screen {
             }
 
         });
+
+
     }
 
 
@@ -661,29 +680,35 @@ public class CombatScreen implements Screen {
     public void nextPage(final int lastButtonIndex, final int prevButtonIndex, final int nextStartingIndex, final List<MoveData> playerWeapons, final int prevStartingIndex, final Map<MoveData, Integer> moveOccurrences) {
 
         //System.out.println("next" + nextStartingIndex);
-
         int numberOfEntries = lastButtonIndex;//how many buttons we will be adding handlers for
         //at most it is lastButtonIndex, as 1 will be used for previous, and the index is 0 based
         //at least it is lastButtonIndex-1, if we have another page after this (and thus a prev and next button)
 
         //start by setting up previous button - also need to shift elements
-        moveButtons[prevButtonIndex].setText("prev page");
+        moveButtons[prevButtonIndex].setText("Prev Page");
         moveButtons[prevButtonIndex].clearListeners();
+        moveButtons[prevButtonIndex].getStyle().fontColor = Color.BLACK;
+        moveButtons[prevButtonIndex].setColor(Color.WHITE);
         moveButtons[prevButtonIndex].addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                clickedNextOrPrev = true;
                 prevPage(lastButtonIndex, prevStartingIndex, prevButtonIndex, playerWeapons, moveOccurrences);
+                //clickedNextOrPrev = false;
                 return true;
             }
         });
 
         //check for next button
         if (playerWeapons.size() > lastButtonIndex + nextStartingIndex) {//we will have another page
-            moveButtons[lastButtonIndex].setText("next page");
+            moveButtons[lastButtonIndex].setText("Next Page");
             moveButtons[lastButtonIndex].clearListeners();
+            moveButtons[lastButtonIndex].getStyle().fontColor = Color.BLACK;
+            moveButtons[lastButtonIndex].setColor(Color.WHITE);
             moveButtons[lastButtonIndex].addListener(new InputListener() {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                    clickedNextOrPrev = true;
                     nextPage(lastButtonIndex, prevButtonIndex, nextStartingIndex + lastButtonIndex - 1, playerWeapons, nextStartingIndex, moveOccurrences);
                     return true;
                 }
@@ -726,7 +751,6 @@ public class CombatScreen implements Screen {
     public void prevPage(final int lastButtonIndex, final int prevStartingIndex, final int prevButtonIndex, final List<MoveData> playerWeapons, final Map<MoveData, Integer> moveOccurrences) {
 
         //System.out.println(prevStartingIndex);
-
         int numberOfEntries = lastButtonIndex;//how many buttons we will be adding handlers for
         boolean prevButtonPresent = false;
         //at most it is lastButtonIndex, as 1 will be used for next, and the index is 0 based
@@ -735,12 +759,15 @@ public class CombatScreen implements Screen {
         //check for previous button
         if (prevStartingIndex > prevButtonIndex) {//we will have another previous page
             //System.out.println("will have a prev: " + prevButtonIndex);
-            moveButtons[prevButtonIndex].setText("prev page");
+            moveButtons[prevButtonIndex].setText("Prev Page");
             moveButtons[prevButtonIndex].clearListeners();
             moveButtons[prevButtonIndex].setVisible(true);
+            moveButtons[prevButtonIndex].getStyle().fontColor = Color.BLACK;
+            moveButtons[prevButtonIndex].setColor(Color.WHITE);
             moveButtons[prevButtonIndex].addListener(new InputListener() {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                    clickedNextOrPrev = true;
                     prevPage(lastButtonIndex, prevStartingIndex - lastButtonIndex, prevButtonIndex, playerWeapons, moveOccurrences);
                     return true;
                 }
@@ -750,13 +777,16 @@ public class CombatScreen implements Screen {
         }
 
         //setting up next page
-        moveButtons[lastButtonIndex].setText("next page");
+        moveButtons[lastButtonIndex].setText("Next Page");
         moveButtons[lastButtonIndex].clearListeners();
         moveButtons[lastButtonIndex].setVisible(true);
+        moveButtons[lastButtonIndex].getStyle().fontColor = Color.BLACK;
+        moveButtons[lastButtonIndex].setColor(Color.WHITE);
         final int finalEntriesDisplayed = numberOfEntries;//nested, must be final
         moveButtons[lastButtonIndex].addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                clickedNextOrPrev = true;
                 nextPage(lastButtonIndex, prevButtonIndex, prevStartingIndex + finalEntriesDisplayed, playerWeapons, prevStartingIndex, moveOccurrences);//use entries displayed to pass correct next index
                 return true;
             }
@@ -769,7 +799,6 @@ public class CombatScreen implements Screen {
             if(currentButton == prevButtonIndex && prevButtonPresent){
                 //System.out.println("nop");
             }else{
-                //System.out.println(currentButton);
                 setHandler(moveButtons[currentButton], playerWeapons.get(currentWeaponIndex), moveOccurrences.get(playerWeapons.get(currentWeaponIndex)));//add corresponding text and handler
                 currentWeaponIndex++;//increment which element to grab
                 //this won't be increment when we're at previous button, keeping us in sync (otherwise we'd skip that element by setting previous)

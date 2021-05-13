@@ -30,7 +30,7 @@ public class Move {
         else if(name.contains("FAX")) weaponList = enemyWeapons.get("Fax");
         else if(name.contains("BOX")) weaponList =  enemyWeapons.get("Box");
         else if(name.contains("CEO")) weaponList =  enemyWeapons.get("CEO");
-        else if(name.contains("SERVER")) weaponList =  enemyWeapons.get("Server");
+        else if(name.contains("SERVER") || name.contains("CLOUD")) weaponList =  enemyWeapons.get("Server");
         else if(name.contains("CABINET")) weaponList =  enemyWeapons.get("Cabinet");
         else {
             System.out.println("\n\n MATT NEEDS TO ADJUST FOR AN IMAGE NAME \n\n");
@@ -40,17 +40,6 @@ public class Move {
         for(String currentWeapon : weaponList){
             returnList.add(Move.getInstance().getCopy(currentWeapon));
         }
-        /*
-        if(name.contains("PRINT")) return enemyWeapons.get("Printer");
-        if(name.contains("FAX")) return enemyWeapons.get("Fax");
-        if(name.contains("BOX")) return enemyWeapons.get("Box");
-        if(name.contains("CEO")) return enemyWeapons.get("CEO");
-        if(name.contains("SERVER")) return enemyWeapons.get("Server");
-        if(name.contains("CABINET")) return enemyWeapons.get("Cabinet");
-        System.out.println("\n\n MATT NEEDS TO ADJUST FOR AN IMAGE NAME \n\n");
-        return enemyWeapons.get("Printer");
-
-         */
         return returnList;
     }
 
@@ -68,59 +57,64 @@ public class Move {
 
         //roughly organized from best (more expensive) to worst (cheapest)
         movelist.put("Desk Lamp", new MoveData.Builder("Desk Lamp", setDamage(20,40), MoveData.MoveType.ATTACK)
-                .setCooldown(3)
-                .setDurability(2)
+                .setDurability(4)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(15, 30), 3)
                 .build());
         movelist.put("Wired Mouse", new MoveData.Builder("Wired Mouse", setDamage(25,35), MoveData.MoveType.ATTACK)
-                .setDurability(1)
+                .setDurability(3)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(15, 20), 2)
                 .build());
         movelist.put("Keyboard", new MoveData.Builder("Keyboard", setDamage(25, 35), MoveData.MoveType.ATTACK)
-                .setDurability(2)
-                .build());
-        movelist.put("Scissors", new MoveData.Builder("Scissors", setDamage(25,30), MoveData.MoveType.ATTACK)
-                .setUsesPerEncounter(1)
-                .setDurability(2)
-                .build());
-        movelist.put("Telephone", new MoveData.Builder("Telephone", setDamage(20, 35), MoveData.MoveType.ATTACK)
-                .setDurability(2)
-                .setCooldown(2)
-                .build());
-        movelist.put("Chair", new MoveData.Builder("Chair", setDamage(20,30), MoveData.MoveType.ATTACK)
-                .setDurability(1)
-                .build());
-        movelist.put("Stapler", new MoveData.Builder("Stapler", setDamage(15, 25), MoveData.MoveType.ATTACK)
-                .setCooldown(2)
-                .setDurability(4)
-                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2) //bleeding
-                .build()); //bare minimum  - name, range, type
-        movelist.put("Laptop", new MoveData.Builder("Laptop", setDamage(15,25), MoveData.MoveType.ATTACK)
-                .setUsesPerEncounter(1)
                 .setDurability(3)
                 .build());
-        movelist.put("Sword", new MoveData.Builder("Sword", setDamage(10, 20), MoveData.MoveType.ATTACK).build()); //bare minimum  - name, range, type
+        movelist.put("Scissors", new MoveData.Builder("Scissors", setDamage(25,30), MoveData.MoveType.ATTACK)
+                .setDurability(3)
+                .build());
+        movelist.put("Telephone", new MoveData.Builder("Telephone", setDamage(20, 35), MoveData.MoveType.ATTACK)
+                .setDurability(3)
+                .setCooldown(1)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(15, 20), 2)
+                .build());
+        movelist.put("Chair", new MoveData.Builder("Chair", setDamage(20,30), MoveData.MoveType.ATTACK)
+                .setDurability(3)
+                .build());
+        movelist.put("Stapler", new MoveData.Builder("Stapler", setDamage(15, 25), MoveData.MoveType.ATTACK)
+                .setCooldown(1)
+                .setDurability(2)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2) //bleeding
+                .build());
+        movelist.put("Laptop", new MoveData.Builder("Laptop", setDamage(15,25), MoveData.MoveType.ATTACK)
+                .setUsesPerEncounter(1)
+                .setDurability(4)
+                .build());
+        movelist.put("Sword", new MoveData.Builder("Sword", setDamage(10, 20), MoveData.MoveType.ATTACK)
+                .setDurability(3)
+                .setCooldown(2)
+                .build());
         movelist.put("Tape", new MoveData.Builder("Tape", setDamage(15, 20), MoveData.MoveType.ATTACK)
-                .setDurability(1)
+                .setDurability(2)
+                .setUsesPerEncounter(2)
                 .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(10, 20), 1)
                 .build());
         movelist.put("Water Bottle", new MoveData.Builder("Water Bottle", setDamage(10, 15), MoveData.MoveType.ATTACK)
-                .setCooldown(3)
                 .setUsesPerEncounter(1)
                 .setDurability(3)
                 .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(10, 20), 2)
                 .build());
         movelist.put("Mug", new MoveData.Builder("Mug", setDamage(10,15), MoveData.MoveType.ATTACK)
                 .setDurability(1)
+                .setCooldown(1)
                 .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(10, 20), 1) //burning
                 .build());
         movelist.put("Ruler", new MoveData.Builder("Ruler", setDamage(10, 15), MoveData.MoveType.ATTACK)
                 .setDurability(2)
                 .build());
-        movelist.put("Fists", new MoveData.Builder("Fists", setDamage(0, 7), MoveData.MoveType.ATTACK)
+        movelist.put("Fists", new MoveData.Builder("Fists", setDamage(2, 7), MoveData.MoveType.ATTACK)
                 .build());
         movelist.put("Paper Clip", new MoveData.Builder("Paper Clip", setDamage(5, 10), MoveData.MoveType.ATTACK)
                 .setDurability(2)
                 .build());
-        movelist.put("Tie", new MoveData.Builder("Tie", setDamage(0,5), MoveData.MoveType.ATTACK).build());
+        movelist.put("Tie", new MoveData.Builder("Tie", setDamage(1,5), MoveData.MoveType.ATTACK).build());
 
         //some player healing moves
         //I'm going to make all healing items single use for now, which means no cooldown or uses per turn limit
@@ -167,7 +161,7 @@ public class Move {
                 .build());
         movelist.put("Milk", new MoveData.Builder("Milk",setDamage(5,10), MoveData.MoveType.HEALING)
                 .setDurability(1)
-                .setStatusEffect(MoveData.MoveType.HEALING, setDamage(0, 10), 2)
+                .setStatusEffect(MoveData.MoveType.HEALING, setDamage(5, 10), 2)
                 .build());
         movelist.put("Soda", new MoveData.Builder("Soda",setDamage(5,10), MoveData.MoveType.HEALING)
                 .setDurability(1)
@@ -182,111 +176,103 @@ public class Move {
         //it also creates variety, which is why I used it a lot below
 
         //printer moves
-        movelist.put("Paper Cut", new MoveData.Builder("Paper Cut",setDamage(10, 20), MoveData.MoveType.ATTACK)
+        movelist.put("Paper Cut", new MoveData.Builder("Paper Cut",setDamage(5, 10), MoveData.MoveType.ATTACK)
                 .setCooldown(3)
-                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(1, 5), 1)
                 .build());
-        movelist.put("Slam Tray", new MoveData.Builder("Slam Tray",setDamage(0,5), MoveData.MoveType.ATTACK)
+        movelist.put("Slam Tray", new MoveData.Builder("Slam Tray",setDamage(1,3), MoveData.MoveType.ATTACK)
                 .setCooldown(1)
                 .build());
-        movelist.put("Toner Leak", new MoveData.Builder("Toner Leak",setDamage(5, 10), MoveData.MoveType.ATTACK)
+        movelist.put("Toner Leak", new MoveData.Builder("Toner Leak",setDamage(1, 5), MoveData.MoveType.ATTACK)
                 .setCooldown(2)
                 .build());
-        movelist.put("Short Circuit", new MoveData.Builder("Short Circuit",setDamage(5, 10), MoveData.MoveType.ATTACK)
+        movelist.put("Short Circuit", new MoveData.Builder("Short Circuit",setDamage(2, 4), MoveData.MoveType.ATTACK)
                 .setCooldown(2)
-                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 15), 1)
                 .build());
-        movelist.put("Electrical Fire", new MoveData.Builder("Electrical Fire",setDamage(5, 10), MoveData.MoveType.ATTACK)
+        movelist.put("Electrical Fire", new MoveData.Builder("Electrical Fire",setDamage(2, 4), MoveData.MoveType.ATTACK)
                 .setCooldown(2)
-                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 15), 2)
                 .build());
-        movelist.put("Shoot Ink", new MoveData.Builder("Shoot Ink",setDamage(15, 25), MoveData.MoveType.ATTACK)
+        movelist.put("Shoot Ink", new MoveData.Builder("Shoot Ink",setDamage(1, 5), MoveData.MoveType.ATTACK)
                 .setCooldown(2)
                 .build());
         movelist.put("Fan Blades", new MoveData.Builder("Fan Blades",setDamage(5, 10), MoveData.MoveType.ATTACK)
-                .setCooldown(2)
-                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2)
+                .setCooldown(3)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 1)
                 .build());
 
 
         //fax moves
-        movelist.put("Dial-up Noise", new MoveData.Builder("Dial-up Noise",setDamage(15, 25), MoveData.MoveType.ATTACK)
-                .setCooldown(2)
-                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2)
-                .build());
-        movelist.put("Shoot Paper", new MoveData.Builder("Shoot Paper",setDamage(15, 20), MoveData.MoveType.ATTACK)
-                .setCooldown(2)
-                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(0, 10), 1)
-                .build());
-        movelist.put("Overheating", new MoveData.Builder("Overheating",setDamage(5, 10), MoveData.MoveType.ATTACK)
-                .setCooldown(4)
-                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 3)
-                .build());
-        movelist.put("Paper Jam", new MoveData.Builder("Paper Jam",setDamage(0, 5), MoveData.MoveType.ATTACK)
-                .setCooldown(1)
-                .build());
-        movelist.put("Power Surge", new MoveData.Builder("Power Surge",setDamage(5, 10), MoveData.MoveType.ATTACK)
+        movelist.put("Dial-up Noise", new MoveData.Builder("Dial-up Noise",setDamage(5, 15), MoveData.MoveType.ATTACK)
                 .setCooldown(2)
                 .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 1)
                 .build());
-        movelist.put("Dust Cloud", new MoveData.Builder("Dust Cloud",setDamage(5, 15), MoveData.MoveType.ATTACK)
+        movelist.put("Shoot Paper", new MoveData.Builder("Shoot Paper",setDamage(1, 10), MoveData.MoveType.ATTACK)
+                .setCooldown(2)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(1, 5), 1)
+                .build());
+        movelist.put("Overheating", new MoveData.Builder("Overheating",setDamage(1, 5), MoveData.MoveType.ATTACK)
+                .setCooldown(4)
+                .build());
+        movelist.put("Paper Jam", new MoveData.Builder("Paper Jam",setDamage(3, 7), MoveData.MoveType.ATTACK)
+                .setCooldown(1)
+                .build());
+        movelist.put("Power Surge", new MoveData.Builder("Power Surge",setDamage(2, 10), MoveData.MoveType.ATTACK)
+                .setCooldown(2)
+                .build());
+        movelist.put("Dust Cloud", new MoveData.Builder("Dust Cloud",setDamage(5, 10), MoveData.MoveType.ATTACK)
                 .setCooldown(2)
                 .build());
 
         //box moves
         movelist.put("Slam Lid", new MoveData.Builder("Slam Lid",setDamage(5, 10), MoveData.MoveType.ATTACK)
                 .setCooldown(2)
-                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(1, 5), 1)
                 .build());
-        movelist.put("Heavy Lifting", new MoveData.Builder("Heavy Lifting",setDamage(0, 10), MoveData.MoveType.ATTACK)
+        movelist.put("Heavy Lifting", new MoveData.Builder("Heavy Lifting",setDamage(1, 5), MoveData.MoveType.ATTACK)
                 .setCooldown(1)
                 .build());
-        movelist.put("Unorganized Files", new MoveData.Builder("Unorganized Files",setDamage(15, 25), MoveData.MoveType.ATTACK)
+        movelist.put("Unorganized Files", new MoveData.Builder("Unorganized Files",setDamage(1, 10), MoveData.MoveType.ATTACK)
                 .setCooldown(3)
-                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(0, 5), 2)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(1, 5), 1)
                 .build());
-        movelist.put("Packing Tape", new MoveData.Builder("Packing Tape", setDamage(10, 15), MoveData.MoveType.ATTACK)
+        movelist.put("Packing Tape", new MoveData.Builder("Packing Tape", setDamage(2, 7), MoveData.MoveType.ATTACK)
                 .setCooldown(2)
                 .build());
 
         //server moves
-        movelist.put("Flashing Lights", new MoveData.Builder("Flashing Lights",setDamage(15, 25), MoveData.MoveType.ATTACK)
-                .setCooldown(2)
-                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2)
-                .build());
-        movelist.put("Loud Beeping", new MoveData.Builder("Loud Beeping",setDamage(15, 20), MoveData.MoveType.ATTACK)
-                .setCooldown(2)
-                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(0, 10), 1)
-                .build());
-        movelist.put("404 Error", new MoveData.Builder("404 Error",setDamage(5, 10), MoveData.MoveType.ATTACK)
-                .setCooldown(4)
-                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 3)
-                .build());
-        movelist.put("Unscheduled Maintenance", new MoveData.Builder("Unscheduled Maintenance", setDamage(0, 5), MoveData.MoveType.ATTACK)
-                .setCooldown(1)
-                .build());
-        movelist.put("Crash", new MoveData.Builder("Crash",setDamage(5, 10), MoveData.MoveType.ATTACK)
+        movelist.put("Flashing Lights", new MoveData.Builder("Flashing Lights",setDamage(5, 20), MoveData.MoveType.ATTACK)
                 .setCooldown(2)
                 .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 1)
                 .build());
-        movelist.put("DDoS Attack", new MoveData.Builder("DDoS Attack",setDamage(5, 15), MoveData.MoveType.ATTACK)
+        movelist.put("Loud Beeping", new MoveData.Builder("Loud Beeping",setDamage(10, 20), MoveData.MoveType.ATTACK)
+                .setCooldown(2)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(1, 10), 1)
+                .build());
+        movelist.put("404 Error", new MoveData.Builder("404 Error",setDamage(5, 10), MoveData.MoveType.ATTACK)
+                .setCooldown(4)
+                .build());
+        movelist.put("Unscheduled Maintenance", new MoveData.Builder("Unscheduled Maintenance", setDamage(1, 5), MoveData.MoveType.ATTACK)
+                .setCooldown(1)
+                .build());
+        movelist.put("Crash", new MoveData.Builder("Crash",setDamage(5, 7), MoveData.MoveType.ATTACK)
+                .setCooldown(2)
+                .build());
+        movelist.put("DDoS Attack", new MoveData.Builder("DDoS Attack",setDamage(1, 15), MoveData.MoveType.ATTACK)
                 .setCooldown(2)
                 .build());
 
         //filing cabinet moves
-        movelist.put("Slam Drawers", new MoveData.Builder("Slam Drawers",setDamage(15, 25), MoveData.MoveType.ATTACK)
+        movelist.put("Slam Drawers", new MoveData.Builder("Slam Drawers",setDamage(10, 25), MoveData.MoveType.ATTACK)
                 .setCooldown(2)
-                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 2)
+                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 1)
                 .build());
-        movelist.put("Pinch Fingers", new MoveData.Builder("Pinch Fingers",setDamage(15, 20), MoveData.MoveType.ATTACK)
+        movelist.put("Pinch Fingers", new MoveData.Builder("Pinch Fingers",setDamage(1, 20), MoveData.MoveType.ATTACK)
                 .setCooldown(2)
-                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(0, 10), 1)
                 .build());
-        movelist.put("Ink Leak", new MoveData.Builder("Ink Leak",setDamage(5, 10), MoveData.MoveType.ATTACK)
+        movelist.put("Ink Leak", new MoveData.Builder("Ink Leak",setDamage(1, 5), MoveData.MoveType.ATTACK)
                 .setCooldown(4)
-                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 3)
                 .build());
-        movelist.put("Tipping Over", new MoveData.Builder("Tipping Over",setDamage(0, 5), MoveData.MoveType.ATTACK)
+        movelist.put("Tipping Over", new MoveData.Builder("Tipping Over",setDamage(1, 10), MoveData.MoveType.ATTACK)
                 .setCooldown(1)
                 .build());
 
@@ -308,7 +294,6 @@ public class Move {
                 .build());
         movelist.put("Downsizing", new MoveData.Builder("Downsizing",setDamage(15, 25), MoveData.MoveType.ATTACK)
                 .setCooldown(2)
-                .setStatusEffect(MoveData.MoveType.ATTACK, setDamage(5, 10), 1)
                 .build());
         movelist.put("Performance Review", new MoveData.Builder("Performance Review",setDamage(5, 10), MoveData.MoveType.ATTACK)
                 .setCooldown(1)
@@ -321,11 +306,6 @@ public class Move {
                 .build());
 
 
-        //enemy healing?
-        //I haven't decided if these should exist
-        //if they do, they'll be much weaker, rarer, and I need a smarter AI
-        movelist.put("Paper Refill", new MoveData.Builder("Paper Refill",setDamage(5, 10), MoveData.MoveType.HEALING)
-                .build());
 
 
         //Set up weapons/abilities for enemies

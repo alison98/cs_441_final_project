@@ -134,6 +134,8 @@ public class Layout {
         enemyNames.add("100 Meter Print.png");
         enemyNames.add("Battlefax.png");
         enemyNames.add("X-Box 360.png");
+        enemyNames.add("The Cloud.png");
+        enemyNames.add("Vile Cabinet.png");
     }
     private void addBossNames(){
         //Add Bosses here
@@ -142,7 +144,7 @@ public class Layout {
         bossNames.add("An Angry Printer.png");
         bossNames.add("Death and Faxes.png");
         bossNames.add("Box Ness Monster.png");
-        bossNames.add("Printer is Coming.png");
+        bossNames.add("Protect and Server.png");
         bossNames.add("The CEO.png");
     }
 

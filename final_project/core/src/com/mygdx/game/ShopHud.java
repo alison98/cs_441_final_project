@@ -28,7 +28,7 @@ public class ShopHud {
     private Stage stage;
     private ScreenViewport stageViewport;
     private ImageButton selectButton;
-    private Label textBox,shopText, priceText,moneyText;
+    private Label textBox,shopText, priceText,typeText, moneyText;
     private ImageButton upButton;
     private ImageButton downButton;
     private ImageButton leftButton;
@@ -73,12 +73,20 @@ public class ShopHud {
         moneyText.setVisible(false);
 
         priceText = new Label("Hello", labelStyle2);
-        priceText.setWidth(100);
+        priceText.setWidth(70);
         priceText.setHeight(900);
         priceText.setFontScale(1f);
         priceText.setAlignment(Align.topLeft);
         priceText.setPosition(Gdx.graphics.getWidth()/2 + priceText.getWidth(), 100);
         priceText.setVisible(false);
+
+        typeText = new Label("Hello", labelStyle2);
+        typeText.setWidth(170);
+        typeText.setHeight(900);
+        typeText.setFontScale(1f);
+        typeText.setAlignment(Align.topLeft);
+        typeText.setPosition(Gdx.graphics.getWidth()/2 + typeText.getWidth(), 100);
+        typeText.setVisible(false);
         setText();
 
         textBox = new Label("Hello", labelStyle);
@@ -221,6 +229,7 @@ public class ShopHud {
         stage.addActor(selectButton);
         stage.addActor(shopText);
         stage.addActor(priceText);
+        stage.addActor(typeText);
         stage.addActor(moneyText);
         stage.addActor(arrow);
         stage.addActor(textBox);
@@ -231,7 +240,7 @@ public class ShopHud {
 
         public Arrow(){
             sprite = new Sprite(new Texture("left-button.png"));
-            setPosition(625,800);
+            setPosition(600,800);
         }
 
         @Override
@@ -261,14 +270,17 @@ public class ShopHud {
     }
 
     public void setText(){
+        Move moves = Move.getInstance();
         String allItems = "\n\n";
         String prices = "\n\n";
+        String types = "\n\n";
         for(List<String> item : items){
             if(item.get(0).equals("Close")){
-                allItems += "          " + item.get(0);
+                allItems += "       " + item.get(0);
             } else {
-                allItems += "          " + item.get(0) + "\n";
+                allItems += "       " + item.get(0) + "\n";
                 prices += item.get(1) + "\n";
+                types += moves.getMoveType(item.get(0)).toString() + "\n";
             }
         }
         shopText.setText(allItems);
@@ -277,6 +289,8 @@ public class ShopHud {
         priceText.setVisible(true);
         moneyText.setText("  $" + player.getMoney());
         moneyText.setVisible(true);
+        typeText.setText(types);
+        typeText.setVisible(true);
     }
 
     public void purchase(String message){

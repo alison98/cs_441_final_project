@@ -19,7 +19,10 @@ public class FinalBoss extends Interactable{
         y = yIn;
         boss = new Enemy(x, y,2, "CEO.png", floorIn, null);
         boss.setMaxHealth(200);
-        String[] bossMessage = new String[]{"PUT A POST-COMBAT MESSAGE\nFOR THE FINAL BOSS HERE"};
+        String[] bossMessage = new String[]{"Congratulations, you’ve defeated\nthe CEO and ruined his plans to",
+                "take over the corporate world\nwith mutant office supplies!",
+                "This is the end of your adventure,\nbut you’re free to return",
+                "to the lower floors to continue\nexploring the office building."};
         boss.setBoss(bossMessage, this);
     }
 

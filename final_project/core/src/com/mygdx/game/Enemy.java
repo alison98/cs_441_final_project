@@ -64,10 +64,10 @@ public class Enemy extends Actor {
         ongoingStatusEffects = new ArrayList<>();
 
 
-        level = random.nextInt(10)+floor;
+        level = random.nextInt(5)+floor;
         //maxHealth = health = 10;
         money = maxHealth = health = floor*10 + random.nextInt(10)+1;
-        experience = level*2;
+        experience = level*4;
         bossMessage = new String[0];
         isHuman = false;
     }

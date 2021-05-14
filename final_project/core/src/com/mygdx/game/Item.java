@@ -55,10 +55,10 @@ public class Item extends Interactable{
             }
         }else if(image.equals("Sword.png")){
             if(floor ==0){
-                droppable.add("Mug");
-                droppable.add("Ruler");//only obtainable through item drop
-                droppable.add("Paper Clip");
-                droppable.add("Tie");
+                droppable.add("Sword");
+                //droppable.add("Ruler");//only obtainable through item drop
+                //droppable.add("Paper Clip");
+                //droppable.add("Tie");
             }else if(floor == 1){
                 droppable.add("Tape");
                 droppable.add("Water Bottle");

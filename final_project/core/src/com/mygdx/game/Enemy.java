@@ -84,7 +84,7 @@ public class Enemy extends Actor {
         sprites[1] = new Sprite(new Texture("human2-6x.png")); //change to random human character
         name = file.substring(0,file.length()-4);
         name = name.replaceAll("-"," ");
-        name = name.toUpperCase();
+        //name = name.toUpperCase();
 
     }
 

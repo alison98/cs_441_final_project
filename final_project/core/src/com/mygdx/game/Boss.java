@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Rectangle;
 public class Boss extends Interactable{
     private int floor, row, column, index, x, y;
     private Enemy boss;
+    private String[] bossMessage;
 
     public Boss(String image, int floorIn, int rowIn, int columnIn, int indexIn, int xIn, int yIn) {
         super(image, floorIn, rowIn, columnIn, indexIn, xIn, yIn);
@@ -17,7 +18,6 @@ public class Boss extends Interactable{
         x = xIn;
         y = yIn;
         boss = new Enemy(x, y,2, super.getSprite().getTexture().toString(), floorIn, null);
-        String[] bossMessage;
         if(floor == 1){
             bossMessage = new String[]{"Thank you for saving me!",
                     "I don’t know how, but somehow I\ngot turned into a fax machine.",
@@ -46,7 +46,7 @@ public class Boss extends Interactable{
     @Override
     public void interact(GameScreen game){
         if(boss.isHuman()){
-            game.getHud().setText("PUT A POST-COMBAT MESSAGE\nFOR THE HUMANS HERE");
+            game.getHud().setText(bossMessage);
         } else {
             if(floor == 1){
                 game.getHud().setText("Kiss my fax!");

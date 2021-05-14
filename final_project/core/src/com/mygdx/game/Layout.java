@@ -26,6 +26,7 @@ public class Layout {
     private Texture stairUpImg;
     private List<String> roomNames, enemyNames, bossNames;
     private List<List<List<String>>> shopItems;
+    private boolean swordGet;
 
 
     //Singleton class
@@ -76,6 +77,7 @@ public class Layout {
         hitboxes.add(bottom);
         hitboxes.add(stair);
 
+        swordGet = false;
     }
 
     public static Layout getInstance(){
@@ -119,6 +121,8 @@ public class Layout {
     }
 
     public int getFloor(){return floor;}
+
+    public void setSwordGet(){swordGet = true;}
 
     private void addRoomNames(){
         //Add room names here to be randomly chosen
@@ -277,8 +281,12 @@ public class Layout {
                 row = 1;
                 column = 0;
             }else if(!downFloor() && getBoss()){
-                respawn();
-                floor +=1;
+                if(floor == 0 && swordGet == false){
+                    return -2;
+                } else{
+                    respawn();
+                    floor +=1;
+                }
             }else{
                 respawn();
                 floor -=1;

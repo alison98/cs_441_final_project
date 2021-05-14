@@ -120,6 +120,8 @@ public class GameScreen implements Screen {
                 player.setPosition(Gdx.graphics.getWidth()/2 - player.getWidth()/2,Gdx.graphics.getHeight() - player.getHeight()-180);
             }else if(location == -1){
                 hud.setText("Door is locked!");
+            }else if(location == -2){ //only used for tutorial second room when player has not picked up sword yet
+                hud.setText("You notice a weapon on the floor in the room,\nyou should investigate before proceeding");
             }
         }
         System.out.println(player.getX() + ", " + player.getY());

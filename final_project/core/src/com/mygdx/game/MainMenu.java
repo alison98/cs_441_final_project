@@ -69,9 +69,27 @@ public class MainMenu implements Screen {
             }
         });
 
+        ImageTextButton howToPlayButton = new ImageTextButton("How To Play", playButtonStyle);
+        howToPlayButton.setWidth(400f);
+        howToPlayButton.setHeight(100f);
+        howToPlayButton.getLabel().setFontScale(1f);
+        howToPlayButton.setPosition(Gdx.graphics.getWidth()/2 - playButton.getWidth()/2, Gdx.graphics.getHeight()/2 - playButton.getHeight() * 4);
+        howToPlayButton.addListener(new InputListener(){
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button){
+                dispose();
+                game.setScreen(new HowToPlay(game));
+            }
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button){
+                return true;
+            }
+        });
+
         stage.addActor(room);
         stage.addActor(title);
         stage.addActor(playButton);
+        stage.addActor(howToPlayButton);
     }
 
     @Override

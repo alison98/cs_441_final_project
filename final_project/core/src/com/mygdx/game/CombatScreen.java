@@ -304,8 +304,8 @@ public class CombatScreen implements Screen {
             player.setPosition(playerX, playerY);//put back in original spot
             if(enemy.isBoss()){
                 enemy.setHuman();
-                String bossMessage = enemy.getBossMessage();
-                if(bossMessage != ""){
+                String[] bossMessage = enemy.getBossMessage();
+                if(bossMessage.length != 0){
                     gameScreen.getHud().setText(bossMessage);
                 }
             }

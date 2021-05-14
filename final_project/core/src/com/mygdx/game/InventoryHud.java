@@ -26,7 +26,7 @@ public class InventoryHud {
     private ScreenViewport stageViewport;
     private Player player;
     private GameScreen gameScreen;
-    private int floor;
+    private int floorNum;
     private Label health;
     private ScrollPane scroller;
 
@@ -35,7 +35,7 @@ public class InventoryHud {
         gameScreen = gameScreenIn;
         stageViewport = new ScreenViewport();
         stage = new Stage(stageViewport, spriteBatch);
-        floor = floorIn;
+        floorNum = floorIn;
 
         Label.LabelStyle labelStyle = new Label.LabelStyle();
         labelStyle.font = new BitmapFont(Gdx.files.internal("font/font.fnt"));
@@ -82,6 +82,13 @@ public class InventoryHud {
         table.setPosition(Gdx.graphics.getWidth()/3 - table.getWidth(), Gdx.graphics.getHeight()/2 - table.getHeight());
 
         final Table weaponTable = new Table();
+        if(Layout.getInstance().getKey()){
+            Label key = new Label("Floor " + floorNum + " Key", labelStyle);
+            key.setFontScale(1.25f);
+            key.setAlignment(Align.center);
+            weaponTable.add(key).width(600f).height(150f).pad(10);
+            weaponTable.row();
+        }
         for(final MoveData item : player.getWeapon()){
             if(item.getMoveType() == MoveData.MoveType.HEALING){
                 final ImageTextButton weapon = new ImageTextButton(item.getName(), imageTextButtonStyle);

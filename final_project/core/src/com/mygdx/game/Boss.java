@@ -17,15 +17,15 @@ public class Boss extends Interactable{
         x = xIn;
         y = yIn;
         boss = new Enemy(x, y,2, super.getSprite().getTexture().toString(), floorIn, null);
-        String bossMessage;
+        String[] bossMessage;
         if(floor == 1){
-            bossMessage = "PUT A POST-COMBAT MESSAGE\nFOR THE FLOOR 1 BOSS HERE";
+            bossMessage = new String[]{"PUT A POST-COMBAT MESSAGE\nFOR THE FLOOR 1 BOSS HERE"};
             boss.setMaxHealth(50);
         } else if(floor == 2){
-            bossMessage = "PUT A POST-COMBAT MESSAGE\nFOR THE FLOOR 2 BOSS HERE";
+            bossMessage = new String[]{"PUT A POST-COMBAT MESSAGE\nFOR THE FLOOR 2 BOSS HERE"};
             boss.setMaxHealth(75);
         } else{
-            bossMessage = "PUT A POST-COMBAT MESSAGE\nFOR THE FLOOR 3 BOSS HERE";
+            bossMessage = new String[]{"PUT A POST-COMBAT MESSAGE\nFOR THE FLOOR 3 BOSS HERE"};
             boss.setMaxHealth(100);
         }
         boss.setBoss(bossMessage, this);

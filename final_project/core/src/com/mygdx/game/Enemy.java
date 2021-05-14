@@ -27,7 +27,7 @@ public class Enemy extends Actor {
     private String name;
     private Random random;
     private List<Integer> movement;
-    private String bossMessage;
+    private String[] bossMessage;
     private boolean isHuman;
     private Interactable boss;
 
@@ -68,7 +68,7 @@ public class Enemy extends Actor {
         //maxHealth = health = 10;
         money = maxHealth = health = floor*10 + random.nextInt(10)+1;
         experience = level*2;
-        bossMessage = "";
+        bossMessage = new String[0];
         isHuman = false;
     }
 
@@ -246,7 +246,7 @@ public class Enemy extends Actor {
 
     public boolean isBoss(){ return isBoss; }
 
-    public void setBoss(String bossMessageIn, Interactable bossIn){
+    public void setBoss(String[] bossMessageIn, Interactable bossIn){
         isBoss = true;
         bossMessage = bossMessageIn;
         boss = bossIn;
@@ -263,7 +263,7 @@ public class Enemy extends Actor {
         positionChanged();
     }
 
-    public String getBossMessage(){
+    public String[] getBossMessage(){
         return bossMessage;
     }
 

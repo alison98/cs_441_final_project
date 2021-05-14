@@ -19,7 +19,7 @@ public class FinalBoss extends Interactable{
         y = yIn;
         boss = new Enemy(x, y,2, "CEO.png", floorIn, null);
         boss.setMaxHealth(200);
-        String bossMessage = "PUT A POST-COMBAT MESSAGE\nFOR THE FINAL BOSS HERE";
+        String[] bossMessage = new String[]{"PUT A POST-COMBAT MESSAGE\nFOR THE FINAL BOSS HERE"};
         boss.setBoss(bossMessage, this);
     }
 

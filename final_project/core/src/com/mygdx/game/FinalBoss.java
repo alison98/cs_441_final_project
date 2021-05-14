@@ -25,7 +25,13 @@ public class FinalBoss extends Interactable{
 
     @Override
     public void interact(GameScreen game){
-        game.getHud().setText("PUT A PRE-COMBAT MESSAGE\nFOR THE FINAL BOSS HERE");
+        game.getHud().setText("Impossible, how did you make it past\nall of my office supplies!?",
+                "Do you have any idea how much money\nI spent on this device?",
+                "Those idiot scientists told me that\nI’d be able to take over any company",
+                "in the world from the inside using\ntheir own office supplies against them,",
+                "and no one would be able to stop me!",
+                "But somehow a nine-to-five button pusher\nlike you destroyed them all?",
+                "I guess I’ll have to deal with you myself!");
     }
 
     public void fight(GameScreen game){

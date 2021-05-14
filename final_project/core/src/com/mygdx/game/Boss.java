@@ -19,13 +19,23 @@ public class Boss extends Interactable{
         boss = new Enemy(x, y,2, super.getSprite().getTexture().toString(), floorIn, null);
         String[] bossMessage;
         if(floor == 1){
-            bossMessage = new String[]{"PUT A POST-COMBAT MESSAGE\nFOR THE FLOOR 1 BOSS HERE"};
+            bossMessage = new String[]{"Thank you for saving me!",
+                    "I don’t know how, but somehow I\ngot turned into a fax machine.",
+                    "I don’t know where all of these\naggressive office supplies came from,",
+                    "all I know is that some of them\nwere originally human like me."};
             boss.setMaxHealth(50);
         } else if(floor == 2){
-            bossMessage = new String[]{"PUT A POST-COMBAT MESSAGE\nFOR THE FLOOR 2 BOSS HERE"};
+            bossMessage = new String[]{"Thanks for getting me out of there!",
+                    "I’m sure you’re wondering about\nwhat’s going on here.",
+                    "The CEO is behind all of this!",
+                    "He’s using some sort of device to\nturn employees into office supplies",
+                    "because he’s trying to infiltrate and\ntake over a rival company."};
             boss.setMaxHealth(75);
         } else{
-            bossMessage = new String[]{"PUT A POST-COMBAT MESSAGE\nFOR THE FLOOR 3 BOSS HERE"};
+            bossMessage = new String[]{"Thank you so much!",
+                    "I’m sure you’ve heard by now,\nbut the CEO is behind all of this.",
+                    "He’s hiding out in his office\non the top floor of the building",
+                    "and you have to stop him\nbefore he starts infecting more people!"};
             boss.setMaxHealth(100);
         }
         boss.setBoss(bossMessage, this);
@@ -39,11 +49,11 @@ public class Boss extends Interactable{
             game.getHud().setText("PUT A POST-COMBAT MESSAGE\nFOR THE HUMANS HERE");
         } else {
             if(floor == 1){
-                game.getHud().setText("PUT A PRE-COMBAT MESSAGE\nFOR THE FLOOR 1 BOSS HERE");
+                game.getHud().setText("Kiss my fax!");
             } else if(floor == 2){
-                game.getHud().setText("PUT A PRE-COMBAT MESSAGE\nFOR THE FLOOR 2 BOSS HERE");
+                game.getHud().setText("I hope you’re ready for a boxing match!");
             } else{
-                game.getHud().setText("PUT A PRE-COMBAT MESSAGE\nFOR THE FLOOR 3 BOSS HERE");
+                game.getHud().setText("It’s your turn to serve me!");
             }
         }
     }

@@ -54,7 +54,7 @@ public class GameScreen implements Screen {
         height = Gdx.graphics.getHeight();
         spriteBatch = new SpriteBatch();
         hud = new Hud(spriteBatch, this);
-        hud.setText("Welcome to your first day on the job!\n Press A to continue", "Your first task is to make eight thousand copies\n of the new mandatory overtime notice", "Find the printer in the break room to get started");
+        hud.setText("Welcome to your first day on the job!\n Press A to continue.", "Make yourself comfortable,\nand feel free to walk around", "and get to know the office.", "When you get a chance,\ncould you print 48 copies of this flier?", "The printer is in the break room\nwith the yellow rug.");
         camera = new OrthographicCamera();
         player = new Player(this);
         player.setPosition(500, 300);

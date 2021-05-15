@@ -92,12 +92,12 @@ public class Item extends Interactable{
             game.getHud().setText("You wonder why there’s a\nsword sitting in the office,",
                     "but you’re more worried about\nwhy the printer attacked you.",
                     "You decide to take the sword with you\nand find out more about what’s going on here");
-        } else{
-            if(isMoney){
-                game.getHud().setText("You obtained $"+ object);
-            }else {
-                game.getHud().setText("You obtained a " + object);
-            }
+        }
+
+        if(isMoney){
+            game.getHud().setText("You obtained $"+ object);
+        }else {
+            game.getHud().setText("You obtained a " + object);
         }
     }
 
